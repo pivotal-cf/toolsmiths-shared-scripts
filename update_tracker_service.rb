@@ -23,8 +23,6 @@ end
 
 
 puts "Testing hook changes ..... "
-#just little time for services to refresh connections
-sleep(10)
 
 @client2 = Octokit::Client.new(access_token: config['github_token'])
 @client2.auto_paginate = true
@@ -32,13 +30,24 @@ sleep(10)
 repos.each do |repo|
   hook_array = @client2.hooks("#{repo}").select { |hook| hook.name == service_name}
   id = hook_array.first.id
-  # seems like only calling it twice give you updated status
-  @client2.test_hook("#{repo}", id)
-  @client2.test_hook("#{repo}", id)
-  if @client2.hooks("#{repo}").select { |hook| hook.name == service_name}.first.last_response.status == 'misconfigured'
-    puts "hook config failed for: #{repo}"
-  else
-    puts "hook config completed for: #{repo}"
+
+# Incremental backoff since Github API doesn't immediately reflect changes.
+
+  i = 1
+  while i <= 4 do
+    @client2.test_hook("#{repo}", id)
+    sleep (2*i)
+
+    if @client2.hooks("#{repo}").select { |hook| hook.name == service_name}.first.last_response.status == 'misconfigured'
+      i += 1
+      if i == 5
+        puts "hook config failed for #{repo}"
+      end
+    else
+      puts "hook config completed for: #{repo}"
+      i = 5
+    end
   end
+
 end
 
