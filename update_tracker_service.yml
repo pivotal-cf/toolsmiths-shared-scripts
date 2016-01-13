@@ -1,0 +1,7 @@
+---
+
+github_token: <github_token>
+tracker_token: <tracker_token>
+repos:
+  - Example-Org/Example-Repo
+  - pivotal-cf/toolsmiths-docs
