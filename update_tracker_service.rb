@@ -16,9 +16,14 @@ config_hash = {:token => config['tracker_token']}
 repos = config['repos']
 repos.each do |repo|
   hook_array = @client.hooks("#{repo}").select { |hook| hook.name == service_name}
-  id = hook_array.first.id
-  puts "Updating repo: #{repo} service: #{service_name} with new token"
-  @client.edit_hook("#{repo}", id, service_name, config_hash)
+  if hook_array.length > 0
+    id = hook_array.first.id
+    puts "Updating repo: #{repo} service: #{service_name} with new token"
+    @client.edit_hook("#{repo}", id, service_name, config_hash)
+  else
+    puts "Adding service: #{service_name} to repo: #{repo} with new token"
+    @client.create_hook("#{repo}", service_name, config_hash)
+  end
 end
 
 
