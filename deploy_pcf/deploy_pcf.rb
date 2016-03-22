@@ -77,7 +77,7 @@ options[:environment_directory] ||= "#{ENV['HOME']}/workspace/deployments-toolsm
 
 if options[:headless]
   # xvfb server can only run one at a time - adds sleep to avoid server conflict errors
-  xvfb = "sleep 2 && xvfb-run "
+  xvfb = "xvfb-run -a "
 end
 
 cmds = [
