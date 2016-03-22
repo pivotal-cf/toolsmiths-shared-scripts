@@ -76,7 +76,7 @@ environment = options[:environment_name]
 options[:environment_directory] ||= "#{ENV['HOME']}/workspace/deployments-toolsmiths/vcenter/environments/config"
 
 if options[:headless]
-  # xvfb server can only run one at a time - adds sleep to avoid server conflict errors
+  # xvfb server can only run one at a time - use -a flag to automatically find a free server number
   xvfb = "xvfb-run -a "
 end
 
