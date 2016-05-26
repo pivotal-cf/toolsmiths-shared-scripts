@@ -2,6 +2,7 @@
 
 require 'optparse'
 include Process
+require 'pry'
 
 options = {}
 OptionParser.new do |opts|
@@ -97,13 +98,13 @@ if options[:interactive]
   puts "Do you want to run: (y/n) "
   cmds.each do |cmd|
     puts "  " + cmd
-    if gets.upcase.include? 'Y'
+    if STDIN.gets.upcase.include? 'Y'
       cmds_to_run << cmd
     end
   end
   puts "Run the following?"
   puts cmds_to_run
-  if gets.upcase.include? 'Y'
+  if STDIN.gets.upcase.include? 'Y'
     cmds = cmds_to_run
   else
     exit
