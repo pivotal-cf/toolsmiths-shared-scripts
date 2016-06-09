@@ -119,7 +119,7 @@ end
 
 ENV['ENV_DIRECTORY'] = options[:environment_directory]
 
-runtime_dir=ENV['HOME'] + "/workspace/p-runtime"
+runtime_dir=ENV['OLDPWD'] + "/p-runtime"
 Dir.chdir(runtime_dir)
 result = system("bundle")
 unless result
