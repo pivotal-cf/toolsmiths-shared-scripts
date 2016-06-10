@@ -44,10 +44,16 @@ end
 def wget_from_pivnet(endpoint, filename, path=nil)
   if path
     Dir.mkdir path
-    `wget -O #{path}/#{filename} --post-data="" --header="Authorization: Token #{@pivnet_token}" #{endpoint}`
+    actual_path = "#{path}/#{filename}"
   else
-    `wget -O #{filename} --post-data="" --header="Authorization: Token #{@pivnet_token}" #{endpoint}`
+    actual_path = filename
   end
+  `wget -O #{actual_path} --post-data="" --header="Authorization: Token #{@pivnet_token}" #{endpoint}`
+  if $?.to_i != 0
+    puts "wget failed."
+    exit 1
+  end
+
 end
 
 def download(product, version=nil)
