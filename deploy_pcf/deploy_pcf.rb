@@ -38,6 +38,10 @@ OptionParser.new do |opts|
   opts.on('-I', '--interactive') do |interactive|
     options[:interactive] = interactive
   end
+  opts.on('-C', '--commands [CMDS]') do |commands|
+    p commands
+    options[:commands] = commands
+  end
   opts.on('-h', '--help') do |help|
     puts opts
     exit
@@ -76,6 +80,14 @@ end
 environment = options[:environment_name]
 options[:environment_directory] ||= "#{ENV['HOME']}/workspace/deployments-toolsmiths/vcenter/environments/config"
 
+if options[:ops_manager] && options[:ops_manager_version].nil?
+  options[:ops_manager_version] = options[:ops_manager].match('[0-9]+\.[0-9]').to_s
+end
+
+if options[:elastic_runtime] && options[:elastic_runtime_version].nil?
+  options[:elastic_runtime_version] = options[:elastic_runtime].match('[0-9]+\.[0-9]').to_s
+end
+
 if options[:headless]
   # xvfb server can only run one at a time - use -a flag to automatically find a free server number
   xvfb = "xvfb-run -a "
@@ -92,6 +104,14 @@ cmds = [
   "#{xvfb}bundle exec rake opsmgr:trigger_install[#{environment},#{options[:ops_manager_version]},240]"
 ]
 
+if options[:commands]
+  commands_to_run = []
+  commands = options[:commands].split(',')
+  commands.each do |command|
+    commands_to_run << cmds.select {|cmd| cmd.include? command}.first
+  end
+  cmds = commands_to_run
+end
 
 if options[:interactive]
   cmds_to_run = []
