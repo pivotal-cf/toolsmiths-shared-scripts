@@ -138,8 +138,8 @@ if options[:dry_run]
 end
 
 ENV['ENV_DIRECTORY'] = options[:environment_directory]
+runtime_dir=File.expand_path('../..', File.dirname(__FILE__)) + "/p-runtime"
 
-runtime_dir=ENV['OLDPWD'] + "/p-runtime"
 Dir.chdir(runtime_dir)
 result = system("bundle")
 unless result
