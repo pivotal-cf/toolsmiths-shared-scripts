@@ -90,19 +90,30 @@ raise "Please set the env variable 'PIVNET_TOKEN' to be your network.pivotal.io 
 @pivnet_api = 'https://network.pivotal.io/api/v2/products'
 @pivnet_token = ENV.fetch('PIVNET_TOKEN')
 
-options = {
-  :ops_manager => get_latest_product_version('ops-manager'),
-  :elastic_runtime => get_latest_product_version('elastic-runtime'),
-}
+options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: --ops-manager <om-version> --elastic-runtime <ert-version>"
+  opts.banner = "Usage:\n\n --ops-manager <om-version> --elastic-runtime <ert-version>\n\n --ops-manager latest --elastic-runtime latest\n\n export OPSMGR_VERSION=<version or 'latest'> ERT_VERSION=<version or 'latest'> --ops-manager --elastic-runtime\n\n"
   opts.on('-o', '--ops-manager [OM]') do |ops_manager|
-    options[:ops_manager] = ops_manager
-    options[:ops_manager] ||= get_latest_product_version('ops-manager')
+    if ops_manager == 'latest'
+      options[:ops_manager] = get_latest_product_version('ops-manager')
+    elsif ops_manager
+      options[:ops_manager] = ops_manager
+    elsif ENV['OPSMGR_VERSION'] && ENV['OPSMGR_VERSION'] == 'latest'
+      options[:ops_manager] = get_latest_product_version('ops-manager')
+    elsif ENV['OPSMGR_VERSION']
+      options[:ops_manager] = ENV['OPSMGR_VERSION']
+    end
   end
   opts.on('-e', '--elastic-runtime [ERT]') do |elastic_runtime|
-    options[:elastic_runtime] = elastic_runtime
-    options[:elastic_runtime] ||= get_latest_product_version('elastic-runtime')
+    if elastic_runtime == 'latest'
+      options[:elastic_runtime] = get_latest_product_version('elastic-runtime')
+    elsif elastic_runtime
+      options[:elastic_runtime] = elastic_runtime
+    elsif ENV['ERT_VERSION'] && ENV['ERT_VERSION'] == 'latest'
+      options[:elastic_runtime] = get_latest_product_version('elastic-runtime')
+    elsif ENV['ERT_VERSION']
+      options[:elastic_runtime] = ENV['ERT_VERSION']
+    end
   end
   opts.on('-h', '--help [ERT]') do |help|
     options[:help] = help
