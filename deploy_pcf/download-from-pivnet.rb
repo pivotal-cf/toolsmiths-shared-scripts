@@ -115,6 +115,17 @@ OptionParser.new do |opts|
       options[:elastic_runtime] = ENV['ERT_VERSION']
     end
   end
+  opts.on('-p', '--print-latest [PRODUCT]') do |product|
+    case product
+    when 'ops-manager'
+      puts get_latest_product_version('ops-manager')
+    when 'elastic-runtime'
+      puts get_latest_product_version('elastic-runtime')
+    else
+      puts "opsmanager version: #{get_latest_product_version('ops-manager')}"
+      puts "elastic runtime version: #{get_latest_product_version('elastic-runtime')}"
+    end
+  end
   opts.on('-h', '--help [ERT]') do |help|
     options[:help] = help
     puts opts

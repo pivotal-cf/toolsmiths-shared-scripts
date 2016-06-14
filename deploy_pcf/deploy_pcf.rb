@@ -79,14 +79,20 @@ end
 
 environment = options[:environment_name]
 options[:environment_directory] ||= "#{ENV['HOME']}/workspace/deployments-toolsmiths/vcenter/environments/config"
+options[:ops_manager_version] ||= ENV['OPSMGR_VERSION']
+options[:elastic_runtime_version] ||= ENV['ERT_VERSION']
 
-if options[:ops_manager] && options[:ops_manager_version].nil?
-  options[:ops_manager_version] = options[:ops_manager].match('[0-9]+\.[0-9]').to_s
+if options[:ops_manager_version] == 'latest'
+  download_pivnet_file = File.expand_path(File.dirname(__FILE__)) + "/download-from-pivnet.rb"
+  options[:ops_manager_version] = `#{download_pivnet_file} --print-latest ops-manager`
+end
+if options[:elastic_runtime_version] == 'latest'
+  download_pivnet_file = File.expand_path(File.dirname(__FILE__)) + "/download-from-pivnet.rb"
+  options[:elastic_runtime_version] = `#{download_pivnet_file} --print-latest elastic-runtime`
 end
 
-if options[:elastic_runtime] && options[:elastic_runtime_version].nil?
-  options[:elastic_runtime_version] = options[:elastic_runtime].match('[0-9]+\.[0-9]').to_s
-end
+options[:ops_manager_version] = options[:ops_manager_version].match('[0-9]+\.[0-9]').to_s if options[:ops_manager_version]
+options[:elastic_runtime_version] = options[:elastic_runtime_version].match('[0-9]+\.[0-9]').to_s if options[:elastic_runtime_version]
 
 if options[:headless]
   # xvfb server can only run one at a time - use -a flag to automatically find a free server number
