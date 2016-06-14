@@ -137,7 +137,7 @@ if options[:dry_run]
   exit
 end
 
-ENV['ENV_DIRECTORY'] = options[:environment_directory]
+ENV['ENV_DIRECTORY'] = File.expand_path(options[:environment_directory])
 runtime_dir=File.expand_path('../..', File.dirname(__FILE__)) + "/p-runtime"
 
 Dir.chdir(runtime_dir)
