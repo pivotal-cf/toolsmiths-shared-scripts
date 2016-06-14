@@ -12,25 +12,25 @@ OptionParser.new do |opts|
     options[:dry_run] = dry_run
   end
   opts.on('-D', '--environment-directory [DIR]') do |environment_directory|
-    options[:environment_directory] = environment_directory
+    options[:environment_directory] = File.expand_path(environment_directory)
   end
   opts.on('-N', '--environment-name [NAME]') do |environment_name|
     options[:environment_name] = environment_name
   end
   opts.on('-O', '--ops-manager [PATH]') do |ops_manager|
-    options[:ops_manager] = ops_manager
+    options[:ops_manager] = File.expand_path(ops_manager)
   end
   opts.on('-V', '--ops-manager-version [VERSION]') do |ops_manager_version|
     options[:ops_manager_version] = ops_manager_version
   end
   opts.on('-E', '--elastic-runtime [PATH]') do |elastic_runtime|
-    options[:elastic_runtime] = elastic_runtime
+    options[:elastic_runtime] = File.expand_path(elastic_runtime)
   end
   opts.on('-W', '--elastic-runtime-version [VERSION]') do |elastic_runtime_version|
     options[:elastic_runtime_version] = elastic_runtime_version
   end
   opts.on('-S', '--stemcell [PATH]') do |stemcell|
-    options[:stemcell] = stemcell
+    options[:stemcell] = File.expand_path(stemcell)
   end
   opts.on('-H', '--headless') do |headless|
     options[:headless] = headless
@@ -143,7 +143,7 @@ if options[:dry_run]
   exit
 end
 
-ENV['ENV_DIRECTORY'] = File.expand_path(options[:environment_directory])
+ENV['ENV_DIRECTORY'] = options[:environment_directory]
 runtime_dir=File.expand_path('../..', File.dirname(__FILE__)) + "/p-runtime"
 
 Dir.chdir(runtime_dir)
