@@ -13,7 +13,7 @@ end
 def attempt(cmd)
   puts "*".cyan * 72
   puts "running #{cmd}...".cyan
-  puts Time.now.cyan
+  puts Time.now.to_s.cyan
   puts "*".cyan * 72
 
   pid = Process.spawn("time " + cmd)
@@ -36,7 +36,7 @@ def download_stemcell(path_to_product_tarball,iaas)
   puts "Finding stemcell version for #{path_to_product_tarball}".cyan
   `unzip #{path_to_product_tarball} metadata/cf.yml && cat metadata/cf.yml | grep -A3 stemcell | grep version | grep -oE "[0-9\.]+" > stemcell_version`
   version = `cat stemcell_version`.chomp!
-  puts "Downloading stemcell version #{version} for #{iaas}"
+  puts "Downloading stemcell version #{version} for #{iaas}".cyan
 
   case iaas
   when 'vsphere'
@@ -181,7 +181,7 @@ runtime_dir=File.expand_path('../..', File.dirname(__FILE__)) + "/p-runtime"
 Dir.chdir(runtime_dir)
 result = system("bundle")
 unless result
-  puts "Couldn't run bundle"
+  puts "Couldn't run bundle".red
   exit 1
 end
 
