@@ -4,9 +4,11 @@ require 'optparse'
 include Process
 require 'pry'
 
-def green;          "\e[32m#{self}\e[0m" end
-def red;            "\e[31m#{self}\e[0m" end
-def cyan;           "\e[36m#{self}\e[0m" end
+class String
+  def green;          "\e[32m#{self}\e[0m" end
+  def red;            "\e[31m#{self}\e[0m" end
+  def cyan;           "\e[36m#{self}\e[0m" end
+end
 
 def attempt(cmd)
   puts "*".cyan * 72
