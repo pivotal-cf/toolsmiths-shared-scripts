@@ -38,6 +38,9 @@ OptionParser.new do |opts|
   opts.on('-I', '--interactive') do |interactive|
     options[:interactive] = interactive
   end
+  opts.on('-i', '--iaas') do |iaas|
+    options[:iaas] = iaas
+  end
   opts.on('-C', '--commands [CMDS]') do |commands|
     p commands
     options[:commands] = commands
@@ -72,6 +75,22 @@ def attempt(cmd)
   end
 end
 
+def download_stemcell(path_to_product_tarball,iaas)
+  version = `tar -xvf #{path_to_product_tarball} metadata/cf.yml && cat metadata/cf.yml | grep -A3 stemcell | grep version | grep -oE "[0-9\.]+"`.chomp!
+  case iaas
+  when 'vsphere'
+    `wget --content-disposition https://bosh.io/d/stemcells/bosh-vsphere-esxi-ubuntu-trusty-go_agent?v=#{version}`
+  when 'aws'
+    `wget --content-disposition https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=#{version}`
+  when 'openstack'
+    `wget --content-disposition https://bosh.io/d/stemcells/bosh-openstack-kvm-ubuntu-trusty-go_agent-raw?v=#{version}`
+  else
+    raise "cannot find iaas named #{iaas}"
+  end
+  file_name = `ls bosh-stemcell-#{version}-#{iaas}*`.split("\n").first
+  File.expand_path(file_name)
+end
+
 if options.empty?
   puts @opts
   exit
@@ -81,6 +100,7 @@ environment = options[:environment_name]
 options[:environment_directory] ||= "#{ENV['HOME']}/workspace/deployments-toolsmiths/vcenter/environments/config"
 options[:ops_manager_version] ||= ENV['OPSMGR_VERSION']
 options[:elastic_runtime_version] ||= ENV['ERT_VERSION']
+options[:iaas] ||= 'vsphere'
 
 if options[:ops_manager_version] == 'latest'
   download_pivnet_file = File.expand_path(File.dirname(__FILE__)) + "/download-from-pivnet.rb"
@@ -99,6 +119,10 @@ if options[:headless]
   xvfb = "xvfb-run -a "
 end
 
+if options[:stemcell].nil? && options[:elastic_runtime]
+  options[:stemcell] = download_stemcell(options[:elastic_runtime],options[:iaas])
+end
+
 cmds = [
   "bundle exec rake opsmgr:destroy[#{environment}]",
   "bundle exec rake opsmgr:install[#{environment},#{options[:ops_manager]}]",
@@ -106,6 +130,7 @@ cmds = [
   "#{xvfb}bundle exec rake opsmgr:microbosh:configure[#{environment},#{options[:ops_manager_version]}]",
   "#{xvfb}bundle exec rake opsmgr:trigger_install[#{environment},#{options[:ops_manager_version]},40]",
   "#{xvfb}bundle exec rake opsmgr:product:upload_add[#{environment},#{options[:ops_manager_version]},#{options[:elastic_runtime]},cf]",
+  "#{xvfb}bundle exec rake opsmgr:product:import_stemcell[#{environment},#{options[:ops_manager_version]},#{options[:stemcell]},cf]",
   "#{xvfb}bundle exec rake ert:configure[#{environment},#{options[:elastic_runtime_version]},#{options[:ops_manager_version]}]",
   "#{xvfb}bundle exec rake opsmgr:trigger_install[#{environment},#{options[:ops_manager_version]},240]"
 ]
