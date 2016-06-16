@@ -128,13 +128,15 @@ OptionParser.new do |opts|
   end
   opts.on('-h', '--help [ERT]') do |help|
     options[:help] = help
-    puts opts
     options[:help] ||= 'help'
   end
+  @opts = opts
 end.parse!
 
 
-if options[:help]
+if options[:help] || options.empty?
+  puts @opts
+  puts ''
   ops_manager_url = "#{@pivnet_api}/ops-manager/releases"
   ops_manager_releases = make_get_request(ops_manager_url).parsed_response
   puts "Available Ops Manager versions:"
