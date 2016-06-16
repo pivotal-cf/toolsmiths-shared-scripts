@@ -136,7 +136,7 @@ cmds = [
   "bundle exec rake opsmgr:install[#{environment},#{options[:ops_manager]}]",
   "#{xvfb}bundle exec rake opsmgr:add_first_user[#{environment},#{options[:ops_manager_version]}]",
   "#{xvfb}bundle exec rake opsmgr:microbosh:configure[#{environment},#{options[:ops_manager_version]}]",
-  "#{xvfb}bundle exec rake opsmgr:trigger_install[#{environment},#{options[:ops_manager_version]},40]",
+  "#{xvfb}bundle exec rake opsmgr:trigger_install[#{environment},#{options[:ops_manager_version]},240]",
   "#{xvfb}bundle exec rake opsmgr:product:upload_add[#{environment},#{options[:ops_manager_version]},#{options[:elastic_runtime]},cf]",
   "#{xvfb}bundle exec rake opsmgr:product:import_stemcell[#{environment},#{options[:ops_manager_version]},#{options[:stemcell]},cf]",
   "#{xvfb}bundle exec rake ert:configure[#{environment},#{options[:elastic_runtime_version]},#{options[:ops_manager_version]}]",
