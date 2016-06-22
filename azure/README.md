@@ -63,11 +63,12 @@ azure login # Follow the instructions to login
 To fetch your storage account key, run the following commands and copy the 'Primary' key.
 
 ```
-resource_grou_name=<your-env-name>
+resource_group_name=<your-env-name>
 storage_account_name=<your-env-name>sa
 
 azure storage account keys list --resource-group $resource_group_name $storage_account_name
 ```
+You can also get the storage account key via the Azure Portal
 
 Sample Output:
 
