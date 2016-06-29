@@ -115,12 +115,12 @@ options[:iaas] ||= 'vsphere'
 
 if options[:ops_manager_version] == 'latest'
   download_pivnet_file = File.expand_path(File.dirname(__FILE__)) + "/download-from-pivnet.rb"
-  options[:ops_manager_version] = `#{download_pivnet_file} --print-latest ops-manager`
+  options[:ops_manager_version] = `#{download_pivnet_file} --print-latest ops-manager#{options[:ops_manager_version]}`
 end
 
 if options[:elastic_runtime_version] == 'latest'
   download_pivnet_file = File.expand_path(File.dirname(__FILE__)) + "/download-from-pivnet.rb"
-  options[:elastic_runtime_version] = `#{download_pivnet_file} --print-latest elastic-runtime`
+  options[:elastic_runtime_version] = `#{download_pivnet_file} --print-latest elastic-runtime#{options[:elastic_runtime_version]}`
 end
 
 options[:ops_manager_version] = options[:ops_manager_version].match('[0-9]+\.[0-9]').to_s if options[:ops_manager_version]

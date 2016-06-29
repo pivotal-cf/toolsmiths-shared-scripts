@@ -3,11 +3,29 @@
 require 'httparty'
 require 'optparse'
 
-def get_latest_product_version(product_name)
+def get_latest_product_version(product_name, version='')
   url = "#{@pivnet_api}/#{product_name}/releases"
   product_releases = make_get_request(url).parsed_response
   product_versions = product_releases['releases'].map {|release| release['version']}
+
   product_versions.keep_if { |a| a=~ /^[0-9].[0-9].*$/}
+
+  if version == 'help'
+    return product_versions.sort! {|a,b| b <=> a }
+  end
+
+  if version == 'latest-stable'
+    product_versions.keep_if { |a| a=~ /^[0-9].[0-9](.\d)*$/}
+  else
+    if version.include? 'latest-stable'
+      version.gsub!('latest-stable', '')
+      product_versions.keep_if { |a| a=~ /^#{version}(.\d)*$/}
+    else
+      version.gsub!('latest', '')
+      product_versions.keep_if { |a| a=~ /^#{version}.*$/}
+    end
+  end
+
   product_versions.sort! {|a,b| b <=> a }.first
 end
 
@@ -86,44 +104,51 @@ def download(product, version=nil)
   wget_from_pivnet(download_link, product_file_name)
 end
 
+
+
 raise "Please set the env variable 'PIVNET_TOKEN' to be your network.pivotal.io token" if ENV['PIVNET_TOKEN'].nil?
 @pivnet_api = 'https://network.pivotal.io/api/v2/products'
 @pivnet_token = ENV.fetch('PIVNET_TOKEN')
+
+
 
 options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage:\n\n --ops-manager <om-version> --elastic-runtime <ert-version>\n\n --ops-manager latest --elastic-runtime latest\n\n export OPSMGR_VERSION=<version or 'latest'> ERT_VERSION=<version or 'latest'> --ops-manager --elastic-runtime\n\n"
   opts.on('-o', '--ops-manager [OM]') do |ops_manager|
-    if ops_manager == 'latest'
-      options[:ops_manager] = get_latest_product_version('ops-manager')
+    if ops_manager.include? 'latest'
+      options[:ops_manager] = get_latest_product_version('ops-manager', ops_manager)
     elsif ops_manager
       options[:ops_manager] = ops_manager
-    elsif ENV['OPSMGR_VERSION'] && ENV['OPSMGR_VERSION'] == 'latest'
-      options[:ops_manager] = get_latest_product_version('ops-manager')
+    elsif ENV['OPSMGR_VERSION'] && ENV['OPSMGR_VERSION'].include? == 'latest'
+      options[:ops_manager] = get_latest_product_version('ops-manager', ENV['OPSMGR_VERSION'])
     elsif ENV['OPSMGR_VERSION']
       options[:ops_manager] = ENV['OPSMGR_VERSION']
     end
   end
   opts.on('-e', '--elastic-runtime [ERT]') do |elastic_runtime|
     if elastic_runtime == 'latest'
-      options[:elastic_runtime] = get_latest_product_version('elastic-runtime')
+      options[:elastic_runtime] = get_latest_product_version('elastic-runtime', elastic_runtime)
     elsif elastic_runtime
       options[:elastic_runtime] = elastic_runtime
     elsif ENV['ERT_VERSION'] && ENV['ERT_VERSION'] == 'latest'
-      options[:elastic_runtime] = get_latest_product_version('elastic-runtime')
+      options[:elastic_runtime] = get_latest_product_version('elastic-runtime', ENV['ERT_VERSION'])
     elsif ENV['ERT_VERSION']
       options[:elastic_runtime] = ENV['ERT_VERSION']
     end
   end
   opts.on('-p', '--print-latest [PRODUCT]') do |product|
-    case product
-    when 'ops-manager'
-      puts get_latest_product_version('ops-manager')
-    when 'elastic-runtime'
-      puts get_latest_product_version('elastic-runtime')
+    options[:print] = true
+    if product.include? 'ops-manager'
+      version = product.gsub!('ops-manager', '')
+      puts get_latest_product_version('ops-manager', version)
+    elsif product.include? 'elastic-runtime'
+      version = product.gsub!('elastic-runtime', '')
+      puts get_latest_product_version('elastic-runtime', version)
     else
-      puts "opsmanager version: #{get_latest_product_version('ops-manager')}"
-      puts "elastic runtime version: #{get_latest_product_version('elastic-runtime')}"
+      version = product
+      puts "opsmanager version: #{get_latest_product_version('ops-manager', version)}"
+      puts "elastic runtime version: #{get_latest_product_version('elastic-runtime', version)}"
     end
   end
   opts.on('-h', '--help [ERT]') do |help|
@@ -137,21 +162,28 @@ end.parse!
 if options[:help] || options.empty?
   puts @opts
   puts ''
-  ops_manager_url = "#{@pivnet_api}/ops-manager/releases"
-  ops_manager_releases = make_get_request(ops_manager_url).parsed_response
   puts "Available Ops Manager versions:"
-  ops_manager_versions = ops_manager_releases['releases'].map {|release| release['version']}
-  p ops_manager_versions.sort! {|a,b| b <=> a }
+  p get_latest_product_version('ops-manager', 'help')
 
-  elastic_runtime_url = "#{@pivnet_api}/elastic-runtime/releases"
-  elastic_runtime_releases = make_get_request(elastic_runtime_url).parsed_response
   puts "\nAvailable Elastic Runtime versions:"
-  elastic_runtime_versions = elastic_runtime_releases['releases'].map {|release| release['version']}
-  p elastic_runtime_versions.sort! {|a,b| b <=> a }
+  p get_latest_product_version('elastic-runtime', 'help')
   exit
 end
 
 
-options.each {|product,version|puts "Downloading: #{product} - #{version}\n" }
-download('ops-manager', options[:ops_manager]) if options[:ops_manager]
-download('elastic-runtime', options[:elastic_runtime]) if options[:elastic_runtime]
+if options.key?(:ops_manager)
+  if options[:ops_manager].nil?
+    puts 'Could not find specified version of Ops Manager.'
+  else
+    puts "Downloading: Ops Manager - #{options[:ops_manager]}"
+    download('ops-manager', options[:ops_manager])
+  end
+end
+if options.key?(:elastic_runtime)
+  if options[:elastic_runtime].nil?
+    puts 'Could not find specified version of Elastic Runtime'
+  else
+    puts "Downloading: Elastic Runtime - #{options[:elastic_runtime]}"
+    download('elastic-runtime', options[:elastic_runtime])
+  end
+end
