@@ -116,7 +116,7 @@ options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage:\n\n --ops-manager <om-version> --elastic-runtime <ert-version>\n\n --ops-manager latest --elastic-runtime latest\n\n export OPSMGR_VERSION=<version or 'latest'> ERT_VERSION=<version or 'latest'> --ops-manager --elastic-runtime\n\n"
   opts.on('-o', '--ops-manager [OM]') do |ops_manager|
-    if ops_manager.include? 'latest'
+    if ops_manager && ops_manager.include? 'latest'
       options[:ops_manager] = get_latest_product_version('ops-manager', ops_manager)
     elsif ops_manager
       options[:ops_manager] = ops_manager
@@ -127,7 +127,7 @@ OptionParser.new do |opts|
     end
   end
   opts.on('-e', '--elastic-runtime [ERT]') do |elastic_runtime|
-    if elastic_runtime == 'latest'
+    if elastic_runtime && elastic_runtime == 'latest'
       options[:elastic_runtime] = get_latest_product_version('elastic-runtime', elastic_runtime)
     elsif elastic_runtime
       options[:elastic_runtime] = elastic_runtime
