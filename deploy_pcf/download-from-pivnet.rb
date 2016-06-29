@@ -18,11 +18,9 @@ def get_latest_product_version(product_name, version='')
     product_versions.keep_if { |a| a=~ /^[0-9].[0-9](.\d)*$/}
   else
     if version.include? 'latest-stable'
-      version.gsub!('latest-stable', '')
-      product_versions.keep_if { |a| a=~ /^#{version}(.\d)*$/}
+      product_versions.keep_if { |a| a=~ /^#{version.gsub('latest-stable', '')}(.\d)*$/}
     else
-      version.gsub!('latest', '')
-      product_versions.keep_if { |a| a=~ /^#{version}.*$/}
+      product_versions.keep_if { |a| a=~ /^#{version.gsub('latest', '')}.*$/}
     end
   end
 
@@ -116,22 +114,22 @@ options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage:\n\n --ops-manager <om-version> --elastic-runtime <ert-version>\n\n --ops-manager latest --elastic-runtime latest\n\n export OPSMGR_VERSION=<version or 'latest'> ERT_VERSION=<version or 'latest'> --ops-manager --elastic-runtime\n\n"
   opts.on('-o', '--ops-manager [OM]') do |ops_manager|
-    if ops_manager && ops_manager.include? 'latest'
+    if (ops_manager && ops_manager.include?('latest'))
       options[:ops_manager] = get_latest_product_version('ops-manager', ops_manager)
     elsif ops_manager
       options[:ops_manager] = ops_manager
-    elsif ENV['OPSMGR_VERSION'] && ENV['OPSMGR_VERSION'].include? == 'latest'
+    elsif (ENV['OPSMGR_VERSION'] && ENV['OPSMGR_VERSION'].include?('latest'))
       options[:ops_manager] = get_latest_product_version('ops-manager', ENV['OPSMGR_VERSION'])
     elsif ENV['OPSMGR_VERSION']
       options[:ops_manager] = ENV['OPSMGR_VERSION']
     end
   end
   opts.on('-e', '--elastic-runtime [ERT]') do |elastic_runtime|
-    if elastic_runtime && elastic_runtime == 'latest'
+    if (elastic_runtime && elastic_runtime.include?('latest'))
       options[:elastic_runtime] = get_latest_product_version('elastic-runtime', elastic_runtime)
     elsif elastic_runtime
       options[:elastic_runtime] = elastic_runtime
-    elsif ENV['ERT_VERSION'] && ENV['ERT_VERSION'] == 'latest'
+    elsif (ENV['ERT_VERSION'] && ENV['ERT_VERSION'].include?('latest'))
       options[:elastic_runtime] = get_latest_product_version('elastic-runtime', ENV['ERT_VERSION'])
     elsif ENV['ERT_VERSION']
       options[:elastic_runtime] = ENV['ERT_VERSION']
