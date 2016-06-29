@@ -144,5 +144,9 @@ Available Elastic Runtime versions:
 ```
 #### Notes:
 
-* The Ops Manager and Elastic Runtime versions need to be exact. You can get the exact version number from the 'help' output
+* The Ops Manager and Elastic Runtime versions need to be exact if you wish to download a specific version. You can get the exact version number from the 'help' output
+  * If you want the latest version you can specify 'latest'
+  * If you want the latest stable version (it will ignore RC and alphas), use 'latest-stable'
+  * You can also prepend a version to get the latest of that version, '1.7latest', '1.7latest-stable'
 * '-p' - to print the latest product version, please specify the product name as 'ops-manager' or 'elastic-runtime'
+  * you can also specify 'ops-managerlatest', 'ops-manager1.6latest', 'ops-manager1.7latest-stable'
