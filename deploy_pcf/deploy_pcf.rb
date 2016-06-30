@@ -34,7 +34,11 @@ end
 
 def download_stemcell(path_to_product_tarball,iaas)
   puts "Finding stemcell version for #{path_to_product_tarball}".cyan
-  `unzip #{path_to_product_tarball} metadata/cf.yml && cat metadata/cf.yml | grep -A3 stemcell | grep version | grep -oE "[0-9\.]+" > stemcell_version`
+  if `uname -s`.chomp == "Darwin"
+    `jar -xf #{path_to_product_tarball} metadata/cf.yml && cat metadata/cf.yml | grep -A3 stemcell | grep version | grep -oE "[0-9\.]+" > stemcell_version`
+  else
+    `unzip #{path_to_product_tarball} metadata/cf.yml && cat metadata/cf.yml | grep -A3 stemcell | grep version | grep -oE "[0-9\.]+" > stemcell_version`
+  end
   version = `cat stemcell_version`.chomp!
   puts "Downloading stemcell version #{version} for #{iaas}".cyan
 
