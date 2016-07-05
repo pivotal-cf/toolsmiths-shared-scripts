@@ -27,7 +27,12 @@ The terraform script will set up your Azure environment according to the [BOSH C
 
 ### Running the terraform script
 
-Update the terraform script at the top, underneath the 'UPDATE BELOW' header.
+Update the terraform script at the top, underneath the 'UPDATE BELOW' header paying head to the following guidelines:
+
+* environment name: should be between 1 and 22 characters, all of which are lowercase or numbers; this is due to naming limits of the storage account which will be created as *environment_name+sa*.
+* devbox username: be advised that there are some reserved usernames which are disallowed, such as "admin".
+* devbox password: must contain at least one from each set: uppercase letter, lowercase letter, special character and number.
+
 Inside the terraform script's directory, run `terraform plan` to view the changes that will be made.
 
 Once you are happy with the changes, execute the terraform script by running `terraform apply`.
