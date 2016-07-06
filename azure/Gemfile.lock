@@ -1,0 +1,24 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    coderay (1.1.1)
+    highline (1.7.8)
+    method_source (0.8.2)
+    monkey_king (0.2.0)
+      highline (~> 1.7, >= 1.7.8)
+      mothership (~> 0.5.1)
+    mothership (0.5.1)
+    pry (0.10.3)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
+    sexpistol (0.0.7)
+    slop (3.6.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  monkey_king
+  pry
+  sexpistol

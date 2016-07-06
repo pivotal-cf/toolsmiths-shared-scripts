@@ -1,0 +1,6 @@
+source 'https://rubygems.org'
+
+gem 'monkey_king'
+gem 'sexpistol'
+gem 'pry'
+

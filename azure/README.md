@@ -94,3 +94,51 @@ storage_account_name=<your-env-name>sa
 azure storage table create --account-name $storage_account_name --account-key $storage_account_key --table stemcell
 ```
 
+# Deploying a BOSH director in your Azure environment
+
+## Prerequisites
+
+You must have the following environment variables set when generating your bosh director manifest. These environment variables are presented to you from the Terraform step above:
+
+```
+Please export the following environments variables:
+
+export VNET_NAME='sample_vnet'
+export SUBNET_NAME='sample_subnet'
+export SUBSCRIPTION_ID='sample_subscription_id'
+export CLIENT_ID='sample_client_id'
+export CLIENT_SECRET='sample_client_secret'
+export TENANT_ID='sample_tenant_id'
+export RESOURCE_GROUP_NAME='sample_resource_group'
+export STORAGE_ACCOUNT_NAME='sample_storage_account'
+export DEFAULT_SECURITY_GROUP='sample_security_group'
+export BOSH_PUB_KEY='<REPLACE_WITH_YOUR_BOSH_PUB_KEY>'
+export BOSH_PRIVATE_KEY_PATH='<REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH>' # Path is relative to where your manifest will be on the dev box
+```
+
+**Be sure to set your `BOSH_PUB_KEY` and `BOSH_PRIVATE_KEY_PATH`**
+
+## Generating the director manifest
+
+We use the rubygem 'monkey_king' to generate our bosh director manifest.
+
+```
+cd ~/workspace/toolsmiths-shared-scripts/azure/
+bundle install
+
+bundle exec mk demo bosh_template.yml > bosh.yml
+```
+
+## Deploying the bosh director from your dev box
+
+* Ensure your bosh private key is on the dev box in the path that is specified in the manifest
+* Feel free to update the release versions
+
+```
+scp bosh.yml <devbox_username>@<devboxpublicip>:~/
+
+ssh <devbox_username>@<devboxpublicip>
+bosh-init deploy bosh.yml
+```
+
+**Make sure you check in your deployment manifests!**

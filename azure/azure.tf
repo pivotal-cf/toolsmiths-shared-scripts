@@ -268,3 +268,21 @@ output "devboxpublicip" {
 output "notes" {
   value = "We currently need to manually create the storage table:\nhttps://github.com/hashicorp/terraform/issues/7257\nhttps://github.com/hashicorp/terraform/issues/7257"
 }
+
+output "environment_variables" {
+  value = <<EOF
+Please export the following environments variables:
+
+export VNET_NAME='${azurerm_virtual_network.virtualnetwork.name}'
+export SUBNET_NAME='${azurerm_subnet.boshsubnet.name}'
+export SUBSCRIPTION_ID='${var.azure_credentials.subscription_id}'
+export CLIENT_ID='${var.azure_credentials.client_id}'
+export CLIENT_SECRET='${var.azure_credentials.client_secret}'
+export TENANT_ID='${var.azure_credentials.tenant_id}'
+export RESOURCE_GROUP_NAME='${azurerm_resource_group.resourcegroup.name}'
+export STORAGE_ACCOUNT_NAME='${azurerm_storage_account.storageaccount.name}'
+export DEFAULT_SECURITY_GROUP='${azurerm_network_security_group.boshsecuritygroup.name}'
+export BOSH_PUB_KEY='<REPLACE_WITH_YOUR_BOSH_PUB_KEY>'
+export BOSH_PRIVATE_KEY_PATH='<REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH>' # Path is relative to where your manifest will be on the dev box
+EOF
+}
