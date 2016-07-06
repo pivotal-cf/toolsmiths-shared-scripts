@@ -6,6 +6,7 @@ env_app_url: &env_app_url environments.toolsmiths.cf-app.com
 pivnet_token: &pivnet_token {{pivnet-token}}
 worker_tag: &worker_tag [vsphere]
 github_key: &github_key {{github-key}}
+download_retry_attempts: &retry 3
 
 groups:
 - name: deploy-pcf-vsphere
@@ -36,6 +37,7 @@ jobs:
       - get: toolsmiths-shared-scripts
       - get: p-runtime
     - task: download-ops-manager-from-pivnet
+      attempts: *retry
       tags: *worker_tag
       privileged: true
       config:
@@ -134,6 +136,7 @@ jobs:
         passed: [configure-ops-manager]
         trigger: true
     - task: download-elastic-runtime-from-pivnet
+      attempts: *retry
       tags: *worker_tag
       privileged: true
       config:

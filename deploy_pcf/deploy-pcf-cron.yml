@@ -9,6 +9,7 @@ github_key: &github_key {{github-key}}
 cron_schedule: &cron_schedule "0 23 * * 1-5"
 cron_location: &cron_location "America/New_York"
 enable_cron: &enable_cron true
+download_retry_attempts: &retry 3
 
 groups:
 - name: deploy-pcf-vsphere
@@ -46,6 +47,7 @@ jobs:
       - get: cron-trigger
         trigger: *enable_cron
     - task: download-ops-manager-from-pivnet
+      attempts: *retry
       tags: *worker_tag
       privileged: true
       config:
@@ -144,6 +146,7 @@ jobs:
         passed: [configure-ops-manager]
         trigger: true
     - task: download-elastic-runtime-from-pivnet
+      attempts: *retry
       tags: *worker_tag
       privileged: true
       config:
