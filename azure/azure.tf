@@ -269,20 +269,35 @@ output "notes" {
   value = "We currently need to manually create the storage table:\nhttps://github.com/hashicorp/terraform/issues/7257\nhttps://github.com/hashicorp/terraform/issues/7257"
 }
 
-output "environment_variables" {
+output "variables.yml" {
   value = <<EOF
-Please export the following environments variables:
 
-export VNET_NAME='${azurerm_virtual_network.virtualnetwork.name}'
-export SUBNET_NAME='${azurerm_subnet.boshsubnet.name}'
-export SUBSCRIPTION_ID='${var.azure_credentials.subscription_id}'
-export CLIENT_ID='${var.azure_credentials.client_id}'
-export CLIENT_SECRET='${var.azure_credentials.client_secret}'
-export TENANT_ID='${var.azure_credentials.tenant_id}'
-export RESOURCE_GROUP_NAME='${azurerm_resource_group.resourcegroup.name}'
-export STORAGE_ACCOUNT_NAME='${azurerm_storage_account.storageaccount.name}'
-export DEFAULT_SECURITY_GROUP='${azurerm_network_security_group.boshsecuritygroup.name}'
-export BOSH_PUB_KEY='<REPLACE_WITH_YOUR_BOSH_PUB_KEY>'
-export BOSH_PRIVATE_KEY_PATH='<REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH>' # Path is relative to where your manifest will be on the dev box
+---
+vnet_name: '${azurerm_virtual_network.virtualnetwork.name}'
+subnet_name: '${azurerm_subnet.boshsubnet.name}'
+subscription_id: '${var.azure_credentials.subscription_id}'
+client_id: '${var.azure_credentials.client_id}'
+client_secret: '${var.azure_credentials.client_secret}'
+tenant_id: '${var.azure_credentials.tenant_id}'
+resource_group_name: '${azurerm_resource_group.resourcegroup.name}'
+storage_account_name: '${azurerm_storage_account.storageaccount.name}'
+default_security_group: '${azurerm_network_security_group.boshsecuritygroup.name}'
+bosh_pub_key: 'REPLACE_WITH_YOUR_BOSH_PUB_KEY'
+bosh_private_key_path: 'REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH' # Path is relative to where your manifest will be on the dev box
+system_domain: 'REPLACE_WITH_YOUR_SYSTEM_DOMAIN'
+cf_subnet_name: '${azurerm_subnet.cloudfoundrysubnet.name}'
+cf_subnet_range: '${var.subnets.cloudfoundry}'
+cf_security_group: '${azurerm_network_security_group.cfsecuritygroup.name}'
+cf_reserved_range: '${cidrhost(var.subnets.cloudfoundry, 2)} - ${cidrhost(var.subnets.cloudfoundry, 3)}'
+cf_static_range: '${cidrhost(var.subnets.cloudfoundry, 4)} - ${cidrhost(var.subnets.cloudfoundry, 10)}'
+cf_gateway: '${cidrhost(var.subnets.cloudfoundry, 1)}'
+consul_ip: '${cidrhost(var.subnets.cloudfoundry, 4)}'
+cf_public_ip: "${azurerm_public_ip.cloudfoundrypublicip.ip_address}"
+haproxy_ip: '${cidrhost(var.subnets.cloudfoundry, 5)}'
+router_ip: '${cidrhost(var.subnets.cloudfoundry, 6)}'
+nats_ip: '${cidrhost(var.subnets.cloudfoundry, 7)}'
+nfs_ip: '${cidrhost(var.subnets.cloudfoundry, 8)}'
+etcd_ip: '${cidrhost(var.subnets.cloudfoundry, 9)}'
+postgres_ip: '${cidrhost(var.subnets.cloudfoundry, 10)}'
 EOF
 }

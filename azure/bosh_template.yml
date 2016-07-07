@@ -30,8 +30,8 @@ networks:
     gateway: 10.0.0.1
     dns: [168.63.129.16]
     cloud_properties:
-      virtual_network_name: !MK:env(VNET_NAME) # <--- Replace
-      subnet_name: !MK:env(SUBNET_NAME) # <--- Replace
+      virtual_network_name: {{vnet_name}} # <--- replace
+      subnet_name: {{subnet_name}} # <--- replace
 
 jobs:
 - name: bosh
@@ -103,15 +103,15 @@ jobs:
 
     azure: &azure
       environment: AzureCloud
-      subscription_id: !MK:env(SUBSCRIPTION_ID)
-      tenant_id: !MK:env(TENANT_ID)
-      client_id: !MK:env(CLIENT_ID)
-      client_secret:  !MK:env(CLIENT_SECRET)
-      resource_group_name: !MK:env(RESOURCE_GROUP_NAME)
-      storage_account_name: !MK:env(STORAGE_ACCOUNT_NAME)
-      default_security_group: !MK:env(DEFAULT_SECURITY_GROUP)
+      subscription_id: {{subscription_id}}
+      tenant_id: {{tenant_id}}
+      client_id: {{client_id}}
+      client_secret:  {{client_secret}}
+      resource_group_name: {{resource_group_name}}
+      storage_account_name: {{storage_account_name}}
+      default_security_group: {{default_security_group}}
       ssh_user: vcap
-      ssh_public_key: !MK:env(BOSH_PUB_KEY)
+      ssh_public_key: {{bosh_pub_key}}
 
     agent: {mbus: "nats://nats:nats-password@10.0.0.4:4222"}
 
@@ -124,7 +124,7 @@ cloud_provider:
     host: 10.0.0.4 # <--- Replace
     port: 22
     user: vcap
-    private_key: !MK:env(BOSH_PRIVATE_KEY_PATH) # Path relative to this manifest file
+    private_key: {{bosh_private_key_path}} # path relative to this manifest file
 
   mbus: "https://mbus:mbus-password@10.0.0.4:6868" # <--- Replace
 

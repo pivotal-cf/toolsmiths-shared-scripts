@@ -98,35 +98,41 @@ azure storage table create --account-name $storage_account_name --account-key $s
 
 ## Prerequisites
 
-You must have the following environment variables set when generating your bosh director manifest. These environment variables are presented to you from the Terraform step above:
+Set the variables required to generate your deployment manifest:
 
 ```
-Please export the following environments variables:
+# From the terraform working dir
+terraform output variables.yml > variables.yml
 
-export VNET_NAME='sample_vnet'
-export SUBNET_NAME='sample_subnet'
-export SUBSCRIPTION_ID='sample_subscription_id'
-export CLIENT_ID='sample_client_id'
-export CLIENT_SECRET='sample_client_secret'
-export TENANT_ID='sample_tenant_id'
-export RESOURCE_GROUP_NAME='sample_resource_group'
-export STORAGE_ACCOUNT_NAME='sample_storage_account'
-export DEFAULT_SECURITY_GROUP='sample_security_group'
-export BOSH_PUB_KEY='<REPLACE_WITH_YOUR_BOSH_PUB_KEY>'
-export BOSH_PRIVATE_KEY_PATH='<REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH>' # Path is relative to where your manifest will be on the dev box
+
+
+# it should look like the following:
+
+---
+vnet_name: 'sample'
+subnet_name: 'sample'
+subscription_id: 'sample'
+client_id: 'sample'
+client_secret: 'sample'
+tenant_id: 'sample'
+resource_group_name: 'sample'
+storage_account_name: 'sample'
+default_security_group: 'sample'
+bosh_pub_key: 'REPLACE_WITH_YOUR_BOSH_PUB_KEY'
+bosh_private_key_path: 'REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH' # Path is relative to where your manifest will be on the dev box
+...
+
 ```
 
-**Be sure to set your `BOSH_PUB_KEY` and `BOSH_PRIVATE_KEY_PATH`**
+**Be sure to set your the variables that are tagged with 'REPLACE'**
 
 ## Generating the director manifest
 
-We use the rubygem 'monkey_king' to generate our bosh director manifest.
+We use the `mustache` command to generate our bosh director manifest:
 
 ```
-cd ~/workspace/toolsmiths-shared-scripts/azure/
-bundle install
-
-bundle exec mk demo bosh_template.yml > bosh.yml
+bundle
+bundle exec mustache variables.yml bosh_template.yml > bosh.yml
 ```
 
 ## Deploying the bosh director from your dev box
