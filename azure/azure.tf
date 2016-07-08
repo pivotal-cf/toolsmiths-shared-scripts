@@ -273,6 +273,12 @@ output "variables.yml" {
   value = <<EOF
 
 ---
+# REPLACE BELOW
+bosh_pub_key: 'REPLACE_WITH_YOUR_BOSH_PUB_KEY'
+bosh_private_key_path: 'REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH' # Path is relative to where your manifest will be on the dev box
+system_domain: 'REPLACE_WITH_YOUR_SYSTEM_DOMAIN'
+
+# These values are generated from the terraform script
 vnet_name: '${azurerm_virtual_network.virtualnetwork.name}'
 subnet_name: '${azurerm_subnet.boshsubnet.name}'
 subscription_id: '${var.azure_credentials.subscription_id}'
@@ -282,9 +288,6 @@ tenant_id: '${var.azure_credentials.tenant_id}'
 resource_group_name: '${azurerm_resource_group.resourcegroup.name}'
 storage_account_name: '${azurerm_storage_account.storageaccount.name}'
 default_security_group: '${azurerm_network_security_group.boshsecuritygroup.name}'
-bosh_pub_key: 'REPLACE_WITH_YOUR_BOSH_PUB_KEY'
-bosh_private_key_path: 'REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH' # Path is relative to where your manifest will be on the dev box
-system_domain: 'REPLACE_WITH_YOUR_SYSTEM_DOMAIN'
 cf_subnet_name: '${azurerm_subnet.cloudfoundrysubnet.name}'
 cf_subnet_range: '${var.subnets.cloudfoundry}'
 cf_security_group: '${azurerm_network_security_group.cfsecuritygroup.name}'
