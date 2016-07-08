@@ -126,6 +126,8 @@ bosh_private_key_path: 'REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH' # Path is relat
 
 **Be sure to set your the variables that are tagged with 'REPLACE'**
 
+
+
 ## Generating the director manifest
 
 We use the `mustache` command to generate our bosh director manifest:
@@ -148,3 +150,69 @@ bosh-init deploy bosh.yml
 ```
 
 **Make sure you check in your deployment manifests!**
+
+# Deploying CF in your Azure environment
+
+## Prerequisites
+
+We need to know the bosh director UUID when deploying CF.
+
+In the terraform working directory:
+
+```
+terraform output add_bosh_director_uuid.sh > add_bosh_director_uuid.sh
+chmod +x add_bosh_director_uuid.sh
+./add_bosh_director_uuid.sh >> variables.yml
+```
+
+We also need to upload the release and stemcell we wish to use:
+
+```
+bosh upload release https://bosh.io/d/github.com/cloudfoundry/cf-release?v=231
+bosh upload stemcell https://bosh.io/d/stemcells/bosh-azure-hyperv-ubuntu-trusty-go_agent?v=3232.11
+```
+
+## Generating your CF manifest
+
+Generate your cf manifest using mustache:
+
+```
+bundle exec mustache variables.yml cf_template.yml > cf.yml
+```
+
+Put your wildcard SSL cert and key in the cf.yml (search for 'REPLACE_WITH_SSL_CERT_AND_KEY'). If you are just generating a new one, you can use the following command:
+
+```
+openssl genrsa -out ~/haproxy.key 2048 &&
+  echo -e "\n\n\n\n\n\n\n" | openssl req -new -x509 -days 365 -key ~/haproxy.key -out ~/haproxy_cert.pem &&
+  cat ~/haproxy_cert.pem ~/haproxy.key > ~/haproxy.ssl &&
+  awk -vr="$(sed -e '2,$s/^/        /' ~/haproxy.ssl)" '(sub("REPLACE_WITH_SSL_CERT_AND_KEY.*$",r))1' cf.yml > tmp &&
+  mv -f tmp cf.yml
+```
+
+## Deploying CF
+
+```
+scp cf.yml <devbox_username>@<devboxpublicip>:~/
+
+ssh <devbox_username>@<devboxpublicip>
+bosh target <YOUR BOSH DIRECTOR>
+bosh deployment cf.yml
+bosh deploy
+```
+
+
+## Enable Diagnostics in all VM
+
+Enables the diagnostics extension on all VMs in a resource group.
+assumes you have a file called PrivateConfig.json with your storage account credentials ([documentation here](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-classic-diagnostic-extension/))
+
+```
+./enable_diagnostics.sh YOUR_RG_NAME PATH_TO_YOUR_PRIVATE_CONFIG_FILE
+```
+
+The above command runs in parallel; if you want it to run serially, run it as:
+
+```
+./enable_diagnostics.sh YOUR_RG_NAME PATH_TO_YOUR_PRIVATE_CONFIG_FILE serial
+```
