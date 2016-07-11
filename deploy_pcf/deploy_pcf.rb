@@ -81,6 +81,9 @@ OptionParser.new do |opts|
   opts.on('-W', '--elastic-runtime-version [VERSION]') do |elastic_runtime_version|
     options[:elastic_runtime_version] = elastic_runtime_version
   end
+  opts.on('-P', '--p-runtime-directory [DIR]') do |p_runtime_directory|
+    options[:p_runtime_directory] = p_runtime_directory
+  end
   opts.on('-S', '--stemcell [PATH]') do |stemcell|
     options[:stemcell] = File.expand_path(stemcell)
   end
@@ -180,7 +183,8 @@ if options[:dry_run]
 end
 
 ENV['ENV_DIRECTORY'] = options[:environment_directory]
-runtime_dir=File.expand_path('../..', File.dirname(__FILE__)) + "/p-runtime"
+default_p_runtime_directory = File.expand_path('../..', File.dirname(__FILE__)) + "/p-runtime"
+runtime_dir = options.fetch(:p_runtime_directory], default_p_runtime_directory)
 
 Dir.chdir(runtime_dir)
 result = system("bundle")
