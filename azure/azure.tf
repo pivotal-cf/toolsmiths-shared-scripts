@@ -81,8 +81,15 @@ resource "azurerm_storage_container" "stemcellcontainer" {
     container_access_type = "blob"
 }
 
-resource "azurerm_public_ip" "cloudfoundrypublicip" {
-    name = "cloudfoundrypublicip"
+resource "azurerm_public_ip" "haproxypublicip" {
+    name = "haproxypublicip"
+    location = "${var.location}"
+    resource_group_name = "${azurerm_resource_group.resourcegroup.name}"
+    public_ip_address_allocation = "static"
+}
+
+resource "azurerm_public_ip" "loginhaproxypublicip" {
+    name = "loginhaproxypublicip"
     location = "${var.location}"
     resource_group_name = "${azurerm_resource_group.resourcegroup.name}"
     public_ip_address_allocation = "static"
@@ -257,10 +264,6 @@ resource "azurerm_virtual_machine" "devboxvm" {
     }
 }
 
-output "cloudfoundrypublicip" {
-  value = "${azurerm_public_ip.cloudfoundrypublicip.ip_address}"
-}
-
 output "devboxpublicip" {
   value = "${azurerm_public_ip.devboxpublicip.ip_address}"
 }
@@ -279,28 +282,33 @@ bosh_private_key_path: 'REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH' # Path is relat
 system_domain: 'REPLACE_WITH_YOUR_SYSTEM_DOMAIN'
 
 # These values are generated from the terraform script
-vnet_name: '${azurerm_virtual_network.virtualnetwork.name}'
-subnet_name: '${azurerm_subnet.boshsubnet.name}'
 subscription_id: '${var.azure_credentials.subscription_id}'
 client_id: '${var.azure_credentials.client_id}'
 client_secret: '${var.azure_credentials.client_secret}'
 tenant_id: '${var.azure_credentials.tenant_id}'
+vnet_name: '${azurerm_virtual_network.virtualnetwork.name}'
 resource_group_name: '${azurerm_resource_group.resourcegroup.name}'
 storage_account_name: '${azurerm_storage_account.storageaccount.name}'
+
+devbox_username: '${var.devbox_configs.username}'
+devbox_public_ip: '${azurerm_public_ip.devboxpublicip.ip_address}'
+
+bosh_subnet_name: '${azurerm_subnet.boshsubnet.name}'
 default_security_group: '${azurerm_network_security_group.boshsecuritygroup.name}'
+
 cf_subnet_name: '${azurerm_subnet.cloudfoundrysubnet.name}'
 cf_subnet_range: '${var.subnets.cloudfoundry}'
 cf_security_group: '${azurerm_network_security_group.cfsecuritygroup.name}'
 cf_reserved_range: '${cidrhost(var.subnets.cloudfoundry, 2)} - ${cidrhost(var.subnets.cloudfoundry, 3)}'
-cf_static_range: '${cidrhost(var.subnets.cloudfoundry, 4)} - ${cidrhost(var.subnets.cloudfoundry, 10)}'
+cf_static_range: '${cidrhost(var.subnets.cloudfoundry, 4)} - ${cidrhost(var.subnets.cloudfoundry, 50)}'
 cf_gateway: '${cidrhost(var.subnets.cloudfoundry, 1)}'
 consul_ip: '${cidrhost(var.subnets.cloudfoundry, 4)}'
-cf_public_ip: "${azurerm_public_ip.cloudfoundrypublicip.ip_address}"
-haproxy_ip: '${cidrhost(var.subnets.cloudfoundry, 5)}'
-router_ip: '${cidrhost(var.subnets.cloudfoundry, 6)}'
-nats_ip: '${cidrhost(var.subnets.cloudfoundry, 7)}'
-nfs_ip: '${cidrhost(var.subnets.cloudfoundry, 8)}'
-etcd_ip: '${cidrhost(var.subnets.cloudfoundry, 9)}'
-postgres_ip: '${cidrhost(var.subnets.cloudfoundry, 10)}'
+haproxy_public_ip: "${azurerm_public_ip.haproxypublicip.ip_address}"
+login_haproxy_public_ip: "${azurerm_public_ip.loginhaproxypublicip.ip_address}"
+router_ip: '${cidrhost(var.subnets.cloudfoundry, 5)}'
+nats_ip: '${cidrhost(var.subnets.cloudfoundry, 6)}'
+nfs_ip: '${cidrhost(var.subnets.cloudfoundry, 7)}'
+etcd_ip: '${cidrhost(var.subnets.cloudfoundry, 8)}'
+postgres_ip: '${cidrhost(var.subnets.cloudfoundry, 9)}'
 EOF
 }

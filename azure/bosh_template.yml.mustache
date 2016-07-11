@@ -31,7 +31,7 @@ networks:
     dns: [168.63.129.16]
     cloud_properties:
       virtual_network_name: {{vnet_name}} # <--- replace
-      subnet_name: {{subnet_name}} # <--- replace
+      subnet_name: {{bosh_subnet_name}} # <--- replace
 
 jobs:
 - name: bosh
