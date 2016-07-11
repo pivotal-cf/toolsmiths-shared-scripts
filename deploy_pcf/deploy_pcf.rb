@@ -184,7 +184,7 @@ end
 
 ENV['ENV_DIRECTORY'] = options[:environment_directory]
 default_p_runtime_directory = File.expand_path('../..', File.dirname(__FILE__)) + "/p-runtime"
-runtime_dir = options.fetch(:p_runtime_directory], default_p_runtime_directory)
+runtime_dir = options.fetch(:p_runtime_directory, default_p_runtime_directory)
 
 Dir.chdir(runtime_dir)
 result = system("bundle")
