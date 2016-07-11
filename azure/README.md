@@ -57,7 +57,7 @@ exit
 
 ### Notes
 
-We currently need to manually create the storage table (see: https://github.com/hashicorp/terraform/issues/7257):
+We currently need to manually create the storage table (see: https://github.com/hashicorp/terraform/issues/7257). **Update:** This feature should be included in the terraform 0.7 release.
 
 Run the following commands:
 
@@ -102,6 +102,7 @@ Set the variables required to generate your deployment manifest:
 
 ```
 # From the terraform working dir
+
 terraform output variables.yml > variables.yml
 
 
@@ -134,7 +135,7 @@ We use the `mustache` command to generate our bosh director manifest:
 
 ```
 bundle
-bundle exec mustache variables.yml bosh_template.yml > bosh.yml
+bundle exec mustache variables.yml bosh_template.yml.mustache > bosh.yml
 ```
 
 ## Deploying the bosh director from your dev box
@@ -169,6 +170,9 @@ We also need to upload the release and stemcell we wish to use:
 
 ```
 bosh upload release https://bosh.io/d/github.com/cloudfoundry/cf-release?v=231
+bosh upload release https://bosh.io/d/github.com/cloudfoundry-incubator/garden-linux-release?v=0.333.0
+bosh upload release https://bosh.io/d/github.com/cloudfoundry-incubator/etcd-release?v=36
+bosh upload release https://bosh.io/d/github.com/cloudfoundry-incubator/diego-release?v=0.1454.0
 bosh upload stemcell https://bosh.io/d/stemcells/bosh-azure-hyperv-ubuntu-trusty-go_agent?v=3232.11
 ```
 
