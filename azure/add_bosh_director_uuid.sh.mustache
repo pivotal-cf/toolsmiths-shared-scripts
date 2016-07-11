@@ -1,0 +1,7 @@
+
+#!/bin/bash
+
+# After your BOSH director has been deployed:
+bosh_director_uuid=$(ssh {{devbox_username}}@{{devbox_public_ip}} "bosh -q target 10.0.0.4 && bosh -q login admin admin && bosh status | grep UUID | awk '{print \$2}'")
+echo "bosh_director_uuid: $bosh_director_uuid"
+

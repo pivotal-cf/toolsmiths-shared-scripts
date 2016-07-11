@@ -160,7 +160,7 @@ We need to know the bosh director UUID when deploying CF.
 In the terraform working directory:
 
 ```
-terraform output add_bosh_director_uuid.sh > add_bosh_director_uuid.sh
+mustache variables.yml add_bosh_director_uuid.sh.mustache > add_bosh_director_uuid.sh
 chmod +x add_bosh_director_uuid.sh
 ./add_bosh_director_uuid.sh >> variables.yml
 ```
