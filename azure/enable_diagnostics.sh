@@ -21,13 +21,20 @@ resource_group_name=$1
 path_to_private_config_file=$2
 serial=$3
 
+azure config mode arm
+
 vm_list=$(azure vm list $resource_group_name | grep $resource_group_name | awk '{print $3}')
 for vm in $vm_list
 do
+  azure vm extension get -g $resource_group_name -m $vm | grep -q LinuxDiagnostic
+  if [[ $? -eq 1 ]]; then
     if [ "$serial" = "serial" ]
     then
 	azure vm extension set -g $resource_group_name -n LinuxDiagnostic -p Microsoft.OSTCExtensions -o 2.3 --private-config-path $path_to_private_config_file -m $vm
     else
 	azure vm extension set -g $resource_group_name -n LinuxDiagnostic -p Microsoft.OSTCExtensions -o 2.3 --private-config-path $path_to_private_config_file -m $vm &
     fi
+  else
+    echo "LinuxDiagnostic has already been enabled on $vm"
+  fi
 done
