@@ -65,6 +65,12 @@ Run the following commands:
 azure login # Follow the instructions to login
 ```
 
+Ensure you have the 'arm' mode configured with your azure CLI:
+
+```
+azure config mode arm
+```
+
 To fetch your storage account key, run the following commands and copy the 'Primary' key.
 
 ```
