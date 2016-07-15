@@ -1,4 +1,64 @@
-# Bootstrapping your Azure environment
+# Deploying CF to Azure
+---
+
+This repo is a collection of tooling to deploy CF on Azure. It is a set of terraform, shell, and ruby scripts to get your CF up and running. Follow the README on how to set up a working CF cluster on your Azure environment. The end result will give you:
+
+* A Dev Box VM in your Azure resource group
+* A MySQL cluster used as an external database for cloud controller
+* A working CF deployment with Diego
+
+###Table of Contents
+1. [Preqrequisites](#prerequisites)
+2. [Bootstrapping your Azure environment](#bootstrapping-your-azure-environment)
+3. [Setting up your devbox](#setting-up-your-devbox)
+4. [Deploying a BOSH director](#deploying-a-bosh-director)
+5. [Deploying CF](#deploying-cf)
+   1. [MySQL](#mysql)
+   1. [CF](#cf)
+   1. [Diego](#diego)
+
+
+---
+## Prerequisites
+
+### Set Quotas
+
+You will need an Azure account with the correct quotas enabled. To do this, you will need to open a support ticket with the Microsoft Azure team. Your email should look something like the following:
+
+```
+Hi Azure support,
+
+Can you please increase our ARM core quotas in <REGION> region for subscription ID: <SUBSCRIPTION ID>.
+
+Requirements:
+
+- Requested quantity of ARM Cores: 202
+- Requested region: <REGION>
+
+- Please fulfill this request as soon as possible
+- The request is not temporary
+- This will not be a bursting request
+- Please allocate 5 TBs of premium storage
+- No standard storage will be used
+
+- VM Types to be used: D series, DS series, Dv2 series
+- VM count (Number of VMs with Cores ):
+  - 2 x D 1 = 2 cores
+  - 200 x DS = 150 cores
+  - 50 x Dv2 = 50 cores
+```
+
+### Generate working directory
+
+We recommend creating a working directory for your specific Azure environment. In our readme, we will be using `~/workspace/<ENV>/`
+
+```
+mkdir ~/workspace/<ENV>
+```
+
+---
+
+## Bootstrapping your Azure environment
 
 ### Prerequisites
 
@@ -13,21 +73,28 @@ The terraform script will set up your Azure environment according to the [BOSH C
 * create a default storage account
 * create the 'bosh' and 'stemcell' storage containers
 * create a public IP to use for your CF deployment
-* creates a virtual network for your environment with 3 subnets (bosh, cloudfoundry, diego)
+* creates a virtual network for your environment with 3 subnets (bosh, mysql, cloudfoundry, diego)
 * sets up the network security groups:
-  * For the BOSH subnet:
+  * For the BOSH security group:
+    * anything within the virtual network
     * ssh (22)
     * bosh-agent (6868)
     * bosh-director (25555)
     * dns (53)
-  * For the Cloudfoundry subnet:
-    * cf-https (443)
-    * cf-log (4443)
+    * http (80)
+    * https (443)
+    * loggregator (4443)
 * create an Ubuntu vm for your use as a dev box to deploy bosh and cf
 
 ### Running the terraform script
 
-Update the terraform script at the top, underneath the 'UPDATE BELOW' header paying head to the following guidelines:
+We recommend you copy the terraform script to your working directory.
+
+```
+cp azure.tf ~/workspace/<ENV>/
+```
+
+Update the script at the top, underneath the 'UPDATE BELOW' header paying head to the following guidelines:
 
 * environment name: should be between 1 and 22 characters, all of which are lowercase or numbers; this is due to naming limits of the storage account which will be created as *environment_name+sa*.
 * devbox username: be advised that there are some reserved usernames which are disallowed, such as "admin".
@@ -37,27 +104,10 @@ Inside the terraform script's directory, run `terraform plan` to view the change
 
 Once you are happy with the changes, execute the terraform script by running `terraform apply`.
 
-### Setting up your devbox
 
-Once the terraform script has completed, you will want to install basic tools such as ruby, bosh cli and bosh-init.
+### Creating the storage table
 
-In this directory, run the following:
-
-```
-ssh-add <your_dev_box_private_key>
-
-scp set_up_dev_box.sh <devbox_username>@<devboxpublicip>:/tmp
-
-ssh <devbox_username>@<devboxpublicip>
-  sudo su
-  /tmp/set_up_dev_box.sh
-exit
-
-```
-
-### Notes
-
-We currently need to manually create the storage table (see: https://github.com/hashicorp/terraform/issues/7257). **Update:** This feature should be included in the terraform 0.7 release.
+We currently need to manually create the storage table (see: https://github.com/hashicorp/terraform/issues/7257).**Update:** This feature should be included in the terraform 0.7 release.
 
 Run the following commands:
 
@@ -96,20 +146,41 @@ Create your storage table:
 
 ```
 storage_account_key=<your-storage-account-key>
-storage_account_name=<your-env-name>sa
+
 azure storage table create --account-name $storage_account_name --account-key $storage_account_key --table stemcell
 ```
 
-# Deploying a BOSH director in your Azure environment
+---
 
-## Prerequisites
+## Setting up your devbox
+
+Once the terraform script has completed, you will want to install basic tools such as ruby, bosh cli and bosh-init.
+
+In your environment directory, run the following:
+
+```
+cd ~/workspace/<ENV>
+
+ssh-add <your_dev_box_private_key>
+
+devboxpublicip=$(terraform output devboxpublicip)
+scp ~/workspace/toolsmiths-shared-scripts/azure/set_up_dev_box.sh <devbox_username>@${devboxpublicip}:/tmp
+
+ssh <devbox_username>@${devboxpublicip} "sudo /tmp/set_up_dev_box.sh"
+```
+
+---
+
+## Deploying a BOSH director
+
+### Prerequisites
 
 Set the variables required to generate your deployment manifest:
 
 ```
 # From the terraform working dir
 
-terraform output variables.yml > variables.yml
+terraform output variables.yml > ~/workspace/<ENV>/variables.yml
 
 
 
@@ -133,18 +204,23 @@ bosh_private_key_path: 'REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH' # Path is relat
 
 **Be sure to set your the variables that are tagged with 'REPLACE'**
 
+* **bosh_pub_key**: This is your public key for bosh
+* **bosh_private_key_path**: This is the full or relative path to the bosh private key on the dev box
+* **system_domain**: This is the wildcard A record that points to your HA proxy. *Be sure to create this record beforehand*
 
 
-## Generating the director manifest
+
+### Generating the director manifest
 
 We use the `mustache` command to generate our bosh director manifest:
 
 ```
+cd ~/workspace/toolsmiths-shared-scripts/azure
 bundle
-bundle exec mustache variables.yml bosh_template.yml.mustache > bosh.yml
+bundle exec mustache ~/workspace/<ENV>/variables.yml bosh.yml.mustache > ~/workspace/<ENV>bosh.yml
 ```
 
-## Deploying the bosh director from your dev box
+### Deploying the bosh director from your dev box
 
 * Ensure your bosh private key is on the dev box in the path that is specified in the manifest
 * Feel free to update the release versions
@@ -152,29 +228,41 @@ bundle exec mustache variables.yml bosh_template.yml.mustache > bosh.yml
 ```
 scp bosh.yml <devbox_username>@<devboxpublicip>:~/
 
-ssh <devbox_username>@<devboxpublicip>
-bosh-init deploy bosh.yml
+ssh <devbox_username>@<devboxpublicip> "bosh-init deploy bosh.yml"
 ```
 
-**Make sure you check in your deployment manifests!**
+**Make sure you check in your deployment manifests to your teams repo!**
 
-# Deploying CF in your Azure environment
+---
 
-## Prerequisites
+## Deploying CF
+
+We will be deploying mysql, cf and diego as three separate deployments.
+
+### Prerequisites
 
 We need to know the bosh director UUID when deploying CF.
 
 In the terraform working directory:
 
 ```
-mustache variables.yml add_bosh_director_uuid.sh.mustache > add_bosh_director_uuid.sh
-chmod +x add_bosh_director_uuid.sh
-./add_bosh_director_uuid.sh >> variables.yml
+cd ~/workspace/toolsmiths-shared-scripts/azure
+mustache ~/workspace/<ENV>/variables.yml add_bosh_director_uuid.sh.mustache > ~/workspace/<ENV>/add_bosh_director_uuid.sh
+chmod +x ~/workspace/<ENV>/add_bosh_director_uuid.sh
+~/workspace/<ENV>/add_bosh_director_uuid.sh >> ~/workspace/<ENV>/variables.yml
 ```
 
-We also need to upload the release and stemcell we wish to use:
+We also need to upload the releases and stemcell we wish to use:
 
 ```
+ssh <devboxuser>@<devboxpublicip>
+
+bosh target 10.0.0.4
+bosh login admin <password>
+
+# These are the versions we have tested with
+
+bosh upload release https://bosh.io/d/github.com/cloudfoundry/cf-mysql-release?v=24
 bosh upload release https://bosh.io/d/github.com/cloudfoundry/cf-release?v=231
 bosh upload release https://bosh.io/d/github.com/cloudfoundry-incubator/garden-linux-release?v=0.333.0
 bosh upload release https://bosh.io/d/github.com/cloudfoundry-incubator/etcd-release?v=36
@@ -182,47 +270,129 @@ bosh upload release https://bosh.io/d/github.com/cloudfoundry-incubator/diego-re
 bosh upload stemcell https://bosh.io/d/stemcells/bosh-azure-hyperv-ubuntu-trusty-go_agent?v=3232.11
 ```
 
-## Generating your CF manifest
+## MySQL
+
+The mysql deployment is used as a standalone mysql cluster to be used as an external database by the cloud controller.
+
+### Generating your Mysql manifest
+
+Generate your mysql manifest using mustache:
+
+```
+mustache ~/workspace/<ENV>/variables.yml mysql.yml.mustache > ~/workspace/<ENV>mysql.yml
+```
+
+SCP your the mysql deployment manifest onto the devbox
+
+```
+scp ~/workspace/<ENV>/mysql.yml <devbox_username>@<devboxpublicip>:~/
+```
+
+### Deploying your Mysql cluster
+
+Set your deployment manifest and deploy your mysql cluster from the devbox:
+
+```
+ssh <devbox_username>@<devboxpublicip> "bosh deployment ~/mysql.yml && bosh deploy"
+``` 
+
+## CF
+
+This is the CF release without any DEA cells. We will be using Diego for our CF cluster.
+
+### Generating your CF manifest
 
 Generate your cf manifest using mustache:
 
 ```
-bundle exec mustache variables.yml cf_template.yml > cf.yml
+bundle exec mustache ~/workspace/<ENV>/variables.yml cf.yml.mustache > ~/workspace/<ENV>/cf.yml
 ```
 
-Put your wildcard SSL cert and key in the cf.yml (search for 'REPLACE_WITH_SSL_CERT_AND_KEY'). If you are just generating a new one, you can use the following command:
+Generate keys and certs if necessary
 
 ```
-openssl genrsa -out ~/haproxy.key 2048 &&
-  echo -e "\n\n\n\n\n\n\n" | openssl req -new -x509 -days 365 -key ~/haproxy.key -out ~/haproxy_cert.pem &&
-  cat ~/haproxy_cert.pem ~/haproxy.key > ~/haproxy.ssl &&
-  awk -vr="$(sed -e '2,$s/^/        /' ~/haproxy.ssl)" '(sub("REPLACE_WITH_SSL_CERT_AND_KEY.*$",r))1' cf.yml > tmp &&
-  mv -f tmp cf.yml
+./generate_cf_certs_and_keys.sh ~/workspace/<ENV>/cert_and_keys
 ```
 
-## Deploying CF
+This will create the following keys and certs in the directory:
 
 ```
-scp cf.yml <devbox_username>@<devboxpublicip>:~/
-
-ssh <devbox_username>@<devboxpublicip>
-bosh target <YOUR BOSH DIRECTOR>
-bosh deployment cf.yml
-bosh deploy
+~/workspace/<ENV>/cert_and_keys/
+└── cf
+    ├── ha_proxy_ssl_pem
+    ├── jwt_signing_key
+    ├── jwt_verification_key
+    └── loginha_proxy_ssl_pem
 ```
 
-
-## Enable Diagnostics in all VM
-
-Enables the diagnostics extension on all VMs in a resource group.
-assumes you have a file called PrivateConfig.json with your storage account credentials ([documentation here](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-linux-classic-diagnostic-extension/))
+Insert the certificates and keys into the deployment manifest:
 
 ```
-./enable_diagnostics.sh YOUR_RG_NAME PATH_TO_YOUR_PRIVATE_CONFIG_FILE
+./insert_certs_and_keys_to_manifest.rb ~/workspace/<ENV>/cert_and_keys/cf ~/workspace/<ENV>/cf.yml
 ```
 
-The above command runs in parallel; if you want it to run serially, run it as:
+SCP the cf manifest to your dev box vm
 
 ```
-./enable_diagnostics.sh YOUR_RG_NAME PATH_TO_YOUR_PRIVATE_CONFIG_FILE serial
+scp ~/workspace/<ENV>/cf.yml <devbox_username>@<devboxpublicip>:~/
+```
+
+### Deploy your CF cluster
+
+```
+ssh <devbox_username>@<devboxpublicip> "bosh deployment ~/cf.yml && bosh deploy"
+```
+
+## Diego
+
+Generate your diego manifest using mustache:
+
+```
+bundle exec mustache ~/workspace/<ENV>/variables.yml diego.yml.mustache > ~/workspace/<ENV>/diego.yml
+```
+
+Generate keys and certs if necessary
+
+```
+./generate_diego_certs_and_keys.sh ~/workspace/<ENV>/cert_and_keys
+```
+
+This will create the following keys and certs in the directory:
+
+```
+~/workspace/<ENV>/cert_and_keys/
+└── diego
+    ├── bbs_client_cert
+    ├── bbs_client_key
+    ├── bbs_server_cert
+    ├── bbs_server_key
+    ├── diego_ca_cert
+    ├── diego_ca_key
+    ├── etcd_client_cert
+    ├── etcd_client_key
+    ├── etcd_peers_cert
+    ├── etcd_peers_key
+    ├── etcd_server_cert
+    ├── etcd_server_key
+    ├── etcdpeers_ca_cert
+    ├── etcdpeers_ca_key
+    └── ssh_proxy_key
+```
+
+Insert the certificates and keys into the deployment manifest:
+
+```
+./insert_certs_and_keys_to_manifest.rb ~/workspace/<ENV>/cert_and_keys/diego ~/workspace/<ENV>/diego.yml
+```
+
+SCP the cf manifest to your dev box vm
+
+```
+scp ~/workspace/<ENV>/diego.yml <devbox_username>@<devboxpublicip>:~/
+```
+
+### Deploy your Diego cluster
+
+```
+ssh <devbox_username>@<devboxpublicip> "bosh deployment ~/diego.yml && bosh deploy"
 ```

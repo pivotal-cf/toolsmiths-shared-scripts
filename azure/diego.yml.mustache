@@ -1,0 +1,625 @@
+---
+name: diego
+director_uuid: {{bosh_director_uuid}}
+
+release_versions:
+releases:
+- name: cf
+  version: &cfversion 231
+- name: diego
+  version: 0.1454.0
+- name: etcd
+  version: 36
+- name: garden-linux
+  version: 0.333.0
+
+networks:
+- name: diego1
+  subnets:
+  - cloud_properties:
+      subnet_name: {{diego_subnet_name}}
+      virtual_network_name: {{vnet_name}}
+    dns: [ {{dns}} ]
+    gateway: {{diego_gateway}}
+    name: default_unused
+    range: {{diego_subnet_range}}
+    reserved: [ {{diego_reserved_range}} ]
+    static: [ {{diego_static_range}} ]
+  type: manual
+
+base_job_templates:
+  access:
+  - { name: ssh_proxy, release: diego }
+  - { name: consul_agent, release: cf }
+  - { name: metron_agent, release: cf }
+  - { name: file_server, release: diego }
+  brain:
+  - { name: consul_agent, release: cf }
+  - { name: auctioneer, release: diego }
+  - { name: converger, release: diego }
+  - { name: metron_agent, release: cf }
+  cc_bridge:
+  - { name: consul_agent, release: cf }
+  - { name: stager, release: diego }
+  - { name: nsync, release: diego }
+  - { name: tps, release: diego }
+  - { name: cc_uploader, release: diego }
+  - { name: metron_agent, release: cf }
+  cell:
+  - { name: rep, release: diego }
+  - { name: consul_agent, release: cf }
+  - { name: garden, release: garden-linux }
+  - { name: rootfses, release: diego }
+  - { name: metron_agent, release: cf }
+  colocated:
+  - { name: rep, release: diego }
+  - { name: auctioneer, release: diego }
+  - { name: bbs, release: diego }
+  - { name: cc_uploader, release: diego }
+  - { name: converger, release: diego }
+  - { name: consul_agent, release: cf }
+  - { name: etcd, release: etcd }
+  - { name: file_server, release: diego }
+  - { name: garden, release: garden-linux }
+  - { name: metron_agent, release: cf }
+  - { name: nsync, release: diego }
+  - { name: rootfses, release: diego }
+  - { name: route_emitter, release: diego }
+  - { name: ssh_proxy, release: diego }
+  - { name: stager, release: diego }
+  - { name: tps, release: diego }
+  database:
+  - { name: etcd, release: etcd }
+  - { name: bbs, release: diego }
+  - { name: consul_agent, release: cf }
+  - { name: metron_agent, release: cf }
+  route_emitter:
+  - { name: route_emitter, release: diego }
+  - { name: consul_agent, release: cf }
+  - { name: metron_agent, release: cf }
+
+base_releases:
+- { name: diego, version: latest }
+- { name: garden-linux, version: latest }
+- { name: etcd, version: latest }
+
+compilation:
+  cloud_properties:
+    instance_type: Standard_DS2
+    storage_account_name: {{storage_account_name}}
+  network: diego1
+  reuse_compilation_vms: true
+  workers: 16
+config_from_cf:
+  app_domains:
+  - {{system_domain}}
+  cc:
+    internal_api_password: {{bulk_api_password}}
+    internal_api_user: internal_user
+    srv_api_uri: https://api.{{system_domain}}
+  cf_deployment_name: cf
+  cf_director_uuid: {{bosh_director_uuid}}
+  cf_release:
+    name: cf
+    version: *cfversion
+  consul:
+    agent_cert:
+    agent_key:
+    ca_cert:
+    datacenter:
+    encrypt_keys: []
+    lan_servers: [ {{consul_ip}} ]
+    log_level:
+    require_ssl: false
+    server_cert:
+    server_key:
+  loggregator:
+    dropsonde_incoming_port:
+    etcd_machines: [ {{etcd_ip}} ]
+    shared_secret: {{doppler_shared_secret}}
+    tls:
+      ca_cert:
+    traffic_controller_url: wss://doppler.{{system_domain}}:443
+  metron_agent:
+    buffer_size:
+    dropsonde_incoming_port:
+    enable_buffer:
+    preferred_protocol:
+    tls:
+      client_cert:
+      client_key:
+  metron_endpoint:
+    shared_secret: {{doppler_shared_secret}}
+  nats:
+    machines: [ {{nats_ip}} ]
+    password: {{nats_password}}
+    port: 4222
+    user: nats
+  uaa:
+    ssh_proxy_client_secret: {{uaa_ssh_proxy_secret}}
+    token_url: https://uaa.{{system_domain}}/oauth/token
+
+disk_pools:
+- cloud_properties: {}
+  disk_size: 1024
+  name: database_disks
+
+empty_hash: {}
+iaas_settings:
+  compilation_cloud_properties:
+    instance_type: Standard_DS2
+    storage_account_name: {{storage_account_name}}
+  resource_pool_cloud_properties:
+  - cloud_properties:
+      instance_type: Standard_DS1
+      storage_account_name: {{storage_account_name}}
+    name: access_z1
+  - cloud_properties:
+      instance_type: Standard_DS1
+      storage_account_name: {{storage_account_name}}
+    name: brain_z1
+  - cloud_properties:
+      instance_type: Standard_DS1
+      storage_account_name: {{storage_account_name}}
+    name: cc_bridge_z1
+  - cloud_properties:
+      instance_type: Standard_DS4
+      storage_account_name: {{storage_account_name}}
+    name: cell_z1
+  - cloud_properties:
+      instance_type: Standard_DS4
+      storage_account_name: {{storage_account_name}}
+    name: colocated_z1
+  - cloud_properties:
+      instance_type: Standard_DS2
+      storage_account_name: {{storage_account_name}}
+    name: database_z1
+  - cloud_properties:
+      instance_type: Standard_DS1
+      storage_account_name: {{storage_account_name}}
+    name: route_emitter_z1
+  stemcell:
+    name: bosh-azure-hyperv-ubuntu-trusty-go_agent
+    version: latest
+  subnet_configs:
+  - name: diego1
+    subnets:
+    - cloud_properties:
+        subnet_name: {{diego_subnet_name}}
+        virtual_network_name: {{vnet_name}}
+      dns: [ {{dns}} ]
+      gateway: {{diego_gateway}}
+      name: default_unused
+      range: {{diego_subnet_range}}
+      reserved: [ {{diego_reserved_range}} ]
+      static: [ {{diego_static_range}} ]
+    type: manual
+
+jobs:
+- name: database_z1
+  instances: 1
+  networks:
+  - name: diego1
+  persistent_disk_pool: database_disks
+  properties:
+    consul:
+      agent:
+        services:
+          etcd: {}
+    metron_agent:
+      zone: z1
+  resource_pool: database_z1
+  templates:
+  - { name: etcd, release: etcd }
+  - { name: bbs, release: diego }
+  - { name: consul_agent, release: cf }
+  - { name: metron_agent, release: cf }
+  update:
+    max_in_flight: 1
+    serial: true
+- name: brain_z1
+  instances: 1
+  networks:
+  - name: diego1
+  properties:
+    metron_agent:
+      zone: z1
+  resource_pool: brain_z1
+  templates:
+  - { name: consul_agent, release: cf }
+  - { name: auctioneer, release: diego }
+  - { name: converger, release: diego }
+  - { name: metron_agent, release: cf }
+  update:
+    max_in_flight: 1
+    serial: true
+- name: cell_z1
+  instances: 2
+  networks:
+  - name: diego1
+  properties:
+    diego:
+      rep:
+        zone: z1
+    metron_agent:
+      zone: z1
+  resource_pool: cell_z1
+  templates:
+  - { name: rep, release: diego }
+  - { name: consul_agent, release: cf }
+  - { name: garden, release: garden-linux }
+  - { name: rootfses, release: diego }
+  - { name: metron_agent, release: cf }
+  update:
+    max_in_flight: 1
+    serial: false
+- name: cc_bridge_z1
+  instances: 1
+  networks:
+  - name: diego1
+  properties:
+    metron_agent:
+      zone: z1
+  resource_pool: cc_bridge_z1
+  templates:
+  - { name: consul_agent, release: cf }
+  - { name: stager, release: diego }
+  - { name: nsync, release: diego }
+  - { name: tps, release: diego }
+  - { name: cc_uploader, release: diego }
+  - { name: metron_agent, release: cf }
+  update:
+    max_in_flight: 1
+    serial: false
+- name: route_emitter_z1
+  instances: 2
+  networks:
+  - name: diego1
+  properties:
+    metron_agent:
+      zone: z1
+  resource_pool: route_emitter_z1
+  templates:
+  - { name: route_emitter, release: diego }
+  - { name: consul_agent, release: cf }
+  - { name: metron_agent, release: cf }
+  update:
+    max_in_flight: 1
+    serial: false
+- name: access_z1
+  instances: 1
+  networks:
+  - name: diego1
+  properties:
+    metron_agent:
+      zone: z1
+  resource_pool: access_z1
+  templates:
+  - { name: ssh_proxy, release: diego }
+  - { name: consul_agent, release: cf }
+  - { name: metron_agent, release: cf }
+  - { name: file_server, release: diego }
+  update:
+    max_in_flight: 1
+    serial: false
+
+properties:
+  consul:
+    agent:
+      datacenter:
+      log_level:
+      servers:
+        lan: [ {{consul_ip}} ]
+    agent_cert:
+    agent_key:
+    ca_cert:
+    encrypt_keys: []
+    require_ssl: false
+    server_cert:
+    server_key:
+  diego:
+    auctioneer:
+      bbs:
+        api_location: bbs.service.cf.internal:8889
+        ca_cert: *diego_ca_cert
+        client_cert: *bbs_client_cert
+        client_key: *bbs_client_key
+        client_session_cache_size:
+        max_idle_conns_per_host:
+        require_ssl:
+      cell_state_timeout:
+      dropsonde_port:
+      log_level:
+      starting_container_weight:
+    bbs:
+      active_key_label: active-key
+      auctioneer:
+        api_url: http://auctioneer.service.cf.internal:9016
+      ca_cert: *diego_ca_cert
+      dropsonde_port:
+      encryption_keys:
+      - label: active-key
+        passphrase: {{bbs_encryption_passphrase}}
+      etcd:
+        ca_cert: *diego_ca_cert
+        client_cert: *etcd_client_cert
+        client_key: *etcd_client_key
+        client_session_cache_size:
+        machines:
+        - etcd.service.cf.internal
+        max_idle_conns_per_host:
+        require_ssl:
+      log_level:
+      require_ssl:
+      server_cert: *bbs_server_cert
+      server_key: *bbs_server_key
+    cc_uploader:
+      dropsonde_port:
+      log_level:
+    converger:
+      bbs:
+        api_location: bbs.service.cf.internal:8889
+        ca_cert: *diego_ca_cert
+        client_cert: *bbs_client_cert
+        client_key: *bbs_client_key
+        client_session_cache_size:
+        max_idle_conns_per_host:
+        require_ssl:
+      dropsonde_port:
+      log_level:
+    executor:
+      disk_capacity_mb:
+      drain_timeout_in_seconds:
+      garden:
+        address:
+        network:
+      garden_healthcheck:
+        command_retry_pause:
+        interval:
+        process:
+          args:
+          dir:
+          env:
+          path:
+          user:
+        timeout:
+      log_level:
+      memory_capacity_mb:
+      post_setup_hook:
+      post_setup_user:
+    file_server:
+      dropsonde_port:
+      log_level:
+    nsync:
+      bbs:
+        api_location: bbs.service.cf.internal:8889
+        ca_cert: *diego_ca_cert
+        client_cert: *bbs_client_cert
+        client_key: *bbs_client_key
+        client_session_cache_size:
+        max_idle_conns_per_host:
+        require_ssl:
+      cc:
+        base_url: https://api.{{system_domain}}
+        basic_auth_password: {{bulk_api_password}}
+        basic_auth_username: internal_user
+      dropsonde_port:
+      log_level:
+    rep:
+      bbs:
+        api_location: bbs.service.cf.internal:8889
+        ca_cert: *diego_ca_cert
+        client_cert: *bbs_client_cert
+        client_key: *bbs_client_key
+        client_session_cache_size:
+        max_idle_conns_per_host:
+        require_ssl:
+      dropsonde_port:
+      evacuation_timeout_in_seconds:
+      log_level:
+    rootfs_cflinuxfs2:
+      trusted_certs:
+    route_emitter:
+      bbs:
+        api_location: bbs.service.cf.internal:8889
+        ca_cert: *diego_ca_cert
+        client_cert: *bbs_client_cert
+        client_key: *bbs_client_key
+        client_session_cache_size:
+        max_idle_conns_per_host:
+        require_ssl:
+      dropsonde_port:
+      log_level:
+      nats:
+        machines: [ {{nats_ip}} ]
+        password: {{nats_password}}
+        port: 4222
+        user: nats
+    ssh_proxy:
+      bbs:
+        api_location: bbs.service.cf.internal:8889
+        ca_cert: *diego_ca_cert
+        client_cert: *bbs_client_cert
+        client_key: *bbs_client_key
+        client_session_cache_size:
+        max_idle_conns_per_host:
+        require_ssl:
+      diego_credentials:
+      dropsonde_port:
+      enable_cf_auth: true
+      enable_diego_auth: false
+      host_key: *ssh_proxy_key
+      uaa_secret: {{uaa_ssh_proxy_secret}}
+      uaa_token_url: https://uaa.{{system_domain}}/oauth/token
+    ssl:
+      skip_cert_verify: true
+    stager:
+      bbs:
+        api_location: bbs.service.cf.internal:8889
+        ca_cert: *diego_ca_cert
+        client_cert: *bbs_client_cert
+        client_key: *bbs_client_key
+        client_session_cache_size:
+        max_idle_conns_per_host:
+        require_ssl:
+      cc:
+        basic_auth_password: {{bulk_api_password}}
+        basic_auth_username: internal_user
+      dropsonde_port:
+      insecure_docker_registry_list:
+      log_level:
+    tps:
+      bbs:
+        api_location: bbs.service.cf.internal:8889
+        ca_cert: *diego_ca_cert
+        client_cert: *bbs_client_cert
+        client_key: *bbs_client_key
+        client_session_cache_size:
+        max_idle_conns_per_host:
+        require_ssl:
+      cc:
+        basic_auth_password: {{bulk_api_password}}
+        basic_auth_username: internal_user
+      dropsonde_port:
+      log_level:
+      traffic_controller_url: wss://doppler.{{system_domain}}:443
+  etcd:
+    ca_cert: *diego_ca_cert
+    client_cert: *etcd_client_cert
+    client_key: *etcd_client_key
+    cluster:
+    - instances: 1
+      name: database_z1
+    election_timeout_in_milliseconds:
+    heartbeat_interval_in_milliseconds:
+    machines:
+    - etcd.service.cf.internal
+    peer_ca_cert: *etcdpeers_ca_cert
+    peer_cert: *etcd_peers_cert
+    peer_key: *etcd_peers_key
+    peer_require_ssl:
+    require_ssl:
+    server_cert: *etcd_server_cert
+    server_key: *etcd_server_key
+  garden:
+    allow_host_access:
+    allow_networks:
+    default_container_grace_time: 0
+    deny_networks:
+    - 0.0.0.0/0
+    disk_quota_enabled:
+    enable_graph_cleanup: true
+    insecure_docker_registry_list:
+    listen_address:
+    listen_network:
+    log_level:
+    network_mtu:
+    persistent_image_list:
+    - "/var/vcap/packages/rootfs_cflinuxfs2/rootfs"
+  loggregator:
+    dropsonde_incoming_port:
+    etcd:
+      machines: [ {{etcd_ip}} ]
+    tls:
+      ca_cert:
+  metron_agent:
+    buffer_size:
+    deployment: diego
+    dropsonde_incoming_port:
+    enable_buffer:
+    preferred_protocol:
+    tls:
+      client_cert:
+      client_key:
+  metron_endpoint:
+    shared_secret: {{doppler_shared_secret}}
+  syslog_daemon_config:
+    address:
+    port:
+property_overrides:
+  bbs:
+    active_key_label: active-key
+    ca_cert: *diego_ca_cert
+    client_cert: *bbs_client_cert
+    client_key: *bbs_client_key
+    encryption_keys:
+    - label: active-key
+      passphrase: {{bbs_encryption_passphrase}}
+    server_cert: *bbs_server_cert
+    server_key: *bbs_server_key
+  etcd:
+    ca_cert: *diego_ca_cert
+    client_cert: *etcd_client_cert
+    client_key: *etcd_client_key
+    peer_ca_cert: *etcdpeers_ca_cert
+    peer_cert: *etcd_peers_cert
+    peer_key: *etcd_peers_key
+    server_cert: *etcd_server_cert
+    server_key: *etcd_server_key
+  ssh_proxy:
+    host_key: *ssh_proxy_key
+
+resource_pools:
+- cloud_properties:
+    instance_type: Standard_DS1
+    storage_account_name: {{storage_account_name}}
+  name: access_z1
+  network: diego1
+  stemcell:
+    name: bosh-azure-hyperv-ubuntu-trusty-go_agent
+    version: latest
+- cloud_properties:
+    instance_type: Standard_DS1
+    storage_account_name: {{storage_account_name}}
+  name: brain_z1
+  network: diego1
+  stemcell:
+    name: bosh-azure-hyperv-ubuntu-trusty-go_agent
+    version: latest
+- cloud_properties:
+    instance_type: Standard_DS1
+    storage_account_name: {{storage_account_name}}
+  name: cc_bridge_z1
+  network: diego1
+  stemcell:
+    name: bosh-azure-hyperv-ubuntu-trusty-go_agent
+    version: latest
+- cloud_properties:
+    instance_type: Standard_DS4
+    storage_account_name: {{storage_account_name}}
+  name: cell_z1
+  network: diego1
+  stemcell:
+    name: bosh-azure-hyperv-ubuntu-trusty-go_agent
+    version: latest
+- cloud_properties:
+    instance_type: Standard_DS2
+    storage_account_name: {{storage_account_name}}
+  name: database_z1
+  network: diego1
+  stemcell:
+    name: bosh-azure-hyperv-ubuntu-trusty-go_agent
+    version: latest
+- cloud_properties:
+    instance_type: Standard_DS1
+    storage_account_name: {{storage_account_name}}
+  name: route_emitter_z1
+  network: diego1
+  stemcell:
+    name: bosh-azure-hyperv-ubuntu-trusty-go_agent
+    version: latest
+- cloud_properties:
+    instance_type: Standard_DS4
+    storage_account_name: {{storage_account_name}}
+  name: colocated_z1
+  network: diego1
+  stemcell:
+    name: bosh-azure-hyperv-ubuntu-trusty-go_agent
+    version: latest
+
+update:
+  canaries: 1
+  canary_watch_time: 5000-600000
+  max_in_flight: 1
+  serial: false
+  update_watch_time: 5000-600000

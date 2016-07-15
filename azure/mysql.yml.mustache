@@ -1,0 +1,162 @@
+---
+name: mysql
+director_uuid: {{bosh_director_uuid}}
+
+meta:
+  environment: mysql
+  syslog_aggregator:
+
+compilation:
+  cloud_properties:
+    instance_type: Standard_DS3
+  network: mysql1
+  reuse_compilation_vms: true
+  workers: 20
+
+releases:
+- name: cf-mysql
+  version: 24
+
+disk_pools:
+- cloud_properties: {}
+  disk_size: 200000
+  name: mysql-persistent-disk
+
+networks:
+- name: mysql1
+  subnets:
+  - cloud_properties:
+      subnet_name: {{mysql_subnet_name}}
+      virtual_network_name: {{vnet_name}}
+    dns: [ {{dns}} ]
+    gateway: {{mysql_gateway}}
+    name: default_unused
+    range: {{mysql_subnet_range}}
+    reserved: [ {{mysql_reserved_range}} ]
+    static: [ {{mysql_static_range}} ]
+  type: manual
+- name: mysql2
+  subnets:
+  - cloud_properties:
+      subnet_name: {{mysql_subnet_name}}
+      virtual_network_name: {{vnet_name}}
+    dns: [ {{dns}} ]
+    gateway: {{mysql_gateway}}
+    name: default_unused
+    range: {{mysql_subnet_range}}
+    reserved: [ {{mysql_reserved_range}} ]
+    static: [ {{mysql_static_range}} ]
+  type: manual
+
+update:
+  canaries: 1
+  canary_watch_time: 30000-600000
+  max_in_flight: 1
+  update_watch_time: 30000-600000
+
+jobs:
+- instances: 1
+  name: mysql_z1
+  networks:
+  - name: mysql1
+    static_ips:
+    - {{mysql_ip}}
+  persistent_disk_pool: mysql-persistent-disk
+  properties:
+    admin_password: {{mysql_admin_password}}
+    cluster_ips:
+    - {{mysql_ip}}
+    database_startup_timeout: 600
+    max_heap_table_size:
+    network_name: mysql1
+    seeded_databases:
+    - name: ccdb
+      password: {{ccdb_password}}
+      username: ccadmin
+    - name: uaadb
+      password: {{uaadb_password}}
+      username: uaaadmin
+    syslog_aggregator:
+    tmp_table_size:
+    wsrep_max_ws_rows:
+    wsrep_max_ws_size:
+  release: cf-mysql
+  resource_pool: mysql_z1
+  template: mysql
+
+- name: proxy_z1
+  instances: 1
+  networks:
+  - name: mysql1
+    static_ips: [ {{mysql_proxy_ip}} ]
+  properties:
+    cluster_ips: [ {{mysql_ip}} ]
+    external_host: p-mysql.STUB
+    nats:
+      machines:
+      - []
+      password: STUB
+      port: 0
+      user: STUB
+    network_name: mysql1
+    proxy:
+      api_force_https:
+      api_password: {{mysql_proxy_password}}
+      api_username: proxy
+      health_port:
+      proxy_ips: [ {{mysql_proxy_ip}} ]
+    standalone: true
+    syslog_aggregator:
+  release: cf-mysql
+  resource_pool: proxy_z1
+  template: proxy
+
+properties:
+  app_domains:
+  - STUB
+  cf:
+    admin_password: STUB
+    admin_username: STUB
+    api_url: https://api.STUB
+    apps_domain: STUB
+    skip_ssl_validation: true
+  default_acceptance_plans:
+  - description: Small db 50mb storage and 10 connections
+    id: 7ed66cdd-0433-4943-b878-bc5e7cccf560
+    max_storage_mb: 50
+    max_user_connections: 10
+    metadata: {}
+    name: small
+  default_mysql_cluster_ips: [ {{mysql_ip}} ]
+  default_proxy_ips: [ {{mysql_proxy_ip}} ]
+  domain: STUB
+  nats:
+    machines:
+    - []
+    password: STUB
+    port: 0
+    user: STUB
+  standalone: true
+  temp:
+    canary_end_in_sec: '600000'
+    database_startup_timeout_str: '600'
+
+resource_pools:
+- name: mysql_z1
+  cloud_properties:
+    availability_set: cf_mysql_mysql
+    instance_type: Standard_DS4
+    storage_account_name: {{storage_account_name}}
+  network: mysql1
+  stemcell:
+    name: bosh-azure-hyperv-ubuntu-trusty-go_agent
+    version: latest
+- name: proxy_z1
+  cloud_properties:
+    availability_set: cf_mysql_proxy_z1
+    instance_type: Standard_DS4
+    storage_account_name: {{storage_account_name}}
+  network: mysql1
+  stemcell:
+    name: bosh-azure-hyperv-ubuntu-trusty-go_agent
+    version: latest
