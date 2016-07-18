@@ -167,7 +167,12 @@ devboxpublicip=$(terraform output devboxpublicip)
 scp ~/workspace/toolsmiths-shared-scripts/azure/set_up_dev_box.sh <devbox_username>@${devboxpublicip}:/tmp
 
 ssh <devbox_username>@${devboxpublicip} "sudo /tmp/set_up_dev_box.sh"
+
+scp ~/workspace/<BOSHPrivateKey> <devbox_username>@${devboxpublicip}:/tmp
 ```
+---
+
+Then set up your system domain. We like to use the Route53 service from AWS for cf-app.com
 
 ---
 
