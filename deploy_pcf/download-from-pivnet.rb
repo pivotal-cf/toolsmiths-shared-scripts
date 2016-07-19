@@ -23,10 +23,8 @@ def get_latest_product_version(product_name, version='')
       product_versions.keep_if { |a| a=~ /^#{version.gsub('latest', '')}.*$/}
     end
   end
-
   product_versions.sort! {|a,b| b <=> a }.first
 end
-
 
 def make_get_request(endpoint)
   response = HTTParty.get(endpoint,
@@ -69,10 +67,9 @@ def wget_from_pivnet(endpoint, filename, path=nil)
     puts "wget failed."
     exit 1
   end
-
 end
 
-def download(product, version=nil)
+def download(product, version=nil, cloudformation=nil)
   releases_url = "#{@pivnet_api}/#{product}/releases"
   product_releases = make_get_request(releases_url).parsed_response
   if !version.empty?
@@ -92,9 +89,15 @@ def download(product, version=nil)
     product_file_name = product_files['product_files'].select { |product_files| product_files['name'].include? 'vSphere'}.first['aws_object_key'].split('/').last
     product_file_id = product_files['product_files'].select { |product_files| product_files['name'].include? 'vSphere'}.first['id']
   elsif product == 'elastic-runtime'
-    download_object = product_files['product_files'].select {|product| product['name'] == 'PCF Elastic Runtime'}.first
-    product_file_name = download_object['aws_object_key'].split('/').last
-    product_file_id = download_object['id']
+    if cloudformation
+      download_object = product_files['product_files'].select { |product| product['name'].include? "CloudFormation"}.first
+      product_file_name = download_object['aws_object_key'].split('/').last
+      product_file_id = download_object['id']
+    else
+      download_object = product_files['product_files'].select {|product| product['name'] == 'PCF Elastic Runtime'}.first
+      product_file_name = download_object['aws_object_key'].split('/').last
+      product_file_id = download_object['id']
+    end
   end
 
   download_link = "#{releases_url}/#{release['id']}/product_files/#{product_file_id}/download"
@@ -124,16 +127,19 @@ OptionParser.new do |opts|
       options[:ops_manager] = ENV['OPSMGR_VERSION']
     end
   end
-  opts.on('-e', '--elastic-runtime [ERT]') do |elastic_runtime|
+  opts.on('-e', '--elastic-runtime [ert]') do |elastic_runtime|
     if (elastic_runtime && elastic_runtime.include?('latest'))
       options[:elastic_runtime] = get_latest_product_version('elastic-runtime', elastic_runtime)
     elsif elastic_runtime
       options[:elastic_runtime] = elastic_runtime
-    elsif (ENV['ERT_VERSION'] && ENV['ERT_VERSION'].include?('latest'))
-      options[:elastic_runtime] = get_latest_product_version('elastic-runtime', ENV['ERT_VERSION'])
-    elsif ENV['ERT_VERSION']
-      options[:elastic_runtime] = ENV['ERT_VERSION']
+    elsif (env['ert_version'] && env['ert_version'].include?('latest'))
+      options[:elastic_runtime] = get_latest_product_version('elastic-runtime', env['ert_version'])
+    elsif env['ert_version']
+      options[:elastic_runtime] = env['ert_version']
     end
+  end
+  opts.on('-c', '--cloud-formation') do |cloud_formation|
+    options[:cloud_formation] = true if (cloud_formation)
   end
   opts.on('-p', '--print-latest [PRODUCT]') do |product|
     options[:print] = true
@@ -181,7 +187,12 @@ if options.key?(:elastic_runtime)
   if options[:elastic_runtime].nil?
     puts 'Could not find specified version of Elastic Runtime'
   else
-    puts "Downloading: Elastic Runtime - #{options[:elastic_runtime]}"
-    download('elastic-runtime', options[:elastic_runtime])
+    if options[:cloud_formation]
+      puts "Downloading: Cloud Formation for ERT - #{options[:elastic_runtime]}"
+      download('elastic-runtime', options[:elastic_runtime], options[:cloud_formation])
+    else
+      puts "Downloading: Elastic Runtime - #{options[:elastic_runtime]}"
+      download('elastic-runtime', options[:elastic_runtime])
+    end
   end
 end
