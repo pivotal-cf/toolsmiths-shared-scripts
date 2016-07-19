@@ -23,30 +23,19 @@ This repo is a collection of tooling to deploy CF on Azure. It is a set of terra
 
 ### Set Quotas
 
-You will need an Azure account with the correct quotas enabled. To do this, you will need to open a support ticket with the Microsoft Azure team. Your email should look something like the following:
+You will need an Azure account with the correct quotas enabled. To do this, you should open a support ticket after logging into portal.azure.com
 
-```
-Hi Azure support,
+1. In portal.azure.com in the upper right hand corner, click the ?
+2. Click on 'New support request'
+3. Issue type: Quota
+4. Cores per subscription
+5. Severity: Recommended B or higher
+5. Deployment model: Resource Manager
+6. Region: the region you want to use!
+7. New quota: 202
+You can add additional people to your e-mail, but it's to just send it to your team.
 
-Can you please increase our ARM core quotas in <REGION> region for subscription ID: <SUBSCRIPTION ID>.
-
-Requirements:
-
-- Requested quantity of ARM Cores: 202
-- Requested region: <REGION>
-
-- Please fulfill this request as soon as possible
-- The request is not temporary
-- This will not be a bursting request
-- Please allocate 5 TBs of premium storage
-- No standard storage will be used
-
-- VM Types to be used: D series, DS series, Dv2 series
-- VM count (Number of VMs with Cores ):
-  - 2 x D 1 = 2 cores
-  - 200 x DS = 150 cores
-  - 50 x Dv2 = 50 cores
-```
+If the Toolsmiths are deploying CF for you, add cf-toolsmiths@pivotal.io as an owner of your account in the Azure portal, and leave us a nice message in Slack.
 
 ### Generate working directory
 
