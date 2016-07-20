@@ -1,28 +1,37 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    Ascii85 (1.0.2)
+    afm (0.2.2)
     coderay (1.1.1)
+    hashery (2.1.2)
     httparty (0.13.7)
       json (~> 1.8)
       multi_xml (>= 0.5.2)
     json (1.8.3)
     method_source (0.8.2)
     multi_xml (0.5.5)
+    pdf-reader (1.4.0)
+      Ascii85 (~> 1.0.0)
+      afm (~> 0.2.1)
+      hashery (~> 2.0)
+      ruby-rc4
+      ttfunk
     pry (0.10.3)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
+    ruby-rc4 (0.1.5)
     slop (3.6.0)
+    ttfunk (1.4.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   httparty
+  pdf-reader
   pry
-
-RUBY VERSION
-   ruby 2.3.0p0
 
 BUNDLED WITH
    1.12.2
