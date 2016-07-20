@@ -211,7 +211,7 @@ We use the `mustache` command to generate our bosh director manifest:
 ```
 cd ~/workspace/toolsmiths-shared-scripts/azure
 bundle
-bundle exec mustache ~/workspace/<ENV>/variables.yml bosh.yml.mustache > ~/workspace/<ENV>bosh.yml
+bundle exec mustache ~/workspace/<ENV>/variables.yml bosh.yml.mustache > ~/workspace/<ENV>/bosh.yml
 ```
 
 ### Deploying the bosh director from your dev box
@@ -273,7 +273,7 @@ The mysql deployment is used as a standalone mysql cluster to be used as an exte
 Generate your mysql manifest using mustache:
 
 ```
-mustache ~/workspace/<ENV>/variables.yml mysql.yml.mustache > ~/workspace/<ENV>mysql.yml
+mustache ~/workspace/<ENV>/variables.yml mysql.yml.mustache > ~/workspace/<ENV>/mysql.yml
 ```
 
 SCP your the mysql deployment manifest onto the devbox
