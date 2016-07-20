@@ -91,13 +91,11 @@ def download(product, version=nil, cloudformation=nil)
   elsif product == 'elastic-runtime'
     if cloudformation
       download_object = product_files['product_files'].select { |product| product['name'].include? "CloudFormation"}.first
-      product_file_name = download_object['aws_object_key'].split('/').last
-      product_file_id = download_object['id']
     else
       download_object = product_files['product_files'].select {|product| product['name'] == 'PCF Elastic Runtime'}.first
-      product_file_name = download_object['aws_object_key'].split('/').last
-      product_file_id = download_object['id']
     end
+    product_file_name = download_object['aws_object_key'].split('/').last
+    product_file_id = download_object['id']
   end
 
   download_link = "#{releases_url}/#{release['id']}/product_files/#{product_file_id}/download"
