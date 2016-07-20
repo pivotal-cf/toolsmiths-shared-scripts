@@ -145,10 +145,10 @@ OptionParser.new do |opts|
       options[:elastic_runtime] = get_latest_product_version('elastic-runtime', elastic_runtime)
     elsif elastic_runtime
       options[:elastic_runtime] = elastic_runtime
-    elsif (env['ert_version'] && env['ert_version'].include?('latest'))
-      options[:elastic_runtime] = get_latest_product_version('elastic-runtime', env['ert_version'])
-    elsif env['ert_version']
-      options[:elastic_runtime] = env['ert_version']
+    elsif (ENV['ERT_VERSION'] && ENV['ERT_VERSION'].include?('latest'))
+      options[:elastic_runtime] = get_latest_product_version('elastic-runtime', env['ERT_VERSION'])
+    elsif ENV['ERT_VERSION']
+      options[:elastic_runtime] = ENV['ERT_VERSION']
     end
   end
   opts.on('-c', '--cloud-formation') do |cloud_formation|
