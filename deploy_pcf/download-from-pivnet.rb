@@ -2,6 +2,7 @@
 
 require 'httparty'
 require 'optparse'
+require 'pdf-reader'
 
 def get_latest_product_version(product_name, version='')
   url = "#{@pivnet_api}/#{product_name}/releases"
@@ -69,7 +70,7 @@ def wget_from_pivnet(endpoint, filename, path=nil)
   end
 end
 
-def download(product, version=nil, cloudformation=nil)
+def download(product, version=nil, cloudformation=nil, iaas='vsphere')
   releases_url = "#{@pivnet_api}/#{product}/releases"
   product_releases = make_get_request(releases_url).parsed_response
   if !version.empty?
@@ -86,8 +87,8 @@ def download(product, version=nil, cloudformation=nil)
   product_files = make_get_request("#{releases_url}/#{release['id']}/product_files").parsed_response
 
   if product == 'ops-manager'
-    product_file_name = product_files['product_files'].select { |product_files| product_files['name'].include? 'vSphere'}.first['aws_object_key'].split('/').last
-    product_file_id = product_files['product_files'].select { |product_files| product_files['name'].include? 'vSphere'}.first['id']
+    product_file_name = product_files['product_files'].select { |product_files| product_files['name'].downcase.include? iaas}.first['aws_object_key'].split('/').last
+    product_file_id = product_files['product_files'].select { |product_files| product_files['name'].downcase.include? iaas}.first['id']
   elsif product == 'elastic-runtime'
     if cloudformation
       download_object = product_files['product_files'].select { |product| product['name'].include? "CloudFormation"}.first
@@ -101,6 +102,17 @@ def download(product, version=nil, cloudformation=nil)
   download_link = "#{releases_url}/#{release['id']}/product_files/#{product_file_id}/download"
   make_post_request("#{releases_url}/#{release['id']}/eula_acceptance")
   wget_from_pivnet(download_link, product_file_name)
+  generate_ami_yaml(product_file_name) if iaas == 'aws'
+end
+
+def generate_ami_yaml(path_to_pdf)
+  pdf_content = PDF::Reader.new(path_to_pdf).pages.first.text
+  pdf_content = pdf_content.split("\n").select {|lines| lines.include? "•" }
+  pdf_content.map! { |x|  x.gsub(/^\s*|•|\*|\ \(.*\)/,'') }
+  hash = {}
+  pdf_content.each { |ami| hash[ami.split(':').first.strip] = ami.split(':').last.strip }
+  File.open('amis.yml', 'w') {|f| f.write hash.to_yaml }
+  puts "Finished generating amis.yml"
 end
 
 
@@ -113,7 +125,7 @@ raise "Please set the env variable 'PIVNET_TOKEN' to be your network.pivotal.io 
 
 options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage:\n\n --ops-manager <om-version> --elastic-runtime <ert-version>\n\n --ops-manager latest --elastic-runtime latest\n\n export OPSMGR_VERSION=<version or 'latest'> ERT_VERSION=<version or 'latest'> --ops-manager --elastic-runtime\n\n"
+  opts.banner = "Usage:\n\n --ops-manager <om-version> --elastic-runtime <ert-version> --cloud-formation --iaas <iaas>\n\n --ops-manager latest --elastic-runtime latest\n\n export OPSMGR_VERSION=<version or 'latest'> ERT_VERSION=<version or 'latest'> --ops-manager --elastic-runtime\n\n --elastic-runtime <ert-version> --cloud-formation #downloads the cloud formation json for that ERT version\n\n --ops-manager <om-version> --iaas <iaas> #downloads the ops manager for specified IaaS"
   opts.on('-o', '--ops-manager [OM]') do |ops_manager|
     if (ops_manager && ops_manager.include?('latest'))
       options[:ops_manager] = get_latest_product_version('ops-manager', ops_manager)
@@ -124,6 +136,9 @@ OptionParser.new do |opts|
     elsif ENV['OPSMGR_VERSION']
       options[:ops_manager] = ENV['OPSMGR_VERSION']
     end
+  end
+  opts.on('-i', '--iaas [iaas]') do |iaas|
+    options[:iaas] = iaas.downcase
   end
   opts.on('-e', '--elastic-runtime [ert]') do |elastic_runtime|
     if (elastic_runtime && elastic_runtime.include?('latest'))
@@ -177,8 +192,13 @@ if options.key?(:ops_manager)
   if options[:ops_manager].nil?
     puts 'Could not find specified version of Ops Manager.'
   else
-    puts "Downloading: Ops Manager - #{options[:ops_manager]}"
-    download('ops-manager', options[:ops_manager])
+    options[:iaas] = 'vsphere' if options[:iaas].nil?
+    if ['vsphere', 'aws', 'openstack'].include?(options[:iaas])
+      puts "Downloading: Ops Manager - #{options[:ops_manager]} for Iaas - #{options[:iaas]}"
+      download('ops-manager', options[:ops_manager], nil, options[:iaas])
+    else
+      puts "IaaS: #{options[:iaas]} is not supported by this script"
+    end
   end
 end
 if options.key?(:elastic_runtime)
