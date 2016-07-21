@@ -1,0 +1,81 @@
+iaas_type: aws
+
+vm_shepherd:
+  env_config:
+    aws_access_key: {{aws_access_key_id}}
+    aws_secret_key: {{aws_secret_access_key}}
+    stack_name: {{aws_environment_name}}
+    region: {{aws_region}}
+    outputs:
+      security_group: {{ops_manager_security_group_id}} # NEEDS SCRIPT
+      public_subnet_id: {{public_subnet_id}}# NEEDS SCRIPT
+      instance_profile: {{iam_instance_profile}}# NEEDS SCRIPT
+      subnets:
+      - {{public_subnet_id}}# NEEDS SCRIPT
+      - {{private_subnet_id}}# NEEDS SCRIPT
+      - {{private_subnet2_id}}# NEEDS SCRIPT
+      s3_bucket_names: [{{ops_manager_s3_bucket_name}}]# NEEDS SCRIPT
+    elbs:
+    - name: {{aws_environment_name}}-pcf-elb
+      port_mappings: [[2222, 22]]
+      stack_output_keys:
+        subnet_id: PcfPublicSubnetId
+        vpc_id: PcfVpc
+    - name: {{aws_environment_name}}-pcf-ssh-elb
+      port_mappings: [[2222, 22]]
+      stack_output_keys:
+        subnet_id: PcfPublicSubnetId
+        vpc_id: PcfVpc
+  vm_configs:
+  - vm_name: 'ops-manager-{{aws_environment_name}}'
+    key_name: {{aws_key_pair_name}}
+
+ops_manager:
+  ip_address: {{release_candidate_public_ip}} #NEEDS SCRIPT
+  username: admin
+  password: admin
+  ntp_servers: us.pool.ntp.org
+  compilation:
+    vm_type: t2.small
+    instances: 1
+  aws:
+    aws_access_key: {{aws_access_key_id}}
+    aws_secret_key: {{aws_secret_access_key}}
+    instance_profile: {{iam_instance_profile}} #NEED SCRIPT
+    region: {{aws_region}}
+    vpc_id: {{vpc}} #NEED SCRIPT
+    security_group: {{vms_security_group_name}}#NEED SCRIPT
+    security_group_id: {{vms_security_group_id}}#NEED SCRIPT
+    key_pair_name: {{aws_key_pair_name}}
+    ssh_key: |  #NEED SCRIPT
+  s3_blobstore:
+    endpoint: {{ops_manager_s3_endpoint}} #NEED SCRIPT
+    bucket_name: {{ops_manager_s3_bucket_name}} #NEED SCRIPT
+    access_key_id: {{aws_access_key_id}}
+    secret_access_key: {{aws_secret_access_key}}
+    region: {{aws_region}}
+  mysql:
+    host: {{ops_manager_rds_address}}  #NEED SCRIPT
+    port: {{ops_manager_rds_port}} #NEED SCRIPT
+    user: {{ops_manager_rds_username}} #NEED SCRIPT
+    password: {{ops_manager_rds_password}}  #NEED SCRIPT
+    dbname: bosh
+  availability_zones:
+  - iaas_identifier: {{aws_region}}
+  networks:
+  - name: first-network
+    identifier: {{private_subnet_id}} #NEED SCRIPT
+    subnet: 10.0.16.0/20
+    reserved_ips: 10.0.16.2-10.0.16.9
+    dns: 8.8.8.8
+    gateway: 10.0.16.1
+    subnets:
+    - identifier: {{private_subnet_id}} #NEED SCRIPT
+      cidr: 10.0.16.0/20
+      reserved_ips: 10.0.16.2-10.0.16.9
+      dns: 8.8.8.8
+      gateway: 10.0.16.1
+      availability_zones: [{{aws_region}}]
+    network_assignments:
+    deployment_network: first-network
+    infrastructure_network: first-network

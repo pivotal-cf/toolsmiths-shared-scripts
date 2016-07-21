@@ -1,0 +1,31 @@
+---
+# env variable specified by user/pipeline
+env-aws_access_key_id: AWS_ACCESS_KEY_ID
+env-aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+env-aws_environment_name: AWS_ENVIRONMENT_NAME
+env-aws_region: AWS_REGION
+env-aws_key_pair_name: AWS_KEY_PAIR_NAME
+env-ops_manager_rds_password: OPS_MANAGER_RDS_PASSWORD
+env-ops_manager_rds_username: OPS_MANAGER_RDS_USERNAME
+env-vms_security_group_name: VMS_SECURITY_GROUP_NAME
+
+## script generated variables
+# vairables are mapped to cloudforamtion stack keys for each extracion
+# variable: cloudformation-vaiable-map
+
+ops_manager_security_group_id: PcfOpsManagerSecurityGroupId
+public_subnet_id: PcfPublicSubnetId
+ #still need to figure out how its stack is mapped to profile
+ # cloudformation stack: toolsmiths-aws
+ # profile-id: toolsmiths-aws-OpsManStack-xxxxxxxx-PcfIamInstanceProfile-xxxxxxxxxx
+ # but we can extract based on cloudformation stack name
+cloudformation-iam_instance_profile: CLOUD_FORMATION_STACK_MAP
+private_subnet_id: PcfPrivateSubnetId
+private_subnet2_id: PcfPrivateSubnet2Id
+ops_manager_rds_port: PcfRdsPort
+vms_security_group_id: PcfVmsSecurityGroupId
+vpc: PcfVpc
+opsn_manager_s3_endpoint: PcfOpsManagerS3Bucket
+ops_manager_rds_address: PcfRdsAddress
+ops_manager_s3_bucket_name: PcfOpsManagerS3Bucket
+
