@@ -7,14 +7,14 @@ vm_shepherd:
     stack_name: {{aws_environment_name}}
     region: {{aws_region}}
     outputs:
-      security_group: {{ops_manager_security_group_id}} # NEEDS SCRIPT
-      public_subnet_id: {{public_subnet_id}}# NEEDS SCRIPT
-      instance_profile: {{iam_instance_profile}}# NEEDS SCRIPT
+      security_group: {{ops_manager_security_group_id}}
+      public_subnet_id: {{public_subnet_id}}
+      instance_profile: {{iam_instance_profile}}
       subnets:
-      - {{public_subnet_id}}# NEEDS SCRIPT
-      - {{private_subnet_id}}# NEEDS SCRIPT
-      - {{private_subnet2_id}}# NEEDS SCRIPT
-      s3_bucket_names: [{{ops_manager_s3_bucket_name}}]# NEEDS SCRIPT
+      - {{public_subnet_id}}
+      - {{private_subnet_id}}
+      - {{private_subnet2_id}}
+      s3_bucket_names: [{{ops_manager_s3_bucket_name}}]
     elbs:
     - name: {{aws_environment_name}}-pcf-elb
       port_mappings: [[2222, 22]]
@@ -31,7 +31,7 @@ vm_shepherd:
     key_name: {{aws_key_pair_name}}
 
 ops_manager:
-  ip_address: {{release_candidate_public_ip}} #NEEDS SCRIPT
+  ip_address: {{ops_manager_public_ip}}
   username: admin
   password: admin
   ntp_servers: us.pool.ntp.org
@@ -41,36 +41,35 @@ ops_manager:
   aws:
     aws_access_key: {{aws_access_key_id}}
     aws_secret_key: {{aws_secret_access_key}}
-    instance_profile: {{iam_instance_profile}} #NEED SCRIPT
+    instance_profile: {{iam_instance_profile}}
     region: {{aws_region}}
-    vpc_id: {{vpc}} #NEED SCRIPT
-    security_group: {{vms_security_group_name}}#NEED SCRIPT
-    security_group_id: {{vms_security_group_id}}#NEED SCRIPT
+    vpc_id: {{vpc}}
+    security_group_id: {{vms_security_group_id}}
     key_pair_name: {{aws_key_pair_name}}
-    ssh_key: |  #NEED SCRIPT
+    ssh_key: *ssh_private_key
   s3_blobstore:
-    endpoint: {{ops_manager_s3_endpoint}} #NEED SCRIPT
-    bucket_name: {{ops_manager_s3_bucket_name}} #NEED SCRIPT
+    endpoint: {{ops_manager_s3_endpoint}}
+    bucket_name: {{ops_manager_s3_bucket_name}}
     access_key_id: {{aws_access_key_id}}
     secret_access_key: {{aws_secret_access_key}}
     region: {{aws_region}}
   mysql:
-    host: {{ops_manager_rds_address}}  #NEED SCRIPT
-    port: {{ops_manager_rds_port}} #NEED SCRIPT
-    user: {{ops_manager_rds_username}} #NEED SCRIPT
-    password: {{ops_manager_rds_password}}  #NEED SCRIPT
+    host: {{ops_manager_rds_address}}
+    port: {{ops_manager_rds_port}}
+    user: {{ops_manager_rds_username}}
+    password: {{ops_manager_rds_password}}
     dbname: bosh
   availability_zones:
   - iaas_identifier: {{aws_region}}
   networks:
   - name: first-network
-    identifier: {{private_subnet_id}} #NEED SCRIPT
+    identifier: {{private_subnet_id}}
     subnet: 10.0.16.0/20
     reserved_ips: 10.0.16.2-10.0.16.9
     dns: 8.8.8.8
     gateway: 10.0.16.1
     subnets:
-    - identifier: {{private_subnet_id}} #NEED SCRIPT
+    - identifier: {{private_subnet_id}}
       cidr: 10.0.16.0/20
       reserved_ips: 10.0.16.2-10.0.16.9
       dns: 8.8.8.8

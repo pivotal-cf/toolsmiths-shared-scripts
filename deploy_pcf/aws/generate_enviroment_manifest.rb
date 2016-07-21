@@ -30,6 +30,10 @@ def get_iam_profile_name(stack_name=nil)
   raise "No macthing InstanceProfileName found for: #{stack_name}"
 end
 
+def get_ops_manager_public_ip
+  `aws ec2 allocate-address --output text | awk '{print $2}'`.chomp
+end
+
 def get_cloudformation_stack(stack_name=nil)
   if stack_name.nil?
     raise_missing_var_error('AWS_ENVIRONMENT_NAME') if ENV['AWS_ENVIRONMENT_NAME'].nil?
@@ -53,10 +57,9 @@ def load_variable_template(path='variable_template.yml')
       raise_missing_var_error(value) if ENV[value].nil?
       key_data = key.split("env-")[1]
       variable_map[key_data] = ENV[value]
-    elsif key.include? "cloudformation-"
-      profile_name = get_iam_profile_name()
-      key_data = key.split("cloudformation-")[1]
-      variable_map[key_data] = profile_name
+    elsif key.include? "awscli-"
+      key_data = key.split("awscli-")[1]
+      variable_map[key_data] = send(value)
     else
       data = stack_data[value]
       raise_missing_var_error(value, false) if data.nil?
