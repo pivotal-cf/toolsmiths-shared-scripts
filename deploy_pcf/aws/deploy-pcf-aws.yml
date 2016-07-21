@@ -3,27 +3,27 @@
 opsmgr_version: &opsmgr_version 1.7.9
 ert_version: &ert_version 1.7.9
 pivnet_token: &pivnet_token {{pivnet-token}}
-worker_tag: &worker_tag
-github_user: &github_user your-github-user
-github_email: &github_email your-github-email
+worker_tag: &worker_tag {{worker-tag}}
+github_user: &github_user {{github-user}}
+github_email: &github_email {{github-email}}
 github_key: &github_key {{github-key}}
 download_retry_attempts: &retry 3
-environment_yml_git_repo: &environment_yml_git_repo git@github.com:your-org/your-environment-repo
-environment_yml_folder: &environment_yml_folder aws/environments/your-environment
+environment_yml_git_repo: &environment_yml_git_repo {{github-environment-repo}}
+environment_yml_folder: &environment_yml_folder aws/environments/
 iaas: &iaas aws
 
 aws_access_key_id: &aws_access_key_id {{aws-access-key-id}}
 aws_secret_access_key: &aws_secret_access_key {{aws-secret-access-key}}
-aws_environment_name: &aws_environment_name your-environment-name
-aws_system_domain: &aws_system_domain your-system-domain
-aws_base_domain: &aws_base_domain base-domain
-aws_key_pair_name: &aws_key_pair_name key-pair-name
-aws_rds_username: &aws_rds_username rds-username
-aws_rds_password: &aws_rds_password rds-password
-aws_public_key: &aws_public_key 'ssh-rsa /xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-aws_region: &aws_region us-east-1
-ops_manager_rds_username: &ops_manager_rds_username ops-rds-user
-ops_manager_rds_password: &ops_manager_rds_password ops-rds-password
+aws_environment_name: &aws_environment_name {{environment-name}}
+aws_system_domain: &aws_system_domain {{system-domain}}
+aws_base_domain: &aws_base_domain {{base-domain}}
+aws_key_pair_name: &aws_key_pair_name {{key-pair-name}}
+aws_rds_username: &aws_rds_username {{rds-username}}
+aws_rds_password: &aws_rds_password {{rds-password}}
+aws_public_key: &aws_public_key {{public-key}}
+aws_region: &aws_region {{aws-region}}
+ops_manager_rds_username: &ops_manager_rds_username {{ops-rds-user}}
+ops_manager_rds_password: &ops_manager_rds_password {{ops-rds-password}}
 
 groups:
 - name: bootstrap-aws
