@@ -35,7 +35,7 @@ You will need an Azure account with the correct quotas enabled. To do this, you 
 7. New quota: 202
 You can add additional people to your e-mail, but it's to just send it to your team.
 
-If the Toolsmiths are deploying CF for you, add cf-toolsmiths@pivotal.io as an owner of your account in the Azure portal, and leave us a nice message in Slack.
+If the Toolsmiths are deploying CF for you, add the 5 Toolsmith Pivots as an owners of your account in the Azure portal, and leave us a nice message in Slack.
 
 ### Generate working directory
 
