@@ -199,7 +199,7 @@ bosh_private_key_path: 'REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH' # Path is relat
 **Be sure to set your the variables that are tagged with 'REPLACE'**
 
 * **bosh_pub_key**: This is your public key for bosh
-* **bosh_private_key_path**: This is the full or relative path to the bosh private key on the dev box
+* **bosh_private_key_path**: This is the full or relative path to where you placed the bosh private key on the dev box
 * **system_domain**: This is the wildcard A record that points to your HA proxy. *Be sure to create this record beforehand*
 
 
@@ -220,7 +220,7 @@ bundle exec mustache ~/workspace/<ENV>/variables.yml bosh.yml.mustache > ~/works
 * Feel free to update the release versions
 
 ```
-scp bosh.yml <devbox_username>@<devboxpublicip>:~/
+scp bosh.yml <devbox_username>@<devboxpublicip>:
 
 ssh <devbox_username>@<devboxpublicip> "bosh-init deploy bosh.yml"
 ```
@@ -279,7 +279,7 @@ mustache ~/workspace/<ENV>/variables.yml mysql.yml.mustache > ~/workspace/<ENV>/
 SCP your the mysql deployment manifest onto the devbox
 
 ```
-scp ~/workspace/<ENV>/mysql.yml <devbox_username>@<devboxpublicip>:~/
+scp ~/workspace/<ENV>/mysql.yml <devbox_username>@<devboxpublicip>:
 ```
 
 ### Deploying your Mysql cluster
@@ -287,7 +287,7 @@ scp ~/workspace/<ENV>/mysql.yml <devbox_username>@<devboxpublicip>:~/
 Set your deployment manifest and deploy your mysql cluster from the devbox:
 
 ```
-ssh <devbox_username>@<devboxpublicip> "bosh deployment ~/mysql.yml && bosh deploy"
+ssh <devbox_username>@<devboxpublicip> "bosh deployment mysql.yml && bosh deploy"
 ``` 
 
 ## CF
@@ -328,13 +328,13 @@ Insert the certificates and keys into the deployment manifest:
 SCP the cf manifest to your dev box vm
 
 ```
-scp ~/workspace/<ENV>/cf.yml <devbox_username>@<devboxpublicip>:~/
+scp ~/workspace/<ENV>/cf.yml <devbox_username>@<devboxpublicip>:
 ```
 
 ### Deploy your CF cluster
 
 ```
-ssh <devbox_username>@<devboxpublicip> "bosh deployment ~/cf.yml && bosh deploy"
+ssh <devbox_username>@<devboxpublicip> "bosh deployment cf.yml && bosh deploy"
 ```
 
 ## Diego
@@ -382,11 +382,11 @@ Insert the certificates and keys into the deployment manifest:
 SCP the cf manifest to your dev box vm
 
 ```
-scp ~/workspace/<ENV>/diego.yml <devbox_username>@<devboxpublicip>:~/
+scp ~/workspace/<ENV>/diego.yml <devbox_username>@<devboxpublicip>:
 ```
 
 ### Deploy your Diego cluster
 
 ```
-ssh <devbox_username>@<devboxpublicip> "bosh deployment ~/diego.yml && bosh deploy"
+ssh <devbox_username>@<devboxpublicip> "bosh deployment diego.yml && bosh deploy"
 ```
