@@ -6,6 +6,7 @@ if [[ -z $1 ]]; then
 fi
 
 certs_and_keys_dir=$1
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function generate_and_sign_cert () {
   name=$1
@@ -13,17 +14,17 @@ function generate_and_sign_cert () {
   domain=$3
 
   if [[ -z $domain ]]; then
-    ./certstrap --depot-path "${certs_and_keys_dir}/diego" request-cert \
+    $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" request-cert \
       --common-name "${common_name}" \
       --passphrase ""
   else
-    ./certstrap --depot-path "${certs_and_keys_dir}/diego" request-cert \
+    $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" request-cert \
         --common-name "${common_name}" \
         --domain "${domain}" \
         --passphrase ""
   fi
 
-  ./certstrap --depot-path "${certs_and_keys_dir}/diego" sign "${common_name}" --CA diegoCA
+  $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" sign "${common_name}" --CA diegoCA
 
   rm -f ${certs_and_keys_dir}/diego/${common_name}.csr
   mv -f ${certs_and_keys_dir}/diego/${common_name}.key ${certs_and_keys_dir}/diego/${name}_key
@@ -50,12 +51,12 @@ popd
 
 if [[ $diego_ca_cert_flag == true ]]; then
   echo -e "\n\n=== GENERATING NEW DIEGO CERTIFICATE AUTHORITY ===\n"
-  ./certstrap --depot-path "${certs_and_keys_dir}/diego" init --common-name "diegoCA" --passphrase ""
+  $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" init --common-name "diegoCA" --passphrase ""
 fi
 
 if [[ $etcdpeers_ca_cert_flag == true ]]; then
   echo -e "\n\n=== GENERATING NEW ETCD PEER CERTIFICATE AUTHORITY ===\n"
-  ./certstrap --depot-path "${certs_and_keys_dir}/diego" init --common-name "peerCA" --passphrase ""
+  $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" init --common-name "peerCA" --passphrase ""
 fi
 
 if [[ $etcd_peers_cert_flag == true ]]; then
@@ -63,12 +64,12 @@ if [[ $etcd_peers_cert_flag == true ]]; then
   common_name="etcd.service.cf.internal"
   domain="*.etcd.service.cf.internal,etcd.service.cf.internal"
 
-  ./certstrap --depot-path "${certs_and_keys_dir}/diego" request-cert \
+  $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" request-cert \
        --common-name "${common_name}" \
        --domain "${domain}" \
        --passphrase ""
 
-  ./certstrap --depot-path "${certs_and_keys_dir}/diego" sign "${common_name}" --CA peerCA
+  $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" sign "${common_name}" --CA peerCA
 
   rm -f ${certs_and_keys_dir}/diego/${common_name}.csr
   mv -f ${certs_and_keys_dir}/diego/${common_name}.key ${certs_and_keys_dir}/diego/etcd_peers_key
