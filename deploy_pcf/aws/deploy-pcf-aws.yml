@@ -1,0 +1,196 @@
+---
+#set all variables
+opsmgr_version: &opsmgr_version 1.7.9
+ert_version: &ert_version 1.7.9
+pivnet_token: &pivnet_token {{pivnet-token}}
+worker_tag: &worker_tag
+github_user: &github_user your-github-user
+github_email: &github_email your-github-email
+github_key: &github_key {{github-key}}
+download_retry_attempts: &retry 3
+environment_yml_git_repo: &environment_yml_git_repo git@github.com:your-org/your-environment-repo
+environment_yml_folder: &environment_yml_folder aws/environments/your-environment
+iaas: &iaas aws
+
+aws_access_key_id: &aws_access_key_id {{aws-access-key-id}}
+aws_secret_access_key: &aws_secret_access_key {{aws-secret-access-key}}
+aws_environment_name: &aws_environment_name your-environment-name
+aws_system_domain: &aws_system_domain your-system-domain
+aws_base_domain: &aws_base_domain base-domain
+aws_key_pair_name: &aws_key_pair_name key-pair-name
+aws_rds_username: &aws_rds_username rds-username
+aws_rds_password: &aws_rds_password rds-password
+aws_public_key: &aws_public_key 'ssh-rsa /xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+aws_region: &aws_region us-east-1
+ops_manager_rds_username: &ops_manager_rds_username ops-rds-user
+ops_manager_rds_password: &ops_manager_rds_password ops-rds-password
+
+groups:
+- name: bootstrap-aws
+  jobs:
+  - prepare-environment
+- name: deploy-pcf
+  jobs:
+  - verify-or-generate-environment-yaml
+  - download-opsmanager-ami-yaml
+  - deploy-om-pcf-aws
+  - configure-ops-manager
+  - upload-elastic-runtime-pcf-aws
+  - configure-elastic-runtime
+  - trigger-install
+
+resources:
+  - name: toolsmiths-shared-scripts
+    type: git
+    source:
+      uri: https://github.com/pivotal-cf/toolsmiths-shared-scripts
+  - name: p-runtime
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/p-runtime.git
+      private_key: *github_key
+      branch: dev/1.8
+  - name: environment-ymls
+    type: git
+    source:
+      uri: *environment_yml_git_repo
+      private_key: *github_key
+      branch: master
+
+jobs:
+  - name: prepare-environment
+    serial: true
+    plan:
+    - aggregate:
+      - get: toolsmiths-shared-scripts
+    - task: download-cloudformation-script
+      attempts: *retry
+      tags: *worker_tag
+      privileged: true
+      config:
+        platform: linux
+        image: docker:///cftoolsmiths/deploy-pcf-vsphere
+        inputs:
+        - name: toolsmiths-shared-scripts
+        outputs:
+        - name: pivnet-downloads
+        run:
+          path: /bin/bash
+          args: ['-c', 'export BUNDLE_GEMFILE=${PWD}/toolsmiths-shared-scripts/deploy_pcf/Gemfile && pushd pivnet-downloads && bundle install && bundle exec ../toolsmiths-shared-scripts/deploy_pcf/download-from-pivnet.rb -e -c']
+      params:
+        PIVNET_TOKEN: *pivnet_token
+        ERT_VERSION: *ert_version
+    - task: request-aws-cert
+      tags: *worker_tag
+      privileged: true
+      config:
+        platform: linux
+        image: docker:///cftoolsmiths/aws_tools
+        outputs:
+        - name: aws-cert-arn
+        run:
+          path: /bin/bash
+          args: ['-c', 'echo "Requesting aws cert for ${AWS_SYSTEM_DOMAIN}" && aws acm request-certificate --domain-name *.${AWS_SYSTEM_DOMAIN} --subject-alternative-names *.system.${AWS_SYSTEM_DOMAIN} *.login.system.${AWS_SYSTEM_DOMAIN} *.uaa.system.${AWS_SYSTEM_DOMAIN} *.apps.${AWS_SYSTEM_DOMAIN} --domain-validation-options DomainName=*.${AWS_SYSTEM_DOMAIN},ValidationDomain=${AWS_BASE_DOMAIN} --output text > arn.txt && cat arn.txt']
+          dir: aws-cert-arn
+      params:
+        AWS_SYSTEM_DOMAIN: *aws_system_domain
+        AWS_BASE_DOMAIN: *aws_base_domain
+        AWS_ACCESS_KEY_ID: *aws_access_key_id
+        AWS_SECRET_ACCESS_KEY: *aws_secret_access_key
+        AWS_DEFAULT_REGION: *aws_region
+    - task: upload-key
+      tags: *worker_tag
+      privileged: true
+      config:
+        platform: linux
+        image: docker:///cftoolsmiths/aws_tools
+        run:
+          path: /bin/bash
+          args: ['-c', 'echo "Uploading public key to aws" && aws ec2 import-key-pair --key-name ${AWS_KEY_PAIR_NAME} --public-key-material "$(echo ${AWS_PUBLIC_KEY})"']
+      params:
+        AWS_KEY_PAIR_NAME: *aws_key_pair_name
+        AWS_PUBLIC_KEY: *aws_public_key
+        AWS_ACCESS_KEY_ID: *aws_access_key_id
+        AWS_SECRET_ACCESS_KEY: *aws_secret_access_key
+        AWS_DEFAULT_REGION: *aws_region
+    - task: generate-cloudformation-parameters
+      tags: *worker_tag
+      privileged: true
+      config:
+        platform: linux
+        image: docker:///cftoolsmiths/aws_tools
+        inputs:
+        - name: aws-cert-arn
+        outputs:
+        - name: cloudformation-parameters
+        run:
+          path: /bin/bash
+          args: ['-c', 'echo "Generating cloudformation parameter" && echo "[{\"ParameterKey\":\"05RdsUsername\",\"ParameterValue\":\"${AWS_RDS_USERNAME}\"},{\"ParameterKey\":\"06RdsPassword\",\"ParameterValue\":\"${AWS_RDS_PASSWORD}\"},{\"ParameterKey\":\"01NATKeyPair\",\"ParameterValue\":\"${AWS_KEY_PAIR_NAME}\"},{\"ParameterKey\":\"07SSLCertificateARN\",\"ParameterValue\":\"$(cat aws-cert-arn/arn.txt)\"}]" > parameters.json && cat parameters.json']
+          dir: cloudformation-parameters
+      params:
+        AWS_KEY_PAIR_NAME: *aws_key_pair_name
+        AWS_PUBLIC_KEY: *aws_public_key
+        AWS_ACCESS_KEY_ID: *aws_access_key_id
+        AWS_SECRET_ACCESS_KEY: *aws_secret_access_key
+        AWS_ENVIRONMENT_NAME: *aws_environment_name
+        AWS_RDS_USERNAME: *aws_rds_username
+        AWS_RDS_PASSWORD: *aws_rds_password
+        AWS_DEFAULT_REGION: *aws_region
+    - task: run-cloudformation
+      tags: *worker_tag
+      privileged: true
+      config:
+        platform: linux
+        image: docker:///cftoolsmiths/aws_tools
+        inputs:
+        - name: pivnet-downloads
+        - name: cloudformation-parameters
+        run:
+          path: /bin/bash
+          args: ['-c', 'echo "Running cloudformation script" && export CLOUDFORMATION_PATH=$(ls ${PWD}/pivnet-downloads/*.json) && aws cloudformation create-stack --stack-name ${AWS_ENVIRONMENT_NAME} --template-body file:///${CLOUDFORMATION_PATH} --parameters file:///${PWD}/cloudformation-parameters/parameters.json --capabilities CAPABILITY_IAM']
+
+      params:
+        AWS_KEY_PAIR_NAME: *aws_key_pair_name
+        AWS_PUBLIC_KEY: *aws_public_key
+        AWS_ACCESS_KEY_ID: *aws_access_key_id
+        AWS_SECRET_ACCESS_KEY: *aws_secret_access_key
+        AWS_ENVIRONMENT_NAME: *aws_environment_name
+        AWS_RDS_USERNAME: *aws_rds_username
+        AWS_RDS_PASSWORD: *aws_rds_password
+        AWS_DEFAULT_REGION: *aws_region
+
+
+  - name: verify-or-generate-environment-yaml
+    serial: true
+    plan:
+    - aggregate:
+      - get: toolsmiths-shared-scripts
+      - get: environment-ymls
+    - task: verify-or-generate-environment-yaml
+      attempts: *retry
+      tags: *worker_tag
+      privileged: true
+      config:
+        platform: linux
+        image: docker:///cftoolsmiths/deploy-pcf-aws
+        inputs:
+        - name: toolsmiths-shared-scripts
+        - name: environment-ymls
+        run:
+          path: /bin/bash
+          args: ['-c', 'toolsmiths-shared-scripts/deploy_pcf/aws/verify_or_generate_environment_yml.sh environment-ymls/${ENV_FOLDER}']
+      params:
+        ENV_FOLDER: *environment_yml_folder
+        GIT_EMAIL: *github_email
+        GIT_USER: *github_user
+        AWS_KEY_PAIR_NAME: *aws_key_pair_name
+        AWS_PUBLIC_KEY: *aws_public_key
+        AWS_ACCESS_KEY_ID: *aws_access_key_id
+        AWS_SECRET_ACCESS_KEY: *aws_secret_access_key
+        AWS_ENVIRONMENT_NAME: *aws_environment_name
+        AWS_RDS_USERNAME: *aws_rds_username
+        AWS_RDS_PASSWORD: *aws_rds_password
+        AWS_DEFAULT_REGION: *aws_region
+    - put: environment-ymls
+      params:
+        - repository: environment-ymls
