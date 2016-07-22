@@ -11,6 +11,7 @@ help() {
 [ -n "$1" ] || help
 
 cd $1
+shift
 
 chmod 0600 id_rsa_bosh
 
