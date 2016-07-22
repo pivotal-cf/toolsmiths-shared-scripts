@@ -7,7 +7,16 @@ die() {
 
 HERE="${PWD}"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CERTSTRAP="${SCRIPT_DIR}/certstrap"
+OS=$(uname -a | cut -d ' ' -f1)
+
+if [ $OS = 'Linux' ]; then
+  CERTSTRAP="${SCRIPT_DIR}/certstrap-linux"
+elif [ $OS = 'Darwin' ]; then
+  CERTSTRAP="${SCRIPT_DIR}/certstrap-osx"
+else
+  die "Missing CA tool binary for ${OS}"
+fi
+
 [ -f "${CERTSTRAP}" ] || die "CA tool not found: ${CERTSTRAP}"
 
 chmod +x $CERTSTRAP
