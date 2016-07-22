@@ -10,6 +10,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CERTSTRAP="${SCRIPT_DIR}/certstrap"
 [ -f "${CERTSTRAP}" ] || die "CA tool not found: ${CERTSTRAP}"
 
+chmod +x $CERTSTRAP
+
 if [[ -z $1 ]]; then
   echo "Usage: $0 [options] <PATH TO DIR>"
   echo "Options:"
