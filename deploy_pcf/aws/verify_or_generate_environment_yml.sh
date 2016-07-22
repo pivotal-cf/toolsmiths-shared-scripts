@@ -1,5 +1,5 @@
 #! /bin/bash
-set -x
+set -xe
 
 AWS_SCRIPTS_DIR=$PWD/toolsmiths-shared-scripts/deploy_pcf/aws
 
@@ -33,5 +33,5 @@ EORUBY
 [ -z $1 ] || help
 
 pushd $1
-  [ -f $AWS_ENVIRONMENT_NAME.yml ] || generate_environment_yml
+  generate_environment_yml
 popd

@@ -60,7 +60,7 @@ def load_variable_template(path='variable_template.yml')
       else
         key_data = key.split("key-")[1]
         #environment_yml_git_repo resource will be named as `environment-ymls` in the pipeline
-        path = "environment-ymls/" + ENV['ENV_FOLDER'] + "/" + ENV[value]
+        path =  ENV['OLDPWD'] + "environment-ymls/" + ENV['ENV_FOLDER'] + "/" + ENV[value]
         load_key = File.open(ENV[value]).read()
         variable_map[key_data] = load_key
       end
