@@ -1,115 +1,228 @@
 #!/bin/bash
 
+die() {
+  echo "[ERROR] $*"
+  exit 1
+}
+
+HERE="${PWD}"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CERTSTRAP="${SCRIPT_DIR}/certstrap"
+[ -f "${CERTSTRAP}" ] || die "CA tool not found: ${CERTSTRAP}"
+
 if [[ -z $1 ]]; then
-  echo "Usage: ./generate_diego_certs_and_keys.sh <PATH TO DIR>"
+  echo "Usage: $0 [options] <PATH TO DIR>"
+  echo "Options:"
+  echo "    -y|--yes    Always overwrite files"
+  echo "    -n|--no     Never overwrite files"
+  echo "Arguments:"
+  echo "    <PATH TO DIR>  the directory _above_ where the diego certs live"
   exit 1
 fi
 
-certs_and_keys_dir=$1
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Process command line options, if any
+DEFAULT_ACTION=
+while true
+do
+  case $1 in
+    -y|--yes)
+      DEFAULT_ACTION=-y
+      shift
+      ;;
+    -n|--no)
+      DEFAULT_ACTION=-n
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+# ask_yn: Ask a question and return 0/yes or 1/no unless default specified
+ask_yn() {
+  local answer
+  case "$1" in
+    -y|--yes)
+      return 0
+      ;;
+    -n|--no)
+      return 1
+      ;;
+  esac
+
+  while true
+  do
+    printf "%s (yes/no) " "$*"
+    read answer
+    answer=$(tr '[:upper:]' '[:lower:]' <<< "$answer")
+    case "$answer" in
+      y|yes)
+        return 0
+        ;;
+      n|no)
+        return 1
+        ;;
+    esac
+  done
+}
+
 
 function generate_and_sign_cert () {
-  name=$1
-  common_name=$2
-  domain=$3
+  local name=$1
+  local common_name=$2
+  local domain=$3
 
-  if [[ -z $domain ]]; then
-    $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" request-cert \
+  if [[ -z $domain ]]
+  then
+    ${CERTSTRAP} --depot-path "${DEST_DIR}" request-cert \
       --common-name "${common_name}" \
       --passphrase ""
   else
-    $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" request-cert \
+    ${CERTSTRAP} --depot-path "${DEST_DIR}" request-cert \
         --common-name "${common_name}" \
         --domain "${domain}" \
         --passphrase ""
   fi
 
-  $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" sign "${common_name}" --CA diegoCA
+  ${CERTSTRAP} --depot-path "${DEST_DIR}" sign "${common_name}" --CA diegoCA
 
-  rm -f ${certs_and_keys_dir}/diego/${common_name}.csr
-  mv -f ${certs_and_keys_dir}/diego/${common_name}.key ${certs_and_keys_dir}/diego/${name}_key
-  mv -f ${certs_and_keys_dir}/diego/${common_name}.crt ${certs_and_keys_dir}/diego/${name}_cert
+  rm -f ${DEST_DIR}/${common_name}.csr
+  mv -f ${DEST_DIR}/${common_name}.key ${DEST_DIR}/${name}_key
+  mv -f ${DEST_DIR}/${common_name}.crt ${DEST_DIR}/${name}_cert
 }
 
 
-mkdir -p $certs_and_keys_dir/diego
-pushd $certs_and_keys_dir/diego
+#
+# Main
+#
+DEST_DIR="$1"
+DEST_DIR=$(tr -s / <<< "${DEST_DIR}/diego")
+mkdir -p "${DEST_DIR}"
+pushd "${DEST_DIR}"
 
-for file in diego_ca_cert bbs_client_cert bbs_server_cert etcd_client_cert etcd_server_cert ssh_proxy_key etcdpeers_ca_cert etcd_peers_cert; do
-  var=${file}_flag
-  declare "${var}=true"
-  if [ -f $file ]; then
-    echo -n "$file already exists. Do you want to recreate it? (y/n)"
-    read line
-    if [[ $line == 'n' ]]; then
-     declare "${var}=false"
+
+# Determine desired action for each certificate
+for file in diego_ca_cert etcdpeers_ca_cert bbs_client_cert bbs_server_cert etcd_client_cert etcd_server_cert ssh_proxy_key etcd_peers_cert
+do
+  var="${file}_flag"
+
+  # Handle dependancies (some things MUST change if the signing CA will change)
+  if [ "${file}" != "diego_ca_cert" -a "${file}" != "etcdpeers_ca_cert" ]
+  then
+    if [ "${file}" == "etcd_peers_cert" ] && ${etcdpeers_ca_cert_flag}
+    then
+      declare "${var}=true"
+    elif ${diego_ca_cert_flag} && [ "${file}" != "ssh_proxy_key" ]
+    then
+      declare "${var}=true"
     fi
+  fi
+
+  if [ -f "$file" -a -z "${!var}" ]  # only runs when ${!var} not yet declared
+  then
+    if ask_yn ${DEFAULT_ACTION} "${file} exists; do you want to recreate it?"
+    then
+      declare "${var}=true"
+    else
+      declare "${var}=false"
+    fi
+  else
+    declare "${var}=true"
   fi
 done
 
 popd
 
-if [[ $diego_ca_cert_flag == true ]]; then
+if $diego_ca_cert_flag
+then
   echo -e "\n\n=== GENERATING NEW DIEGO CERTIFICATE AUTHORITY ===\n"
-  $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" init --common-name "diegoCA" --passphrase ""
+  ${CERTSTRAP} --depot-path "${DEST_DIR}" init --common-name "diegoCA" --passphrase ""
+
+  rm -f ${DEST_DIR}/diegoCA.crl
+  cp -f ${DEST_DIR}/diegoCA.crt ${DEST_DIR}/diego_ca_cert
+  cp -f ${DEST_DIR}/diegoCA.key ${DEST_DIR}/diego_ca_key
 fi
 
-if [[ $etcdpeers_ca_cert_flag == true ]]; then
+if $etcdpeers_ca_cert_flag
+then
   echo -e "\n\n=== GENERATING NEW ETCD PEER CERTIFICATE AUTHORITY ===\n"
-  $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" init --common-name "peerCA" --passphrase ""
+  ${CERTSTRAP} --depot-path "${DEST_DIR}" init --common-name "peerCA" --passphrase ""
+
+  rm -f ${DEST_DIR}/peerCA.crl
+  cp -f ${DEST_DIR}/peerCA.crt ${DEST_DIR}/etcdpeers_ca_cert
+  cp -f ${DEST_DIR}/peerCA.key ${DEST_DIR}/etcdpeers_ca_key
 fi
 
-if [[ $etcd_peers_cert_flag == true ]]; then
+## HACK HACK HACK
+# generate_and_sign_cert() wants to see .crt and .key style certs, so we need
+# to recreate those on repeat runs to make it happy.
+[ -f "${DEST_DIR}/diegoCA.crt" ] || cp "${DEST_DIR}/diego_ca_cert" "${DEST_DIR}/diegoCA.crt"
+[ -f "${DEST_DIR}/diegoCA.key" ] || cp "${DEST_DIR}/diego_ca_key" "${DEST_DIR}/diegoCA.key"
+[ -f "${DEST_DIR}/peerCA.crt" ] || cp "${DEST_DIR}/etcdpeers_ca_cert" "${DEST_DIR}/peerCA.crt"
+[ -f "${DEST_DIR}/peerCA.key" ] || cp "${DEST_DIR}/etcdpeers_ca_key" "${DEST_DIR}/peerCA.key"
+# END HACK
+
+if $etcd_peers_cert_flag
+then
   echo -e "\n\n=== GENERATING NEW ETCD PEER CERT AND KEY ===\n"
   common_name="etcd.service.cf.internal"
   domain="*.etcd.service.cf.internal,etcd.service.cf.internal"
 
-  $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" request-cert \
+  ${CERTSTRAP} --depot-path "${DEST_DIR}" request-cert \
        --common-name "${common_name}" \
        --domain "${domain}" \
        --passphrase ""
 
-  $SCRIPT_DIR/certstrap --depot-path "${certs_and_keys_dir}/diego" sign "${common_name}" --CA peerCA
+  ${CERTSTRAP} --depot-path "${DEST_DIR}" sign "${common_name}" --CA peerCA
 
-  rm -f ${certs_and_keys_dir}/diego/${common_name}.csr
-  mv -f ${certs_and_keys_dir}/diego/${common_name}.key ${certs_and_keys_dir}/diego/etcd_peers_key
-  mv -f ${certs_and_keys_dir}/diego/${common_name}.crt ${certs_and_keys_dir}/diego/etcd_peers_cert
+  rm -f ${DEST_DIR}/${common_name}.csr
+  mv -f ${DEST_DIR}/${common_name}.key ${DEST_DIR}/etcd_peers_key
+  mv -f ${DEST_DIR}/${common_name}.crt ${DEST_DIR}/etcd_peers_cert
 fi
 
-if [[ $bbs_client_cert_flag == true ]]; then
+if $bbs_client_cert_flag
+then
   echo -e "\n\n=== GENERATING NEW BBS CLIENT CERT AND KEY ===\n"
   generate_and_sign_cert "bbs_client" "clientName"
 fi
 
-if [[ $bbs_server_cert_flag == true ]]; then
+if $bbs_server_cert_flag
+then
   echo -e "\n\n=== GENERATING NEW BBS SERVER CERT AND KEY ===\n"
   generate_and_sign_cert "bbs_server" "bbs.service.cf.internal" "*.bbs.service.cf.internal,bbs.service.cf.internal"
 fi
 
-if [[ $etcd_client_cert_flag == true ]]; then
+if $etcd_client_cert_flag
+then
   echo -e "\n\n=== GENERATING NEW ETCD CLIENT CERT AND KEY ===\n"
   generate_and_sign_cert "etcd_client" "clientName"
 fi
 
-if [[ $etcd_server_cert_flag == true ]]; then
+if $etcd_server_cert_flag
+then
   echo -e "\n\n=== GENERATING NEW ETCD SERVER CERT AND KEY ===\n"
   generate_and_sign_cert "etcd_server" "etcd.service.cf.internal" "*.etcd.service.cf.internal,etcd.service.cf.internal"
 fi
 
-if [[ $ssh_proxy_key_flag == true ]]; then
+if $ssh_proxy_key_flag
+then
   echo -e "\n\n=== GENERATING NEW SSH PROXY KEY ===\n"
-  echo -e  'y\n'| ssh-keygen -q -t rsa -N "" -f "${certs_and_keys_dir}/diego/ssh_proxy_key"
-  rm -f "${certs_and_keys_dir}/diego/ssh_proxy_key.pub"
+  [ -f "${DEST_DIR}/ssh_proxy_key" ] && rm -f "${DEST_DIR}/ssh_proxy_key"
+  [ -f "${DEST_DIR}/ssh_proxy_key.pub" ] && rm -f "${DEST_DIR}/ssh_proxy_key.pub"
+  ssh-keygen -q -t rsa -N "" -f "${DEST_DIR}/ssh_proxy_key"
+  rm -f "${DEST_DIR}/ssh_proxy_key.pub"
 fi
 
-rm -f ${certs_and_keys_dir}/diego/diegoCA.crl
-mv -f ${certs_and_keys_dir}/diego/diegoCA.crt ${certs_and_keys_dir}/diego/diego_ca_cert
-mv -f ${certs_and_keys_dir}/diego/diegoCA.key ${certs_and_keys_dir}/diego/diego_ca_key
+# Clean up the CA cert copies which we do not want to check into the repo
+for fn in diegoCA peerCA
+do
+  fn="${DEST_DIR}/${fn}"
+  [ -f "${fn}.crt" ] && rm -f ${fn}.crt
+  [ -f "${fn}.key" ] && rm -f ${fn}.key
+done
 
-rm -f ${certs_and_keys_dir}/diego/peerCA.crl
-mv -f ${certs_and_keys_dir}/diego/peerCA.crt ${certs_and_keys_dir}/diego/etcdpeers_ca_cert
-mv -f ${certs_and_keys_dir}/diego/peerCA.key ${certs_and_keys_dir}/diego/etcdpeers_ca_key
-
-ls -l ${certs_and_keys_dir}/diego
+echo
+ls -l ${DEST_DIR}
 
 echo -e "\n\nFinished generating certs and keys."
