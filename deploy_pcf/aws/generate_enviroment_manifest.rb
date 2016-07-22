@@ -47,8 +47,8 @@ def get_cloudformation_stack(stack_name=nil)
   return parameters
 end
 
-def load_variable_template(path='variable_template.yml')
-  template_var = YAML.load_file(path)
+def load_variable_template(template_path='variable_template.yml', private_key_path=nil)
+  template_var = YAML.load_file(template_path)
   stack_data = get_cloudformation_stack()
   variable_map = {}
   template_var.each do |key, value|
@@ -60,7 +60,7 @@ def load_variable_template(path='variable_template.yml')
       else
         key_data = key.split("key-")[1]
         #environment_yml_git_repo resource will be named as `environment-ymls` in the pipeline
-        path =  ENV['OLDPWD'] + "environment-ymls/" + ENV['ENV_FOLDER'] + "/" + ENV[value]
+        path =  private_key_path + "/" + ENV[value]
         load_key = File.open(ENV[value]).read()
         variable_map[key_data] = load_key
       end
@@ -77,7 +77,11 @@ def load_variable_template(path='variable_template.yml')
 end
 
 def create_variable_file(path="./")
-  variable_data = load_variable_template()
+  if ARGV.length == 0
+    puts "ERROR: Need private key path"
+    exit 1
+  end
+  variable_data = load_variable_template('variable_template.yml', ARGV[0])
   File.write("#{path}/variable.yml", variable_data)
   puts "Vaiable file created: \n#{variable_data}"
 end
