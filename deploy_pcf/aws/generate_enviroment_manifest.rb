@@ -61,7 +61,7 @@ def load_variable_template(template_path='variable_template.yml', private_key_pa
         key_data = key.split("key-")[1]
         #environment_yml_git_repo resource will be named as `environment-ymls` in the pipeline
         path =  private_key_path + "/" + ENV[value]
-        load_key = File.open(ENV[value]).read()
+        load_key = File.open(path).read()
         variable_map[key_data] = load_key
       end
     elsif key.include? "awscli-"
