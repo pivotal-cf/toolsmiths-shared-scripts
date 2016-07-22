@@ -7,7 +7,7 @@ env-aws_region: AWS_DEFAULT_REGION
 env-aws_key_pair_name: AWS_KEY_PAIR_NAME
 env-ops_manager_rds_password: OPS_MANAGER_RDS_PASSWORD
 env-ops_manager_rds_username: OPS_MANAGER_RDS_USERNAME
-env-key-ssh-private-key: SSH_PRIVATE_KEY_PATH
+env-key-ssh-private-key: AWS_PRIVATE_KEY_PATH
 
 ## script generated variables from cloudformation output
 ops_manager_security_group_id: PcfOpsManagerSecurityGroupId

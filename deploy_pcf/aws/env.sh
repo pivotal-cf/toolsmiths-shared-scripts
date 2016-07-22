@@ -6,4 +6,4 @@ export AWS_KEY_PAIR_NAME=toolsmiths-aws-kp
 export OPS_MANAGER_RDS_PASSWORD=blapasswordbla
 export OPS_MANAGER_RDS_USERNAME=blabla
 export VMS_SECURITY_GROUP_NAME=gupgup
-export SSH_PRIVATE_KEY_PATH=full-path-to-you-private-key
+export AWS_PRIVATE_KEY_PATH=full-path-to-you-private-key
