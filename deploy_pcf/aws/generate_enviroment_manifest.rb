@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'YAML'
+require 'yaml'
 require 'json'
 
 def raise_missing_var_error(var_name=nil, env=true)
