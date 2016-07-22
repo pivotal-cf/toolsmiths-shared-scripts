@@ -1,7 +1,7 @@
 #! /bin/bash
 set -x
 
-AWS_SCRIPTS_DIR=$PWD/toolsmiths-shared-scripts/deploy_cf_aws
+AWS_SCRIPTS_DIR=$PWD/toolsmiths-shared-scripts/deploy_pcf/aws
 
 help() {
   echo "USAGE:"
