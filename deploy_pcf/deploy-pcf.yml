@@ -27,7 +27,7 @@ resources:
     source:
       uri: git@github.com:pivotal-cf/p-runtime.git
       private_key: *github_key
-      branch: dev/1.8
+      branch: rel/1.8
 
 jobs:
   - name: upload-om-pcf-vsphere
