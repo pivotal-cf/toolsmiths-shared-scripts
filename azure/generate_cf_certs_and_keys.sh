@@ -1,9 +1,30 @@
 #!/bin/bash
 
 if [[ -z $1 ]]; then
-  echo "Usage: ./generate_cf_certs_and_keys.sh <PATH TO DIR>"
+  echo "Usage: ./generate_cf_certs_and_keys.sh [options] <PATH TO DIR>"
+  echo "Options:"
+  echo "    -y|--yes    Always overwrite files"
+  echo "    -n|--no     Never overwrite files"
   exit 1
 fi
+
+MODE=ask
+while true
+do
+  case $1 in
+    -y|--yes)
+      MODE=overwrite
+      shift
+      ;;
+    -n|--no)
+      MODE=keep
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
 
 certs_and_keys_dir=$1
 
@@ -13,12 +34,19 @@ pushd $certs_and_keys_dir/cf
 
 for file in ha_proxy_ssl_pem loginha_proxy_ssl_pem jwt_signing_key; do
   var=${file}_flag
-  declare "${var}=true"
+  declare "${var}=false"
   if [ -f $file ]; then
-    echo -n "$file already exists. Do you want to recreate it? (y/n)"
-    read line
-    if [[ $line == 'n' ]]; then
-     declare "${var}=false"
+    action=
+    [ "$MODE" == "overwrite" ] && action=y
+    [ "$MODE" == "keep" ] && action=n
+    if [ -z "$action" ]
+    then
+      echo -n "$file already exists. Do you want to recreate it? (y/n)"
+      read action
+    fi
+
+    if [[ $action == 'y' ]]; then
+     declare "${var}=true"
     fi
   fi
 done
