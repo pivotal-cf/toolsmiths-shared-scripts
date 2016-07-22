@@ -48,6 +48,8 @@ for file in ha_proxy_ssl_pem loginha_proxy_ssl_pem jwt_signing_key; do
     if [[ $action == 'y' ]]; then
      declare "${var}=true"
     fi
+  else
+    declare "${var}=true"
   fi
 done
 
