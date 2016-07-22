@@ -53,9 +53,15 @@ def load_variable_template(path='variable_template.yml')
   variable_map = {}
   template_var.each do |key, value|
     if key.include?"env-"
-      raise_missing_var_error(value) if ENV[value].nil?
-      key_data = key.split("env-")[1]
-      variable_map[key_data] = ENV[value]
+      if ! key.include? "key-"
+        raise_missing_var_error(value) if ENV[value].nil?
+        key_data = key.split("env-")[1]
+        variable_map[key_data] = ENV[value]
+      else
+        key_data = key.split("key-")[1]
+        load_key = File.open(ENV[value]).read()
+        variable_map[key_data] = load_key
+      end
     elsif key.include? "awscli-"
       key_data = key.split("awscli-")[1]
       variable_map[key_data] = send(value)
