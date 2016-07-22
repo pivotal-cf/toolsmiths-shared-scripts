@@ -1,5 +1,3 @@
-ssh_private_key: &ssh-private-key |
-{{ssh-private-key}}
 iaas_type: aws
 
 vm_shepherd:
@@ -48,7 +46,7 @@ ops_manager:
     vpc_id: {{vpc}}
     security_group_id: {{vms_security_group_id}}
     key_pair_name: {{aws_key_pair_name}}
-    ssh_key: *ssh_private_key
+    ssh_key: {{ssh-private-key}}
   s3_blobstore:
     endpoint: {{ops_manager_s3_endpoint}}
     bucket_name: {{ops_manager_s3_bucket_name}}
