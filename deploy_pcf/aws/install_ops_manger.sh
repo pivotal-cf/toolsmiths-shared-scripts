@@ -1,4 +1,4 @@
-#!/bin/env bash
+#! /bin/bash
 
 set -xe
 git clone ./environment-ymls output/environment-ymls
