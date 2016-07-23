@@ -2,7 +2,7 @@
 
 set -xe
 git clone ./environment-ymls output/environment-ymls
-ENV_DIRECTORY=$PWD/output/environment-ymls/$ENV_FOLDER
+export ENV_DIRECTORY=$PWD/output/environment-ymls/$ENV_FOLDER
 OLDPWD=$PWD
 
 function install_ops_manager() {
