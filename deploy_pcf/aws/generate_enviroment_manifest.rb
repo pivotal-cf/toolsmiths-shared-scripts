@@ -61,8 +61,7 @@ def load_variable_template(template_path='variable_template.yml', private_key_pa
         key_data = key.split("key-")[1]
         #environment_yml_git_repo resource will be named as `environment-ymls` in the pipeline
         path =  private_key_path + "/" + ENV[value]
-        load_key = File.open(path).read()
-        variable_map[key_data] = load_key
+        add_ssh_private_key("environment.yml.mustache", path)
       end
     elsif key.include? "awscli-"
       key_data = key.split("awscli-")[1]
@@ -74,6 +73,12 @@ def load_variable_template(template_path='variable_template.yml', private_key_pa
     end
   end
   variable_map.to_yaml
+end
+
+def add_ssh_private_key(env_temp_path, private_key_path)
+  env_temp = YAML.load_file(env_temp_path)
+  load_key = File.open(path).read()
+  env_temp
 end
 
 def create_variable_file(path="./")
