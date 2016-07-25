@@ -258,7 +258,7 @@ jobs:
         - name: azure_environments
         run:
           path: /bin/bash
-          args: ["-c", "toolsmiths-shared-scripts/azure/ci_devbox_ssh.sh azure_environments/$ENV_DIR/$ENV_NAME 'bosh init delete ~/bosh.yml'"]
+          args: ["-c", "toolsmiths-shared-scripts/azure/ci_devbox_ssh.sh azure_environments/$ENV_DIR/$ENV_NAME 'bosh-init delete ~/bosh.yml'"]
       params:
         ENV_NAME: *environment_name
         ENV_DIR: *environment_dir
