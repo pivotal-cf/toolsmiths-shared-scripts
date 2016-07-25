@@ -22,7 +22,7 @@ devboxpublicip=$(grep devbox_public_ip variables.yml | awk '{print $NF}' | tr -d
 devboxusername=$(grep devbox_username variables.yml | awk '{print $NF}' | tr -d "'")
 boshadminpassword=$(grep bosh_admin_password variables.yml | awk '{print $NF}' | tr -d "'")
 
-ssh -i id_rsa_bosh -o StrictHostKeyChecking=no ${devboxusername}@${devboxpublicip} "bosh-init deploy /tmp/bosh.yml"
+ssh -i id_rsa_bosh -o StrictHostKeyChecking=no ${devboxusername}@${devboxpublicip} "bosh-init deploy ~/bosh.yml"
 
 bosh_director_uuid=$(ssh -i id_rsa_bosh -o StrictHostKeyChecking=no ${devboxusername}@${devboxpublicip} "bosh -n -q target 10.0.0.4 && bosh -q login admin ${boshadminpassword} && bosh status | grep UUID | awk '{print \$2}'")
 echo "bosh_director_uuid: $bosh_director_uuid" >> variables.yml
@@ -42,9 +42,9 @@ ${AZURE_TEMPLATES}/insert_certs_and_keys_to_manifest.rb ./certs_and_keys/diego d
 sed -i -e "s/PASSWORDHERE/$boshadminpassword/" ${AZURE_TEMPLATES}/devbox_upload_bosh_releases.sh
 chmod +x ${AZURE_TEMPLATES}/devbox_upload_bosh_releases.sh
 
-scp -i id_rsa_bosh -o StrictHostKeyChecking=no ${AZURE_TEMPLATES}/devbox_upload_bosh_releases.sh mysql.yml cf.yml diego.yml ${devboxusername}@${devboxpublicip}:/tmp
+scp -i id_rsa_bosh -o StrictHostKeyChecking=no ${AZURE_TEMPLATES}/devbox_upload_bosh_releases.sh mysql.yml cf.yml diego.yml ${devboxusername}@${devboxpublicip}:~/
 
-ssh -i id_rsa_bosh -o StrictHostKeyChecking=no ${devboxusername}@${devboxpublicip} "/tmp/devbox_upload_bosh_releases.sh"
+ssh -i id_rsa_bosh -o StrictHostKeyChecking=no ${devboxusername}@${devboxpublicip} "~/devbox_upload_bosh_releases.sh"
 
 git add .
 git commit -m "Generates deployment ymls for ${ENV_NAME}"

@@ -45,7 +45,7 @@ generate_details() {
   terraform output variables.yml > variables.yml
 
   sed -i -e "s^REPLACE_WITH_YOUR_BOSH_PUB_KEY^${BOSH_SSH_PUBLIC_KEY}^" \
-    -e "s^REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH^/tmp/id_rsa_bosh^" \
+    -e "s^REPLACE_WITH_YOUR_BOSH_PRIVATE_KEY_PATH^./id_rsa_bosh^" \
     -e "s^REPLACE_WITH_YOUR_SYSTEM_DOMAIN^${SYSTEM_DOMAIN}^" \
     variables.yml
   git add variables.yml
