@@ -9,13 +9,31 @@ This repo is a collection of tooling to deploy CF on Azure. It is a set of terra
 
 ###Table of Contents
 1. [Preqrequisites](#prerequisites)
-2. [Bootstrapping your Azure environment](#bootstrapping-your-azure-environment)
-3. [Setting up your devbox](#setting-up-your-devbox)
-4. [Deploying a BOSH director](#deploying-a-bosh-director)
-5. [Deploying CF](#deploying-cf)
-   1. [MySQL](#mysql)
-   1. [CF](#cf)
-   1. [Diego](#diego)
+2. [Concourse Pipeline](#concourse-pipeline)
+	1. 	[Setting up your pipeline](#setting-up-your-pipeline)
+	2.	[Pipeline steps](#pipeline-steps)
+	    1. [bootstrap-azure](#bootstrap-azure)
+			1. [bootstrap-environment](#bootstrap-environment)
+			2. [MANUAL STEP: create storage table](#manual-step:-create-storage-table)
+			3. [MANUAL STEP: create wildcard A record](#manual-step:-create-wildcard-a-record)
+			4. [setup-devbox-upload-bosh-yml](#setup-devbox-upload-bosh-yml)
+		2. [deploy-cf-azure](#deploy-cf-azure)
+			1. [deploy-bosh-generate-upload-deployment-ymls](#deploy-bosh-generate-upload-deployment-ymls)
+			2. [deploy-mysql](#deploy-mysql)
+			3. [deploy-cf](#deploy-cf)
+			4. [deploy-diego](#deploy-diego)
+		3. [destroy-cf-azure](#destroy-cf-azure)
+			1. [destroy-bosh-deployments](#destroy-bosh-deployments)
+			2. [destroy-bosh-director](#destroy-bosh-director)
+			3. [destroy-azure-resource-group](#destroy-azure-resource-group)
+3. [Manual Steps](#manual-steps)
+	1. [Bootstrapping your Azure environment](#bootstrapping-your-azure-environment)
+	2. [Setting up your devbox](#setting-up-your-devbox)
+	3. [Deploying a BOSH director](#deploying-a-bosh-director)
+	4. [Deploying CF](#deploying-cf)
+	    1. [MySQL](#mysql)
+	    2. [CF](#cf)
+	    3. [Diego](#diego)
 
 
 ---
@@ -37,6 +55,192 @@ You can add additional people to your e-mail, but it's to just send it to your t
 
 If the Toolsmiths are deploying CF for you, add the 5 Toolsmith Pivots as an owners of your account in the Azure portal, and leave us a nice message in Slack.
 
+---
+## Concourse Pipeline
+
+### Setting up your pipeline
+
+To configure the pipeline for your needs, modify the `deploy-cf-azure.yml`. The values that you would need to change are at the top of the file.
+
+```
+environment_repo: &environment_repo git@github.com:your-org/your-repo.git # This is a git repo where your azure environment manifests will be (or are) stored.
+environment_dir: &environment_dir azure/environments # This is the directory within your azure environments git repo which contains your azure environment(s)
+environment_name: &environment_name banana # This is a directory inside your environments directory which will contain the azure environment manifests
+system_domain: &sys_domain banana.cf-app.com
+devbox_username: &devbox_username <your-dev-box-user> # Azure does not allow 'admin' or 'root'
+git_email: &git_email <your-email> # this is used for your git check-ins
+git_name: &git_name <your-github-name> # this is used for your git check-ins
+github_key: &github_key {{github-key}}
+worker_tag: &worker_tag []
+```
+
+### Pipeline steps
+
+#### bootstrap-azure
+
+This is a pipeline group that is used to bootstrap your Azure environment. In this pipeline group, a terraform script is used to create the following:
+
+  * a resource group
+  * a storage account/container
+  * public ips for haproxy and devbox
+  * virtual network
+  * subnets for bosh, cloudfoundry, diego, mysql
+  * a bosh security group
+  * an ubuntu devbox vm
+
+After the terraform script is run, the devbox is set up to install common utilities such as bosh cli, bosh-init, and ruby. The bosh director deployment manifest (bosh.yml) and associated keys are generated/uploaded to the devbox.
+
+##### bootstrap-environment
+
+* **SSH keys:** You have the option of setting the ssh key used to set up your devbox and all bosh-deployed vms by adding the private and public key with the name `id_rsa_bosh` and `id_rsa_bosh.pub` inside the repo/directory specified in your pipeline
+
+	i.e. given the following pipeline settings:
+
+    ```
+    environment_repo: &environment_repo git@github.com:your-org/your-repo.git
+    environment_dir: &environment_dir azure/environments
+    environment_name: &environment_name banana
+    ```
+
+    your keys must be in the folder: `~/your-repo/azure/environment/banana/id_rsa_bosh(.pub)`
+
+* **Dev Box Password:** You can specify the devbox password to use by creating the file `devbox_password.txt` inside the repo/directory specified in your pipeline. (i.e. ~/your-repo/azure/environment/banana/devbox_password.txt)
+
+##### MANUAL STEP: create storage table
+
+We currently need to manually create the storage table (see: https://github.com/hashicorp/terraform/issues/7257).**Update:** This feature should be included in the terraform 0.7 release.
+
+Run the following commands:
+
+```
+azure login # Follow the instructions to login
+```
+
+Ensure you have the 'arm' mode configured with your azure CLI:
+
+```
+azure config mode arm
+```
+
+To fetch your storage account key, run the following commands and copy the 'Primary' key.
+
+```
+resource_group_name=<your-env-name>
+storage_account_name=<your-env-name>sa
+
+azure storage account keys list --resource-group $resource_group_name $storage_account_name
+```
+You can also get the storage account key via the Azure Portal
+
+Sample Output:
+
+```
+info:    Executing command storage account keys list
+Resource group name: bosh-res-group
++ Getting storage account keys
+data:    Primary: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+data:    Secondary: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+info:    storage account keys list command OK
+```
+
+Create your storage table:
+
+```
+storage_account_key=<your-storage-account-key>
+
+azure storage table create --account-name $storage_account_name --account-key $storage_account_key --table stemcell
+```
+##### MANUAL STEP: create wildcard A record
+
+You will need to create the wildcard A record to point to the generate HA proxy public IP.
+
+You can find the HA Proxy public IP in your Concourse build logs (haproxy_public_ip). The A record should look like the following:
+
+```
+*.<YOUR-SYSTEM-DOMAIN> = <HA-PROXY-PUBLIC-IP>
+```
+
+##### setup-devbox-upload-bosh-yml
+
+In this step, the bosh.yml and id_rsa_bosh key are both uploaded to the devbox. The `set_up_dev_box.sh` script is then run to install bosh-init, bosh cli and ruby.
+
+
+#### deploy-cf-azure
+
+This pipeline group, contains a set of jobs that will deploy:
+  * a bosh director
+  * a mysql cluster to be used as an external database for cf's cloud controller
+  * cf
+  * diego cells to be used with your cf deployment
+
+##### deploy-bosh-generate-upload-deployment-ymls
+
+This step will do the following:
+
+  * deploy your bosh director
+  * generate your mysql, cf, and diego bosh deployment manifests using the credentials specifed at the top of your azure terraform script
+  * generate your self-signed certs and keys for CF
+
+     ```
+	ha_proxy_ssl_pem
+	jwt_signing_key
+	jwt_verification_key
+	loginha_proxy_ssl_pem
+	```
+  * generate your CA, signed-certs, and keys for Diego
+
+  	```
+	bbs_client_cert
+	bbs_client_key
+	bbs_server_cert
+	bbs_server_key
+	diego_ca_cert
+	diego_ca_key
+	etcd_client_cert
+	etcd_client_key
+	etcd_peers_cert
+	etcd_peers_key
+	etcd_server_cert
+	etcd_server_key
+	etcdpeers_ca_cert
+	etcdpeers_ca_key
+	ssh_proxy_key
+	```
+  * The deployment manifests are then uploaded onto the devbox
+  * Upload the mysql, cf, and diego bosh releases onto the bosh director
+  * All the certs, keys and manifests are then all checked in your git repository
+
+##### deploy-mysql
+
+This step will deploy your mysql cluster using the mysql manifest generated. You can view the mysql manifest in the environment git repository you specified.
+
+##### deploy-cf
+
+This step will deploy cf using the cf manifest generated. The cf manifest uses the certs and keys generated in the [deploy-bosh-generated-upload-deployment-ymls](#deploy-bosh-generate-upload-deployment-ymls) step above.
+
+##### deploy-diego
+
+This step will deploy diego using the diego manifest generated. The diego manifest uses the certs and keys generated in the [deploy-bosh-generated-upload-deployment-ymls](#deploy-bosh-generate-upload-deployment-ymls) step above.
+
+#### destroy-cf-azure
+
+This pipeline group is used to destroy your bosh deployments and azure environment.
+
+##### destroy-bosh-deployments
+
+This job runs `bosh delete deployment` on your bosh deployments.
+
+##### destroy-bosh-director
+
+This job runs `bosh-init delete bosh.yml` agains your bosh director.
+
+##### destroy-azure-resource-group
+
+This job runs `terraform destroy` to destroy the Azure resource you created. This job will retry this 3 times as the terraform destroy task occasionally fails agains the Azure API.
+
+---
+
+## Manual Steps
 ### Generate working directory
 
 We recommend creating a working directory for your specific Azure environment. In our readme, we will be using `~/workspace/<ENV>/`
