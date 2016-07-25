@@ -100,7 +100,7 @@ then
   if [ -f terraform.tfstate ]
   then
     echo "Destroying environment."
-    terraform destroy -force
+    retry 3 terraform destroy -force
   else
     echo "There does not seem to be anything to destroy."
     exit 0
