@@ -14,8 +14,8 @@ function install_ops_manager() {
 }
 
 function add_public_ip() {
-  PUBLIC_IP=$(awsaws ec2 describe-instances --filter "Name=tag:Name,Values=ops-manager-${AWS_ENVIRONMENT_NAME}" | jq -r .Reservations[].Instances[].NetworkInterfaces[].Association.PublicIp)
-  sed 's/ops_manager_public_ip_willbereplaced/${PUBLIC_IP}' $ENV_DIRECTORY/*.yml
+  PUBLIC_IP=$(aws ec2 describe-instances --filter "Name=tag:Name,Values=ops-manager-${AWS_ENVIRONMENT_NAME}" | jq -r .Reservations[].Instances[].NetworkInterfaces[].Association.PublicIp)
+  sed -i "s/ops_manager_public_ip_willbereplaced/${PUBLIC_IP}/" $ENV_DIRECTORY/*.yml
   echo "Public IP added in manifest"
 }
 
