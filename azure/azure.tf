@@ -5,7 +5,7 @@
 #
 ############################## UPDATE BELOW #################################
 
-# Follow instructions here to get credentials: https://www.terraform.io/docs/providers/azurerm/index.html
+# Follow instructions here to get credentials: http://bosh.io/docs/azure-resources.html
 variable "azure_credentials" {
   default = {
     subscription_id = "your-subscription-id"
