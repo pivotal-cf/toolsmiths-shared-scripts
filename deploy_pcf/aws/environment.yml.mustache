@@ -31,7 +31,7 @@ vm_shepherd:
     key_name: {{aws_key_pair_name}}
 
 ops_manager:
-  ip_address: ops_manager_public_ip_willbereplaced
+  url: ops_manager_public_url_willbereplaced
   username: admin
   password: admin
   ntp_servers: us.pool.ntp.org
@@ -46,7 +46,7 @@ ops_manager:
     vpc_id: {{vpc}}
     security_group_id: {{vms_security_group_id}}
     key_pair_name: {{aws_key_pair_name}}
-    ssh_key: ssh-private-key-willbereplaced
+    ssh_key: *ssh_key
   s3_blobstore:
     endpoint: {{ops_manager_s3_endpoint}}
     bucket_name: {{ops_manager_s3_bucket_name}}
@@ -60,7 +60,7 @@ ops_manager:
     password: {{ops_manager_rds_password}}
     dbname: bosh
   availability_zones:
-  - iaas_identifier: {{aws_region}}
+  - iaas_identifier: {{aws_az}}
   networks:
   - name: first-network
     identifier: {{private_subnet_id}}

@@ -76,9 +76,13 @@ def load_variable_template(template_path='variable_template.yml', private_key_pa
 end
 
 def add_ssh_private_key(env_temp_path, private_key_path)
-  env_temp = YAML.load_file(env_temp_path)
-  load_key = File.open(path).read()
-  env_temp
+  private_key_string = File.read(private_key_path)
+  private_key_string = YAML.dump({"ssh_key" => private_key_string})
+  private_key_string = private_key_string.gsub(/^---/,'')
+  private_key_string = private_key_string.gsub('ssh_key:', 'ssh_key: *ssh_key')
+  environment_yml_string = File.read(env_temp_path)
+  yaml_string = private_key_string + "\n\n" + environment_yml_string
+  File.open(env_temp_path, 'w') { |f| f.puts yaml_string }
 end
 
 def create_variable_file(path="./")
