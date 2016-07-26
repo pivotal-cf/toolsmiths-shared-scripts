@@ -18,7 +18,6 @@ private_subnet2_id: PcfPrivateSubnet2Id
 ops_manager_rds_port: PcfRdsPort
 vms_security_group_id: PcfVmsSecurityGroupId
 vpc: PcfVpc
-ops_manager_s3_endpoint: PcfOpsManagerS3Bucket
 ops_manager_rds_address: PcfRdsAddress
 ops_manager_s3_bucket_name: PcfOpsManagerS3Bucket
 
