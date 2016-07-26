@@ -78,3 +78,8 @@ ops_manager:
     network_assignments:
     deployment_network: first-network
     infrastructure_network: first-network
+  elastic_runtime:
+    name: cf
+    system_domain: {{aws_system_domain}}
+    apps_domain: {{aws_system_domain}}
+    trust_self_signed_certificates: true
