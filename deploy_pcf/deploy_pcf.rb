@@ -52,7 +52,7 @@ def download_stemcell(path_to_product_tarball,iaas)
   else
     raise "cannot find iaas named #{iaas}".red
   end
-  file_name = `ls bosh-stemcell-#{version}-#{iaas}*`.split("\n").first
+  file_name = `ls *bosh-stemcell-#{version}-#{iaas}*`.split("\n").first
   File.expand_path(file_name)
 end
 
@@ -93,7 +93,7 @@ OptionParser.new do |opts|
   opts.on('-I', '--interactive') do |interactive|
     options[:interactive] = interactive
   end
-  opts.on('-i', '--iaas') do |iaas|
+  opts.on('-i', '--iaas [IAAS]') do |iaas|
     options[:iaas] = iaas
   end
   opts.on('-C', '--commands [CMDS]') do |commands|
