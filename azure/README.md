@@ -65,10 +65,13 @@ To configure the pipeline for your needs, modify the `deploy-cf-azure.yml`. The 
 ```
 # Git repo where your azure environment manifests will be (or are) stored.
 environment_repo: &environment_repo git@github.com:your-org/your-repo.git 
+
 # Directory within your azure environments git repo which contains your azure environment(s)
 environment_dir: &environment_dir azure/environments 
+
 # The environment directory (ie: <environment_repo>/<environment_dir>/<environment_name>)
 environment_name: &environment_name banana 
+
 system_domain: &sys_domain banana.cf-app.com
 devbox_username: &devbox_username <your-dev-box-user> # Azure does not allow 'admin' or 'root'
 git_email: &git_email <your-email> # this is used for your git check-ins
