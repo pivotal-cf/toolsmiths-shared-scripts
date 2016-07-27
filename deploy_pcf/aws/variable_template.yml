@@ -5,6 +5,7 @@ env-aws_secret_access_key: AWS_SECRET_ACCESS_KEY
 env-aws_environment_name: AWS_ENVIRONMENT_NAME
 env-aws_system_domain: AWS_SYSTEM_DOMAIN
 env-aws_region: AWS_DEFAULT_REGION
+env-aws_s3_endpoint: AWS_S3_ENDPOINT
 env-aws_az: AWS_DEFAULT_AZ
 env-aws_key_pair_name: AWS_KEY_PAIR_NAME
 env-ops_manager_rds_password: OPS_MANAGER_RDS_PASSWORD

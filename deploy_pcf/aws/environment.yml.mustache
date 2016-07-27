@@ -48,7 +48,7 @@ ops_manager:
     key_pair_name: {{aws_key_pair_name}}
     ssh_key: *ssh_key
   s3_blobstore:
-    endpoint: 'https://s3-{{aws_region}}.amazonaws.com'
+    endpoint: {{aws_s3_endpoint}}
     bucket_name: {{ops_manager_s3_bucket_name}}
     access_key_id: {{aws_access_key_id}}
     secret_access_key: {{aws_secret_access_key}}
