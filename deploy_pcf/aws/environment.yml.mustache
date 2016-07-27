@@ -33,7 +33,7 @@ vm_shepherd:
 ops_manager:
   url: ops_manager_public_url_willbereplaced
   username: admin
-  password: admin
+  password: {{ops_manager_password}}
   ntp_servers: us.pool.ntp.org
   compilation:
     vm_type: t2.small
@@ -83,3 +83,4 @@ ops_manager:
     system_domain: {{aws_system_domain}}
     apps_domain: {{aws_system_domain}}
     trust_self_signed_certificates: true
+    security_acknowledgement: X
