@@ -63,7 +63,7 @@ If the Toolsmiths are deploying CF for you, add the 5 Toolsmith Pivots (check Al
 To configure the pipeline for your needs, modify the `deploy-cf-azure.yml`. The values that you would need to change are at the top of the file.
 
 ```
-# Git repo where your azure environment manifests will be (or are) stored.
+# The **PRIVATE** git repo where your azure environment manifests will be (or are) stored.
 environment_repo: &environment_repo git@github.com:your-org/your-repo.git 
 
 # Directory within your azure environments git repo which contains your azure environment(s)
