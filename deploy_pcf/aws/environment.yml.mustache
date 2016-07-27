@@ -60,7 +60,7 @@ ops_manager:
     password: {{ops_manager_rds_password}}
     dbname: bosh
   availability_zones:
-  - iaas_identifier: {{aws_az}}
+  - iaas_identifier: {{aws_region}}a
   networks:
   - name: first-network
     identifier: {{private_subnet_id}}
@@ -74,7 +74,7 @@ ops_manager:
       reserved_ips: 10.0.16.2-10.0.16.9
       dns: 8.8.8.8
       gateway: 10.0.16.1
-      availability_zones: [{{aws_region}}]
+      availability_zones: [{{aws_region}}a]
     network_assignments:
     deployment_network: first-network
     infrastructure_network: first-network
