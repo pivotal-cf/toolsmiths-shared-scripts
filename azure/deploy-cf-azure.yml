@@ -9,6 +9,10 @@ git_name: &git_name myuser
 github_key: &github_key {{github-key}}
 worker_tag: &worker_tag []
 azure_region: &azure_region "West US"
+azure_subscription: &azure_subscription {{azure_subscription}}
+azure_tenant_id: &azure_tenant_id {{azure_tenant_id}}
+azure_client_id: &azure_client_id {{azure_client_id}}
+azure_client_secret: &azure_client_secret {{azure_client_secret}}
 
 groups:
 - name: bootstrap-azure
@@ -63,11 +67,11 @@ jobs:
         ENV_NAME: *environment_name
         ENV_DIR: *environment_dir
         DEVBOX_USERNAME: *devbox_username
-        AZURE_SUBSCRIPTION: {{azure_subscription}}
-        AZURE_TENANT_ID: {{azure_tenant_id}}
-        AZURE_CLIENT_ID: {{azure_client_id}}
-        AZURE_CLIENT_SECRET: {{azure_client_secret}}
         AZURE_REGION: *azure_region
+        AZURE_SUBSCRIPTION: *azure_subscription
+        AZURE_TENANT_ID: *azure_tenant_id
+        AZURE_CLIENT_ID: *azure_client_id
+        AZURE_CLIENT_SECRET: *azure_client_secret
         GIT_EMAIL: *git_email
         GIT_NAME: *git_name
         SYSTEM_DOMAIN: *sys_domain
@@ -289,11 +293,11 @@ jobs:
         ENV_NAME: *environment_name
         ENV_DIR: *environment_dir
         DEVBOX_USERNAME: *devbox_username
-        AZURE_SUBSCRIPTION: {{azure_subscription}}
-        AZURE_TENANT_ID: {{azure_tenant_id}}
-        AZURE_CLIENT_ID: {{azure_client_id}}
-        AZURE_CLIENT_SECRET: {{azure_client_secret}}
         AZURE_REGION: *azure_region
+        AZURE_SUBSCRIPTION: *azure_subscription
+        AZURE_TENANT_ID: *azure_tenant_id
+        AZURE_CLIENT_ID: *azure_client_id
+        AZURE_CLIENT_SECRET: *azure_client_secret
         GIT_EMAIL: *git_email
         GIT_NAME: *git_name
         SYSTEM_DOMAIN: *sys_domain
