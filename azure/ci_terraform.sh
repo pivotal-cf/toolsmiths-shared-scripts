@@ -1,5 +1,6 @@
 #!/bin/bash
 set -xe
+trap 'ec=$?; [ $ec -eq 0 ] || echo "[ERROR] unexpected exit (code: $ec)"' EXIT
 
 TOP=$PWD
 EXIT_CODE=0
