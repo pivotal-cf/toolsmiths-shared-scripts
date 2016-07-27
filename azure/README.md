@@ -63,15 +63,23 @@ If the Toolsmiths are deploying CF for you, add the 5 Toolsmith Pivots (check Al
 To configure the pipeline for your needs, modify the `deploy-cf-azure.yml`. The values that you would need to change are at the top of the file.
 
 ```
-environment_repo: &environment_repo git@github.com:your-org/your-repo.git # This is a git repo where your azure environment manifests will be (or are) stored.
-environment_dir: &environment_dir azure/environments # This is the directory within your azure environments git repo which contains your azure environment(s)
-environment_name: &environment_name banana # This is a directory inside your environments directory which will contain the azure environment manifests
+# Git repo where your azure environment manifests will be (or are) stored.
+environment_repo: &environment_repo git@github.com:your-org/your-repo.git 
+# Directory within your azure environments git repo which contains your azure environment(s)
+environment_dir: &environment_dir azure/environments 
+# The environment directory (ie: <environment_repo>/<environment_dir>/<environment_name>)
+environment_name: &environment_name banana 
 system_domain: &sys_domain banana.cf-app.com
 devbox_username: &devbox_username <your-dev-box-user> # Azure does not allow 'admin' or 'root'
 git_email: &git_email <your-email> # this is used for your git check-ins
 git_name: &git_name <your-github-name> # this is used for your git check-ins
 github_key: &github_key {{github-key}}
 worker_tag: &worker_tag []
+azure_region: &azure_region "West US"
+azure_subscription: &azure_subscription {{azure_subscription}}
+azure_tenant_id: &azure_tenant_id {{azure_tenant_id}}
+azure_client_id: &azure_client_id {{azure_client_id}}
+azure_client_secret: &azure_client_secret {{azure_client_secret}}
 ```
 
 ### Pipeline steps
