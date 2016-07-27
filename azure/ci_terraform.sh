@@ -1,14 +1,20 @@
 #!/bin/bash
-set -x
+set -xe
 
 TOP=$PWD
-dir=$PWD
+EXIT_CODE=0
 
 help() {
   echo "USAGE:"
   echo "  $0 [-d env_dir] destroy"
   echo "  $0 [-d env_dir] apply"
   echo "  $0 [-d env_dir] recreate"
+}
+
+
+die() {
+  echo "[ERROR] $*"
+  exit 1
 }
 
 
@@ -19,7 +25,7 @@ generate_config() {
   git add devbox_password.txt
 
   # Generate SSH keypair
-  [ -f id_rsa_bosh ] || ssh-keygen -t rsa -b 2048 -N "" -f id_rsa_bosh
+  [ -f id_rsa_bosh ] || ssh-keygen -t rsa -b 2048 -N "" -C "bosh key for ${ENV_NAME}" -f id_rsa_bosh
   [ -f id_rsa_bosh.pub ] || ssh-keygen -y -f id_rsa_bosh > id_rsa_bosh.pub
   git add id_rsa_bosh id_rsa_bosh.pub
 
@@ -61,7 +67,7 @@ retry() {
   local try=1
   local tries=$1
   shift
-  local cmd=$@
+  local cmd="$@"
 
   while [ ${try} -le ${tries} ]
   do
@@ -70,10 +76,11 @@ retry() {
     try=$(( $try + 1 ))
   done
 
-  exit 1
+  return 1
 }
 
 
+dir=.
 while true
 do
   case $1 in
@@ -88,12 +95,21 @@ do
 done
 
 
-# Clone deployments-toolsmiths for update
+# Clone deployments-toolsmiths for state update.
 git config --global user.email "${GIT_EMAIL}"
 git config --global user.name "${GIT_NAME}"
 git clone ${TOP}/azure_environments ${TOP}/environment
-cd ${TOP}/environment/${dir}
 
+# Ensure that the environment state tracking directory is exists
+if [ ! -d "${TOP}/environment/${dir}" ]
+then
+  mkdir -p "${TOP}/environment/${dir}" || die "cannot create state directory: ${TOP}/environment/${dir}"
+  git add "${TOP}/environment/${dir}"
+fi
+cd ${TOP}/environment/${dir}
+git status >/dev/null 2>&1 || die "Not in a git repository"
+
+# Ensure that we have an upto date state file
 [ -f terraform.tfstate ] && terraform refresh
 
 if [ $1 = destroy ]
@@ -101,28 +117,44 @@ then
   if [ -f terraform.tfstate ]
   then
     echo "Destroying environment."
-    retry 3 terraform destroy -force
+    if retry 3 terraform destroy -force
+    then
+      git rm terraform.tfstate
+    else
+      EXIT_CODE=1
+    fi
   else
     echo "There does not seem to be anything to destroy."
-    exit 0
   fi
 elif [ $1 = apply ]
 then
   echo "Applying changes to environment."
   generate_config
-  retry 3 terraform apply
-  generate_details
+  if retry 3 terraform apply
+  then
+    generate_details
+  else
+    EXIT_CODE=1
+  fi
 elif [ $1 = recreate ]
 then
   echo "[Re-]creating environment."
   [ -f terraform.tfstate ] && terraform destroy -force
   generate_config
   retry 3 terraform apply
+  EXIT_CODE=$?
   generate_details
 else
   help
   exit 1
 fi
 
-git add terraform.tfstate
-git commit -m "Concourse Azure pipeline: terraform ${ENV_NAME}"
+[ -f terraform.tfstate ] && git add terraform.tfstate
+if [ -n "$(git status -s | grep -v ^?)" ]
+then
+  git commit -m "Concourse Azure pipeline: terraform ${1} ${ENV_NAME}"
+else
+  echo "Skipping commit; no changes to tracked files."
+fi
+
+exit ${EXIT_CODE}
