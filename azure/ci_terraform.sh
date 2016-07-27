@@ -28,7 +28,8 @@ generate_config() {
   BOSH_SSH_PUBLIC_KEY=$(cat id_rsa_bosh.pub)
 
   cp $TOP/toolsmiths-shared-scripts/azure/azure.tf .
-  sed -i -e "s/your-subscription-id/${AZURE_SUBSCRIPTION}/" \
+  sed -i -e "s/your-location/${AZURE_REGION}/" \
+    -e "s/your-subscription-id/${AZURE_SUBSCRIPTION}/" \
     -e "s/your-client-id/${AZURE_CLIENT_ID}/" \
     -e "s/your-client-secret/${AZURE_CLIENT_SECRET}/" \
     -e "s/your-tenant-id/${AZURE_TENANT_ID}/" \

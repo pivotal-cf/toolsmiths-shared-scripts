@@ -55,7 +55,7 @@ variable "environment_name" {
 }
 
 variable "location" {
-  default = "West US"
+  default = "your-location"
 }
 
 variable "dns" {

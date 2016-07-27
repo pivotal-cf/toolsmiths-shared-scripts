@@ -8,6 +8,7 @@ git_email: &git_email my_github_email@example.com
 git_name: &git_name myuser
 github_key: &github_key {{github-key}}
 worker_tag: &worker_tag []
+azure_region: &azure_region "West US"
 
 groups:
 - name: bootstrap-azure
@@ -66,6 +67,7 @@ jobs:
         AZURE_TENANT_ID: {{azure_tenant_id}}
         AZURE_CLIENT_ID: {{azure_client_id}}
         AZURE_CLIENT_SECRET: {{azure_client_secret}}
+        AZURE_REGION: *azure_region
         GIT_EMAIL: *git_email
         GIT_NAME: *git_name
         SYSTEM_DOMAIN: *sys_domain
@@ -291,6 +293,7 @@ jobs:
         AZURE_TENANT_ID: {{azure_tenant_id}}
         AZURE_CLIENT_ID: {{azure_client_id}}
         AZURE_CLIENT_SECRET: {{azure_client_secret}}
+        AZURE_REGION: *azure_region
         GIT_EMAIL: *git_email
         GIT_NAME: *git_name
         SYSTEM_DOMAIN: *sys_domain
