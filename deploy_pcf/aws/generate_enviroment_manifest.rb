@@ -47,7 +47,7 @@ def get_cloudformation_stack(stack_name=nil)
   return parameters
 end
 
-def load_variable_template(template_path='variable_template.yml', private_key_path=nil)
+def load_variable_template(template_path='variable_template.yml', env_directory=nil)
   template_var = YAML.load_file(template_path)
   stack_data = get_cloudformation_stack()
   variable_map = {}
@@ -60,12 +60,15 @@ def load_variable_template(template_path='variable_template.yml', private_key_pa
       else
         key_data = key.split("key-")[1]
         #environment_yml_git_repo resource will be named as `environment-ymls` in the pipeline
-        path =  private_key_path + "/" + ENV[value]
-        add_ssh_private_key("environment.yml.mustache", path)
+        key_path =  env_directory + "/" + ENV[value]
+        add_ssh_private_key("environment.yml.mustache", key_path)
       end
     elsif key.include? "awscli-"
       key_data = key.split("awscli-")[1]
       variable_map[key_data] = send(value)
+    elsif key.include? "import-ssl"
+      next if value != true
+      add_ssl_cert_and_key("environment.yml.mustache", env_directory)
     else
       data = stack_data[value]
       raise_missing_var_error(value, false) if data.nil?
@@ -73,6 +76,25 @@ def load_variable_template(template_path='variable_template.yml', private_key_pa
     end
   end
   variable_map.to_yaml
+end
+
+def add_ssl_cert_and_key(env_temp_path, env_directory)
+  ssl_cert_path = Dir.glob("#{env_directory}/*.pem").first
+  ssl_key_path = Dir.glob("#{env_directory}/*.key").first
+
+  ssl_cert_string = File.read(ssl_cert_path)
+  ssl_cert_string = YAML.dump({"ssl_certificate" => ssl_cert_string})
+  ssl_cert_string = ssl_cert_string.gsub(/^---/,'')
+  ssl_cert_string = ssl_cert_string.gsub('ssl_certificate:', 'ssl_certificate: &ssl_certificate')
+
+  ssl_key_string = File.read(ssl_key_path)
+  ssl_key_string = YAML.dump({"ssl_private_key" => ssl_key_string})
+  ssl_key_string = ssl_key_string.gsub(/^---/,'')
+  ssl_key_string = ssl_key_string.gsub('ssl_private_key:', 'ssl_private_key: &ssl_private_key')
+
+  environment_yml_string = File.read(env_temp_path)
+  yaml_string = ssl_cert_string + "\n" + ssl_key_string + "\n\n" + environment_yml_string
+  File.open(env_temp_path, 'w') { |f| f.puts yaml_string }
 end
 
 def add_ssh_private_key(env_temp_path, private_key_path)

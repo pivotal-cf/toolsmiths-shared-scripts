@@ -111,3 +111,6 @@ ops_manager:
         password: {{smtp_password}}
       enable_starttls_auto: true
       smtp_auth_mechanism: plain
+    trust_self_signed_certificates: true
+    ssl_certificate: *ssl_certificate
+    ssl_private_key: *ssl_private_key

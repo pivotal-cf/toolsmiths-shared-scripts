@@ -16,6 +16,8 @@ env-smtp_port: SMTP_PORT
 env-smtp_user: SMTP_USER
 env-smtp_password: SMTP_PASSWORD
 
+import-ssl: true
+
 ## script generated variables from cloudformation output
 ops_manager_security_group_id: PcfOpsManagerSecurityGroupId
 public_subnet_id: PcfPublicSubnetId
