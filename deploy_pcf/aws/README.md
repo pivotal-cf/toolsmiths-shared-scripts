@@ -20,7 +20,6 @@ This Concourse pipeline is used to quickly spin up a PCF environment using the [
 
 #### Prerequisites:
 
-* Concourse deployment that has access to environments.toolsmiths.cf-app.com
 * Github key that has access to pivotal-cf/p-runtime
 * Pivnet API token
 
