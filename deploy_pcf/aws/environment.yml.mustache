@@ -54,13 +54,13 @@ ops_manager:
     secret_access_key: {{aws_secret_access_key}}
     region: {{aws_region}}
   mysql:
-    host: {{ops_manager_rds_address}}
-    port: {{ops_manager_rds_port}}
-    user: {{ops_manager_rds_username}}
-    password: {{ops_manager_rds_password}}
+    host: {{rds_address}}
+    port: {{rds_port}}
+    user: {{rds_username}}
+    password: {{rds_password}}
     dbname: bosh
   availability_zones:
-  - iaas_identifier: {{aws_region}}a
+  - iaas_identifier: {{private_subnet_availability_zone}}
   networks:
   - name: first-network
     identifier: {{private_subnet_id}}
@@ -74,7 +74,7 @@ ops_manager:
       reserved_ips: 10.0.16.2-10.0.16.9
       dns: 8.8.8.8
       gateway: 10.0.16.1
-      availability_zones: [{{aws_region}}a]
+      availability_zones: [{{private_subnet_availability_zone}}]
     network_assignments:
     deployment_network: first-network
     infrastructure_network: first-network
@@ -82,5 +82,32 @@ ops_manager:
     name: cf
     system_domain: {{aws_system_domain}}
     apps_domain: {{aws_system_domain}}
-    trust_self_signed_certificates: true
-    security_acknowledgement: X
+    elb_name: {{aws_environment_name}}-pcf-elb
+    elb_dns_name: {{pcf_elb_dns_name}}
+    ssh_elb_name: {{aws_environment_name}}-pcf-ssh-elb
+    ssh_elb_dns_name: {{pcf_elb_ssh_dns_name}}
+    tcp_elb_name: # tcp elb is introduced in 1.8
+    tcp_elb_dns_name: # tcp elb is introduced in 1.8
+    file_storage:
+      endpoint: {{aws_s3_endpoint}}
+      bucket: {{ ert_s3_buildpacks_bucket_name }}
+      buildpacks_bucket: {{ ert_s3_buildpacks_bucket_name }}
+      droplets_bucket: {{ ert_s3_droplets_bucket_name }}
+      packages_bucket: {{ ert_s3_packages_bucket_name }}
+      resources_bucket: {{ ert_s3_resources_bucket_name }}
+      access_key: {{pcf_iam_access_key_id}}
+      secret_key: {{pcf_iam_secret_access_key}}
+    rds:
+      host: {{rds_address}}
+      port: {{rds_port}}
+      username: {{rds_username}}
+      password: {{rds_password}}
+    smtp:
+      from: {{smtp_from}}
+      address: {{smtp_address}}
+      port: {{smtp_port}}
+      credentials:
+        identity: {{smtp_user}}
+        password: {{smtp_password}}
+      enable_starttls_auto: true
+      smtp_auth_mechanism: plain
