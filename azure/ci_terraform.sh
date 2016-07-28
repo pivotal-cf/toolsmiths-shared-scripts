@@ -100,6 +100,7 @@ done
 git config --global user.email "${GIT_EMAIL}"
 git config --global user.name "${GIT_NAME}"
 git clone ${TOP}/azure_environments ${TOP}/environment
+cd ${TOP}/environment
 
 # Ensure that the environment state tracking directory is exists
 if [ ! -d "${TOP}/environment/${dir}" ]
