@@ -96,11 +96,12 @@ azure_client_secret: &azure_client_secret {{azure_client_secret}}
 
 ### Example AD App creation
 
-These steps worked for us, follow the link for detailed explanations
+These steps worked for us, follow the link above for detailed explanations
 ```
 azure config mode arm
 azure login --environment AzureCloud
-azure account set <AZURE_SUSCRIPTION>
+azure account set <AZURE_SUBCRIPTION>
+azure account list --json # look for the tenantId entry
 azure ad app create --name "cf terraform" --password <AZURE_CLIENT_SECRET> --identifier-uris "http://CFterraform" --home-page "http://CFterraform"
 azure ad sp create -a <AZURE_CLIENT_ID>
 azure role assignment create --roleName "Contributor" --spn "http://CFterraform" --subscription <AZURE_SUBSCRIPTION>
