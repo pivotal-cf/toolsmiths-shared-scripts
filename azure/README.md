@@ -73,6 +73,7 @@ environment_repo: &environment_repo git@github.com:your-org/your-repo.git
 environment_dir: &environment_dir azure/environments 
 
 # The environment directory (ie: <environment_repo>/<environment_dir>/<environment_name>)
+# Must be 3-22 characters -- lowercase letters and numbers only -- and unique within Azure
 environment_name: &environment_name banana 
 
 system_domain: &sys_domain banana.cf-app.com
