@@ -92,9 +92,12 @@ retry() {
 
   while [ ${try} -le ${tries} ]
   do
-    $cmd
-    [ $? -eq 0 ] && return
-    try=$(( $try + 1 ))
+    if $cmd
+    then
+      return
+    else
+      try=$(( $try + 1 ))
+    fi
   done
 
   return 1
