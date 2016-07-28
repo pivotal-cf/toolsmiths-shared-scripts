@@ -8,7 +8,7 @@ meta:
 
 compilation:
   cloud_properties:
-    instance_type: Standard_DS3
+    instance_type: Standard_DS3_v2
   network: mysql1
   reuse_compilation_vms: true
   workers: 20
@@ -145,7 +145,7 @@ resource_pools:
 - name: mysql_z1
   cloud_properties:
     availability_set: cf_mysql_mysql
-    instance_type: Standard_DS4
+    instance_type: Standard_DS4_v2
     storage_account_name: {{storage_account_name}}
   network: mysql1
   stemcell:
@@ -154,7 +154,7 @@ resource_pools:
 - name: proxy_z1
   cloud_properties:
     availability_set: cf_mysql_proxy_z1
-    instance_type: Standard_DS4
+    instance_type: Standard_DS4_v2
     storage_account_name: {{storage_account_name}}
   network: mysql1
   stemcell:

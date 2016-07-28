@@ -85,7 +85,7 @@ base_releases:
 
 compilation:
   cloud_properties:
-    instance_type: Standard_DS2
+    instance_type: Standard_DS2_v2
     storage_account_name: {{storage_account_name}}
   network: diego1
   reuse_compilation_vms: true
@@ -147,35 +147,35 @@ disk_pools:
 empty_hash: {}
 iaas_settings:
   compilation_cloud_properties:
-    instance_type: Standard_DS2
+    instance_type: Standard_DS2_v2
     storage_account_name: {{storage_account_name}}
   resource_pool_cloud_properties:
   - cloud_properties:
-      instance_type: Standard_DS1
+      instance_type: Standard_DS1_v2
       storage_account_name: {{storage_account_name}}
     name: access_z1
   - cloud_properties:
-      instance_type: Standard_DS1
+      instance_type: Standard_DS1_v2
       storage_account_name: {{storage_account_name}}
     name: brain_z1
   - cloud_properties:
-      instance_type: Standard_DS1
+      instance_type: Standard_DS1_v2
       storage_account_name: {{storage_account_name}}
     name: cc_bridge_z1
   - cloud_properties:
-      instance_type: Standard_DS4
+      instance_type: Standard_DS4_v2
       storage_account_name: {{storage_account_name}}
     name: cell_z1
   - cloud_properties:
-      instance_type: Standard_DS4
+      instance_type: Standard_DS4_v2
       storage_account_name: {{storage_account_name}}
     name: colocated_z1
   - cloud_properties:
-      instance_type: Standard_DS2
+      instance_type: Standard_DS2_v2
       storage_account_name: {{storage_account_name}}
     name: database_z1
   - cloud_properties:
-      instance_type: Standard_DS1
+      instance_type: Standard_DS1_v2
       storage_account_name: {{storage_account_name}}
     name: route_emitter_z1
   stemcell:
@@ -561,7 +561,7 @@ property_overrides:
 
 resource_pools:
 - cloud_properties:
-    instance_type: Standard_DS1
+    instance_type: Standard_DS1_v2
     storage_account_name: {{storage_account_name}}
   name: access_z1
   network: diego1
@@ -569,7 +569,7 @@ resource_pools:
     name: bosh-azure-hyperv-ubuntu-trusty-go_agent
     version: latest
 - cloud_properties:
-    instance_type: Standard_DS1
+    instance_type: Standard_DS1_v2
     storage_account_name: {{storage_account_name}}
   name: brain_z1
   network: diego1
@@ -577,7 +577,7 @@ resource_pools:
     name: bosh-azure-hyperv-ubuntu-trusty-go_agent
     version: latest
 - cloud_properties:
-    instance_type: Standard_DS1
+    instance_type: Standard_DS1_v2
     storage_account_name: {{storage_account_name}}
   name: cc_bridge_z1
   network: diego1
@@ -585,7 +585,7 @@ resource_pools:
     name: bosh-azure-hyperv-ubuntu-trusty-go_agent
     version: latest
 - cloud_properties:
-    instance_type: Standard_DS4
+    instance_type: Standard_DS4_v2
     storage_account_name: {{storage_account_name}}
   name: cell_z1
   network: diego1
@@ -593,7 +593,7 @@ resource_pools:
     name: bosh-azure-hyperv-ubuntu-trusty-go_agent
     version: latest
 - cloud_properties:
-    instance_type: Standard_DS2
+    instance_type: Standard_DS2_v2
     storage_account_name: {{storage_account_name}}
   name: database_z1
   network: diego1
@@ -601,7 +601,7 @@ resource_pools:
     name: bosh-azure-hyperv-ubuntu-trusty-go_agent
     version: latest
 - cloud_properties:
-    instance_type: Standard_DS1
+    instance_type: Standard_DS1_v2
     storage_account_name: {{storage_account_name}}
   name: route_emitter_z1
   network: diego1
@@ -609,7 +609,7 @@ resource_pools:
     name: bosh-azure-hyperv-ubuntu-trusty-go_agent
     version: latest
 - cloud_properties:
-    instance_type: Standard_DS4
+    instance_type: Standard_DS4_v2
     storage_account_name: {{storage_account_name}}
   name: colocated_z1
   network: diego1
