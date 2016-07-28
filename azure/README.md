@@ -79,6 +79,11 @@ git_name: &git_name <your-github-name> # this is used for your git check-ins
 github_key: &github_key {{github-key}}
 worker_tag: &worker_tag []
 azure_region: &azure_region "West US"
+
+# Azure subscription ID can be recovered from your Azure account details
+# Tenant ID, Client ID, and Client secret need to be created as documented:
+# https://www.terraform.io/docs/providers/azurerm/index.html#creating-credentials
+
 azure_subscription: &azure_subscription {{azure_subscription}}
 azure_tenant_id: &azure_tenant_id {{azure_tenant_id}}
 azure_client_id: &azure_client_id {{azure_client_id}}
