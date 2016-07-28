@@ -140,6 +140,7 @@ then
   then
     echo "Destroying environment."
     if ! retry 3 terraform destroy -force
+    then
       EXIT_CODE=1
     fi
   else
