@@ -41,19 +41,22 @@ This repo is a collection of tooling to deploy CF on Azure. It is a set of terra
 
 ### Set Quotas
 
-You will need an Azure account with the correct quotas enabled. To do this, you should open a support ticket after logging into portal.azure.com
+Azure Core Quotas may prevent CF deployment to your account.  You should verify that you have at least 350 cores available in the region you'd like to deploy to.
+
+To verify and request an increase if necessary,  log into portal.azure.com
 
 1. In portal.azure.com in the upper right hand corner, click the ?
 2. Click on 'New support request'
 3. Issue type: Quota
-4. Cores per subscription
+4. Subscription: Your Account
+4. Quota Type: Cores per subscription
 5. Severity: Recommended B or higher
 5. Deployment model: Resource Manager
 6. Region: the region you want to use!
-7. New quota: 202
+7. Verify "Current quota (cores)" is at least 350 and request a new quota of 350 if not.
 You can add additional people to your e-mail, but it's to just send it to your team.
 
-If the Toolsmiths are deploying CF for you, add the 5 Toolsmith Pivots (check Allocations) as an owners of your account in the Azure portal, and leave us a nice message in Slack.
+If the Toolsmiths are deploying CF for you, add the 5 Toolsmith Pivots (check Allocations) as owners of your account in the Azure portal, and leave us a nice message in Slack (please include your region!).
 
 ---
 ## Concourse Pipeline
