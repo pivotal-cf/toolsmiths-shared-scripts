@@ -82,12 +82,24 @@ azure_region: &azure_region "West US"
 
 # Azure subscription ID can be recovered from your Azure account details
 # Tenant ID, Client ID, and Client secret need to be created as documented:
-# https://www.terraform.io/docs/providers/azurerm/index.html#creating-credentials
+# https://github.com/cloudfoundry-incubator/bosh-azure-cpi-release/blob/master/docs/get-started/create-service-principal.md
 
 azure_subscription: &azure_subscription {{azure_subscription}}
 azure_tenant_id: &azure_tenant_id {{azure_tenant_id}}
 azure_client_id: &azure_client_id {{azure_client_id}}
 azure_client_secret: &azure_client_secret {{azure_client_secret}}
+```
+
+### Example AD App creation
+
+These steps worked for us, follow the link for detailed explanations
+```
+azure config mode arm
+azure login --environment AzureCloud
+azure account set <AZURE_SUSCRIPTION>
+azure ad app create --name "cf terraform" --password <AZURE_CLIENT_SECRET> --identifier-uris "http://CFterraform" --home-page "http://CFterraform"
+azure ad sp create -a <AZURE_CLIENT_ID>
+azure role assignment create --roleName "Contributor" --spn "http://CFterraform" --subscription <AZURE_SUBSCRIPTION>
 ```
 
 ### Pipeline steps
