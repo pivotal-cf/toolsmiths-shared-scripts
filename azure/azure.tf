@@ -301,7 +301,7 @@ resource "azurerm_virtual_machine" "devboxvm" {
     storage_image_reference {
         publisher = "Canonical"
         offer = "UbuntuServer"
-        sku = "14.04-LTS"
+        sku = "14.04.4-LTS"
         version = "latest"
     }
 
