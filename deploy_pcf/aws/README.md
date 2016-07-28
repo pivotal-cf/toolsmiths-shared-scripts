@@ -24,6 +24,14 @@ This Concourse pipeline is used to quickly spin up a PCF environment using the [
 * Github key that has access to pivotal-cf/p-runtime
 * Pivnet API token
 
+#### Caveats:
+
+You will need to manually create the wildcard A record to point to your PcfELB after your cloudformation script has created your ELB:
+
+```
+*.<SYSTEM-DOMAIN> = <YOUR-PCF-ELB-DNS>
+```
+
 #### Usage:
 
 Edit deploy-pcf-aws.yml and configure the following values at the top of the file:
