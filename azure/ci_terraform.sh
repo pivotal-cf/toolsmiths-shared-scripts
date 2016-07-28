@@ -1,6 +1,26 @@
 #!/bin/bash
 set -xe
-trap 'ec=$?; [ $ec -eq 0 ] || echo "[ERROR] unexpected exit (code: $ec)"' EXIT
+
+exit_func() {
+  exit_code=$?
+
+  # Try to ensure that terraform state is preserved
+  [ -f terraform.tfstate ] && git add terraform.tfstate
+  if [ -n "$(git status -s | grep -v ^?)" ]
+  then
+    git commit -m "Concourse Azure pipeline: terraform ${1} ${ENV_NAME}"
+  else
+    echo "Skipping commit; no changes to tracked files."
+  fi
+
+  if [ ${exit_code} -eq 0 ]
+  then
+    exit
+  else
+    echo "[ERROR] Unexpected progam exit (code: $exit_code)"
+  fi
+}
+trap exit_func EXIT
 
 TOP=$PWD
 EXIT_CODE=0
@@ -119,10 +139,7 @@ then
   if [ -f terraform.tfstate ]
   then
     echo "Destroying environment."
-    if retry 3 terraform destroy -force
-    then
-      git rm terraform.tfstate
-    else
+    if ! retry 3 terraform destroy -force
       EXIT_CODE=1
     fi
   else
@@ -149,14 +166,6 @@ then
 else
   help
   exit 1
-fi
-
-[ -f terraform.tfstate ] && git add terraform.tfstate
-if [ -n "$(git status -s | grep -v ^?)" ]
-then
-  git commit -m "Concourse Azure pipeline: terraform ${1} ${ENV_NAME}"
-else
-  echo "Skipping commit; no changes to tracked files."
 fi
 
 exit ${EXIT_CODE}
