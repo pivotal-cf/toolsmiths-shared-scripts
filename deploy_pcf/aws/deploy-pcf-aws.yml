@@ -506,6 +506,20 @@ jobs:
         OPSMGR_VERSION: *opsmgr_version
         ERT_VERSION: *ert_version
         PIVNET_TOKEN: *pivnet_token
+    - task: delete-ec2-key-pair
+      attempts: *retry
+      privileged: true
+      config:
+        platform: linux
+        image: docker:///cftoolsmiths/aws_tools
+        run:
+          path: /bin/bash
+          args: ['-c', 'echo "Deleting key-pair: ${AWS_KEY_PAIR_NAME} ..." && aws ec2 delete-key-pair --key-name ${AWS_KEY_PAIR_NAME}']
+      params:
+        AWS_KEY_PAIR_NAME: *aws_key_pair_name
+        AWS_DEFAULT_REGION: *aws_region
+        AWS_ACCESS_KEY_ID: *aws_access_key_id
+        AWS_SECRET_ACCESS_KEY: *aws_secret_access_key
 
   - name: delete-all-bootstrap-resources
     serial: true
