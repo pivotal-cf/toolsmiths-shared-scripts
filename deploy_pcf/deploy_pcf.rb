@@ -147,6 +147,7 @@ cmds = [
   "#{xvfb}bundle exec rake opsmgr:product:upload_add[#{environment},#{options[:ops_manager_version]},#{options[:elastic_runtime]},cf]",
   "#{xvfb}bundle exec rake opsmgr:product:import_stemcell[#{environment},#{options[:ops_manager_version]},#{options[:stemcell]},cf]",
   "#{xvfb}bundle exec rake ert:configure[#{environment},#{options[:elastic_runtime_version]},#{options[:ops_manager_version]}]",
+  "#{xvfb}bundle exec rake ert:create_aws_dbs[#{environment}]",
   "#{xvfb}bundle exec rake ert:configure_external_dbs[#{environment},#{options[:elastic_runtime_version]},#{options[:ops_manager_version]}]",
   "#{xvfb}bundle exec rake ert:configure_external_file_storage[#{environment},#{options[:elastic_runtime_version]},#{options[:ops_manager_version]}]",
   "#{xvfb}bundle exec rake opsmgr:trigger_install[#{environment},#{options[:ops_manager_version]},240]"
