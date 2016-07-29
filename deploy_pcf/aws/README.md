@@ -25,11 +25,7 @@ This Concourse pipeline is used to quickly spin up a PCF environment using the [
 
 #### Caveats:
 
-You will need to manually create the wildcard A record to point to your PcfELB after your cloudformation script has created your ELB:
-
-```
-*.<SYSTEM-DOMAIN> = <YOUR-PCF-ELB-DNS>
-```
+You will need to ensure the wildcard cname and A record for the Ops Manager and PCF ELB does not exist before running the script.
 
 #### Usage:
 
