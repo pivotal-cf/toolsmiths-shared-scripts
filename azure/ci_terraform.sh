@@ -138,7 +138,15 @@ cd ${TOP}/environment/${dir}
 git status >/dev/null 2>&1 || die "Not in a git repository"
 
 # Ensure that we have an upto date state file
-[ -f terraform.tfstate ] && terraform refresh
+if [ -f terraform.tfstate ]
+then
+  if terraform refresh
+  then
+    echo "Terraform refresh complete."
+  else
+    echo "Terraform refresh failed."
+  fi
+fi
 
 if [ $1 = destroy ]
 then
