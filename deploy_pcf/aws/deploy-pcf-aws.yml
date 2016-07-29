@@ -447,7 +447,7 @@ jobs:
         - name: p-runtime
         run:
           path: /bin/bash
-          args: ['-c', 'bundle install && ./deploy_pcf.rb -D ../../environment-ymls/${ENV_FOLDER} -N ${AWS_ENVIRONMENT_NAME} -H -C ert:configure']
+          args: ['-c', 'bundle install && ./deploy_pcf.rb -D ../../environment-ymls/${ENV_FOLDER} -N ${AWS_ENVIRONMENT_NAME} -H -C ert:configure,ert:create_aws_dbs,ert:configure_external_dbs,ert:configure_external_file_storage']
           dir: toolsmiths-shared-scripts/deploy_pcf
       params:
         AWS_ENVIRONMENT_NAME: *aws_environment_name
