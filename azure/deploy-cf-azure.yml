@@ -51,7 +51,7 @@ jobs:
     - aggregate:
       - get: toolsmiths-shared-scripts
       - get: azure_environments
-    - task: recreate-environment
+    - task: create-environment
       config:
         platform: linux
         image: docker:///cftoolsmiths/deploy-cf-azure
@@ -62,7 +62,7 @@ jobs:
         - name: environment
         run:
           path: /bin/bash
-          args: ["-c", "toolsmiths-shared-scripts/azure/ci_terraform.sh -d ${ENV_DIR}/${ENV_NAME} recreate"]
+          args: ["-c", "toolsmiths-shared-scripts/azure/ci_terraform.sh -d ${ENV_DIR}/${ENV_NAME} apply"]
       params:
         ENV_NAME: *environment_name
         ENV_DIR: *environment_dir
@@ -75,10 +75,11 @@ jobs:
         GIT_EMAIL: *git_email
         GIT_NAME: *git_name
         SYSTEM_DOMAIN: *sys_domain
-    - put: azure_environments
-      params:
-        repository: environment
-        rebase: true
+      ensure:
+        put: azure_environments
+        params:
+          repository: environment
+          rebase: true
 
   - name: setup-devbox-upload-bosh-yml
     build_logs_to_retain: 50
@@ -301,7 +302,8 @@ jobs:
         GIT_EMAIL: *git_email
         GIT_NAME: *git_name
         SYSTEM_DOMAIN: *sys_domain
-    - put: azure_environments
-      params:
-        repository: environment
-        rebase: true
+      ensure:
+        put: azure_environments
+        params:
+          repository: environment
+          rebase: true
