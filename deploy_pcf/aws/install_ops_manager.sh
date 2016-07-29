@@ -15,7 +15,7 @@ function install_ops_manager() {
 
 function add_public_ip() {
   opsman_public_ip=$(aws ec2 describe-instances --filter "Name=tag:Name,Values=ops-manager-${AWS_ENVIRONMENT_NAME}" | jq -r .Reservations[].Instances[].NetworkInterfaces[].Association.PublicIp)
-  pcf_elb_dns_name=$(aws cloudformation describe-stacks --stack-name PCFTrackerDemo --output text | grep PcfElbDnsName | awk '{print $3}')
+  pcf_elb_dns_name=$(aws cloudformation describe-stacks --stack-name ${AWS_ENVIRONMENT_NAME} --output text | grep PcfElbDnsName | awk '{print $3}')
   export AWS_ACCESS_KEY_ID=${AWS_ROUTE53_ACCESS_KEY_ID}
   export AWS_SECRET_ACCESS_KEY=${AWS_ROUTE53_SECRET_ACCESS_KEY}
 
