@@ -15,6 +15,14 @@ variable "azure_credentials" {
   }
 }
 
+variable "aws" {
+  default = {
+    access_key = "your-aws-access-key"
+    secret_key = "your-aws-secret-key"
+    route_53_zone = "your-route53-zone-id"
+  }
+}
+
 variable "credentials" {
   default = {
     bosh_admin_password= "admin"
@@ -91,6 +99,13 @@ provider "azurerm" {
   client_id       = "${var.azure_credentials.client_id}"
   client_secret   = "${var.azure_credentials.client_secret}"
   tenant_id       = "${var.azure_credentials.tenant_id}"
+}
+
+provider "aws" {
+  alias = "aws"
+  access_key = "${var.aws.access_key}"
+  secret_key = "${var.aws.secret_key}"
+  region = "us-east-1"
 }
 
 
@@ -326,6 +341,27 @@ resource "azurerm_virtual_machine" "devboxvm" {
         }
     }
 }
+
+resource "aws_route53_record" "jumpbox" {
+  provider = "aws.aws"
+  zone_id = "${var.aws.route_53_zone}"
+  name = "jb.${var.environment_name}.azure"
+  type = "A"
+  ttl = "60"
+  records = [
+    "${azurerm_public_ip.devboxpublicip.ip_address}"]
+}
+
+resource "aws_route53_record" "wildcard" {
+  provider = "aws.aws"
+  zone_id = "${var.aws.route_53_zone}"
+  name = "*.${var.environment_name}.azure"
+  type = "A"
+  ttl = "60"
+  records = [
+    "${azurerm_public_ip.haproxypublicip.ip_address}"]
+}
+
 
 output "devboxpublicip" {
   value = "${azurerm_public_ip.devboxpublicip.ip_address}"

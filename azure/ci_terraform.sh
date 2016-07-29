@@ -60,6 +60,9 @@ generate_config() {
     -e "s/your-client-id/${AZURE_CLIENT_ID}/" \
     -e "s/your-client-secret/${AZURE_CLIENT_SECRET}/" \
     -e "s/your-tenant-id/${AZURE_TENANT_ID}/" \
+    -e "s/your-aws-access-key/${AWS_SHARED_DNS_ACCESS_KEY}/" \
+    -e "s/your-aws-access-secret/${AWS_SHARED_DNS_ACCESS_SECRET}/" \
+    -e "s/your-route53-zone-id/${AWS_ROUTE53_ZONE_ID}/" \
     -e "s/your-environment-name/${ENV_NAME}/" \
     -e "s/your-devbox-admin-user/${DEVBOX_USERNAME}/" \
     -e "s/your-devbox-admin-password/${DEVBOX_PASSWORD}/" \

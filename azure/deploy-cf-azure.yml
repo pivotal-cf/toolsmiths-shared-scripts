@@ -13,6 +13,9 @@ azure_subscription: &azure_subscription {{azure_subscription}}
 azure_tenant_id: &azure_tenant_id {{azure_tenant_id}}
 azure_client_id: &azure_client_id {{azure_client_id}}
 azure_client_secret: &azure_client_secret {{azure_client_secret}}
+aws_shared_dns_access_key: &aws_shared_dns_access_key {{aws-shared-dns-access-key}}
+aws_shared_dns_access_secret: &aws_shared_dns_access_secret {{aws-shared-dns-access-secret}}
+aws_route53_zone_id: &aws_route53_zone_id Z1OE08QT9BJFFU  # this is cf-app.com
 
 groups:
 - name: bootstrap-azure
@@ -72,6 +75,9 @@ jobs:
         AZURE_TENANT_ID: *azure_tenant_id
         AZURE_CLIENT_ID: *azure_client_id
         AZURE_CLIENT_SECRET: *azure_client_secret
+        AWS_SHARED_DNS_ACCESS_KEY: *aws_shared_dns_access_key
+        AWS_SHARED_DNS_ACCESS_SECRET: *aws_shared_dns_access_secret
+        AWS_ROUTE53_ZONE_ID: *aws_route53_zone_id
         GIT_EMAIL: *git_email
         GIT_NAME: *git_name
         SYSTEM_DOMAIN: *sys_domain
@@ -299,6 +305,9 @@ jobs:
         AZURE_TENANT_ID: *azure_tenant_id
         AZURE_CLIENT_ID: *azure_client_id
         AZURE_CLIENT_SECRET: *azure_client_secret
+        AWS_SHARED_DNS_ACCESS_KEY: *aws_shared_dns_access_key
+        AWS_SHARED_DNS_ACCESS_SECRET: *aws_shared_dns_access_secret
+        AWS_ROUTE53_ZONE_ID: *aws_route53_zone_id
         GIT_EMAIL: *git_email
         GIT_NAME: *git_name
         SYSTEM_DOMAIN: *sys_domain
