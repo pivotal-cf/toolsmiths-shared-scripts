@@ -30,6 +30,10 @@ aws_private_key_file_name: &aws_private_key_file_name <PRIVATE-KEY-FILENAME> # t
 aws_region: &aws_region <AWS-REGION>
 aws_s3_endpoint: &aws_s3_endpoint 'https://s3.amazonaws.com' # This varies per region: http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
 
+aws_route_53_access_key_id: &aws_route53_access_key_id {{aws-route53-access-key-id}}
+aws_route_53_secret_access_key: &aws_route53_secret_access_key {{aws-route53-secret-access-key}}
+ops_manager_fqdn: &ops_manager_fqdn <YOUR-OPSMANAGER-FQDN>
+
 ops_manager_password: &ops_manager_password <YOUR-OPSMANAGER-PASSWORD>
 
 smtp_from: &smtp_from <SMTP-FROM-ADDRESS>
@@ -303,6 +307,10 @@ jobs:
         AWS_ACCESS_KEY_ID: *aws_access_key_id
         AWS_ENVIRONMENT_NAME: *aws_environment_name
         AWS_DEFAULT_REGION: *aws_region
+        AWS_ROUTE53_ACCESS_KEY_ID: *aws_route53_access_key_id
+        AWS_ROUTE53_SECRET_ACCESS_KEY: *aws_route53_secret_access_key
+        AWS_SYSTEM_DOMAIN: *aws_system_domain
+        OPS_MANAGER_FQDN: *ops_manager_fqdn
     - put: environment-ymls
       params: {rebase: true, repository: output/environment-ymls}
 
