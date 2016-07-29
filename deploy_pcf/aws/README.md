@@ -65,6 +65,11 @@ aws_s3_endpoint: &aws_s3_endpoint 'https://s3.amazonaws.com' # This varies per r
 
 ops_manager_password: &ops_manager_password <YOUR-OPSMANAGER-PASSWORD>
 
+aws_route_53_access_key_id: &aws_route53_access_key_id {{aws-route53-access-key-id}}
+aws_route_53_secret_access_key: &aws_route53_secret_access_key {{aws-route53-secret-access-key}}
+aws_route_53_hosted_zone_id: &aws_route53_hosted_zone_id {{aws-route53-hosted-zone-id}}
+ops_manager_fqdn: &ops_manager_fqdn <YOUR-OPSMANAGER-FQDN>
+
 smtp_from: &smtp_from <SMTP-FROM-ADDRESS>
 smtp_address: &smtp_address <SMTP-ADDRESS>
 smtp_port: &smtp_port <SMTP-PORT>
