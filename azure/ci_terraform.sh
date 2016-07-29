@@ -58,7 +58,7 @@ generate_config() {
   sed -i -e "s/your-location/${AZURE_REGION}/" \
     -e "s/your-subscription-id/${AZURE_SUBSCRIPTION}/" \
     -e "s/your-client-id/${AZURE_CLIENT_ID}/" \
-    -e "s/your-client-secret/${AZURE_CLIENT_SECRET}/" \
+    -e "s^your-client-secret^${AZURE_CLIENT_SECRET}^" \
     -e "s/your-tenant-id/${AZURE_TENANT_ID}/" \
     -e "s/your-aws-access-key/${AWS_SHARED_DNS_ACCESS_KEY}/" \
     -e "s^your-aws-secret-key^${AWS_SHARED_DNS_ACCESS_SECRET}^" \
