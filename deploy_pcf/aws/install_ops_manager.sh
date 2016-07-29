@@ -14,9 +14,50 @@ function install_ops_manager() {
 }
 
 function add_public_ip() {
-  PUBLIC_IP=$(aws ec2 describe-instances --filter "Name=tag:Name,Values=ops-manager-${AWS_ENVIRONMENT_NAME}" | jq -r .Reservations[].Instances[].NetworkInterfaces[].Association.PublicIp)
-  sed -i "s/ops_manager_public_url_willbereplaced/\"https:\/\/${PUBLIC_IP}\"/" $ENV_DIRECTORY/*.yml
-  echo "Public IP added in manifest"
+  opsman_public_ip=$(aws ec2 describe-instances --filter "Name=tag:Name,Values=ops-manager-${AWS_ENVIRONMENT_NAME}" | jq -r .Reservations[].Instances[].NetworkInterfaces[].Association.PublicIp)
+  pcf_elb_dns_name=$(aws cloudformation describe-stacks --stack-name PCFTrackerDemo --output text | grep PcfElbDnsName | awk '{print $3}')
+  export AWS_ACCESS_KEY_ID=${AWS_ROUTE53_ACCESS_KEY_ID}
+  export AWS_SECRET_ACCESS_KEY=${AWS_ROUTE53_SECRET_ACCESS_KEY}
+
+  JSON="
+  {
+    \"Comment\": \"$AWS_ENVIRONMENT_NAME AWS environment\",
+    \"Changes\": [
+      {
+        \"Action\": \"CREATE\",
+        \"ResourceRecordSet\": {
+          \"Name\": \"*.${AWS_SYSTEM_DOMAIN}\",
+          \"Type\": \"CNAME\",
+          \"TTL\": 300,
+          \"ResourceRecords\": [
+            {
+              \"Value\": \"$pcf_elb_dns_name\"
+            }
+          ]
+        }
+      },
+      {
+        \"Action\": \"CREATE\",
+        \"ResourceRecordSet\": {
+          \"Name\": \"${OPS_MANAGER_FQDN}\",
+          \"Type\": \"A\",
+          \"TTL\": 300,
+          \"ResourceRecords\": [
+            {
+              \"Value\": \"$opsman_public_ip\"
+            }
+          ]
+        }
+      }
+    ]
+  }"
+
+  echo $JSON | jq .
+
+  aws route53 change-resource-record-sets --hosted-zone-id ${AWS_ROUTE53_HOSTED_ZONE_ID} --change-batch "$JSON"
+
+  sed -i "s/ops_manager_public_url_willbereplaced/\"https:\/\/${OPS_MANAGER_FQDN}\"/" $ENV_DIRECTORY/*.yml
+  echo "DNS records for ${OPS_MANAGER_FQDN} and *.${AWS_SYSTEM_DOMAIN} have been created and added in manifest"
 }
 
 function commit_changes(){
