@@ -116,8 +116,8 @@ This is a pipeline group that is used to bootstrap your Azure environment. In th
   * a resource group
   * a storage account/container
   * public ips for haproxy and devbox
-  * DNS record for the jumpbox: jb.<environment_name>.azure.cf-app.com
-  * DNS wildcard record for the HAProxy: *.<environment_name>.azure.cf-app.com
+  * DNS record for the jumpbox: jb.**environment_name**.azure.cf-app.com
+  * DNS wildcard record for the HAProxy: \*.**environment_name**.azure.cf-app.com
   * virtual network
   * subnets for bosh, cloudfoundry, diego, mysql
   * a bosh security group
