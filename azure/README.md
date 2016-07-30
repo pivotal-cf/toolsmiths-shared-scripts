@@ -15,7 +15,6 @@ This repo is a collection of tooling to deploy CF on Azure. It is a set of terra
 	    1. [bootstrap-azure](#bootstrap-azure)
 			1. [bootstrap-environment](#bootstrap-environment)
 			2. [MANUAL STEP: create storage table](#manual-step:-create-storage-table)
-			3. [MANUAL STEP: create wildcard A record](#manual-step:-create-wildcard-a-record)
 			4. [setup-devbox-upload-bosh-yml](#setup-devbox-upload-bosh-yml)
 		2. [deploy-cf-azure](#deploy-cf-azure)
 			1. [deploy-bosh-generate-upload-deployment-ymls](#deploy-bosh-generate-upload-deployment-ymls)
@@ -97,6 +96,7 @@ azure_client_secret: &azure_client_secret {{azure_client_secret}}
 ### Example AD App creation
 
 These steps worked for us, follow the link above for detailed explanations
+
 ```
 azure config mode arm
 azure login --environment AzureCloud
@@ -116,6 +116,8 @@ This is a pipeline group that is used to bootstrap your Azure environment. In th
   * a resource group
   * a storage account/container
   * public ips for haproxy and devbox
+  * DNS record for the jumpbox: jb.<environment_name>.azure.cf-app.com
+  * DNS wildcard record for the HAProxy: *.<environment_name>.azure.cf-app.com
   * virtual network
   * subnets for bosh, cloudfoundry, diego, mysql
   * a bosh security group
