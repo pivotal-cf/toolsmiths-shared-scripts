@@ -18,7 +18,7 @@ def get_latest_product_version(product_name, version='')
   if version == 'latest-stable'
     product_versions.keep_if { |a| a=~ /^[0-9].[0-9](.\d)*$/}
   else
-    if version.include? 'latest-stable'
+    if version.downcase.include? 'latest-stable'
       product_versions.keep_if { |a| a=~ /^#{version.gsub('latest-stable', '')}(.\d)*$/}
     else
       product_versions.keep_if { |a| a=~ /^#{version.gsub('latest', '')}.*$/}
@@ -91,7 +91,7 @@ def download(product, version=nil, cloudformation=nil, iaas='vsphere')
     product_file_id = product_files['product_files'].select { |product_files| product_files['name'].downcase.include? iaas}.first['id']
   elsif product == 'elastic-runtime'
     if cloudformation
-      download_object = product_files['product_files'].select { |product| product['name'].downcase.include? "CloudFormation"}.first
+      download_object = product_files['product_files'].select { |product| product['name'].downcase.include? "cloudformation"}.first
     else
       download_object = product_files['product_files'].select {|product| product['name'] == 'PCF Elastic Runtime'}.first
     end
