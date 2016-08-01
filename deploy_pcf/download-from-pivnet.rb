@@ -91,7 +91,7 @@ def download(product, version=nil, cloudformation=nil, iaas='vsphere')
     product_file_id = product_files['product_files'].select { |product_files| product_files['name'].downcase.include? iaas}.first['id']
   elsif product == 'elastic-runtime'
     if cloudformation
-      download_object = product_files['product_files'].select { |product| product['name'].include? "CloudFormation"}.first
+      download_object = product_files['product_files'].select { |product| product['name'].downcase.include? "CloudFormation"}.first
     else
       download_object = product_files['product_files'].select {|product| product['name'] == 'PCF Elastic Runtime'}.first
     end
@@ -127,11 +127,11 @@ options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage:\n\n --ops-manager <om-version> --elastic-runtime <ert-version> --cloud-formation --iaas <iaas>\n\n --ops-manager latest --elastic-runtime latest\n\n export OPSMGR_VERSION=<version or 'latest'> ERT_VERSION=<version or 'latest'> --ops-manager --elastic-runtime\n\n --elastic-runtime <ert-version> --cloud-formation #downloads the cloud formation json for that ERT version\n\n --ops-manager <om-version> --iaas <iaas> #downloads the ops manager for specified IaaS"
   opts.on('-o', '--ops-manager [OM]') do |ops_manager|
-    if (ops_manager && ops_manager.include?('latest'))
+    if (ops_manager && ops_manager.downcase.include?('latest'))
       options[:ops_manager] = get_latest_product_version('ops-manager', ops_manager)
     elsif ops_manager
       options[:ops_manager] = ops_manager
-    elsif (ENV['OPSMGR_VERSION'] && ENV['OPSMGR_VERSION'].include?('latest'))
+    elsif (ENV['OPSMGR_VERSION'] && ENV['OPSMGR_VERSION'].downcase.include?('latest'))
       options[:ops_manager] = get_latest_product_version('ops-manager', ENV['OPSMGR_VERSION'])
     elsif ENV['OPSMGR_VERSION']
       options[:ops_manager] = ENV['OPSMGR_VERSION']
@@ -141,11 +141,11 @@ OptionParser.new do |opts|
     options[:iaas] = iaas.downcase
   end
   opts.on('-e', '--elastic-runtime [ert]') do |elastic_runtime|
-    if (elastic_runtime && elastic_runtime.include?('latest'))
+    if (elastic_runtime && elastic_runtime.downcase.include?('latest'))
       options[:elastic_runtime] = get_latest_product_version('elastic-runtime', elastic_runtime)
     elsif elastic_runtime
       options[:elastic_runtime] = elastic_runtime
-    elsif (ENV['ERT_VERSION'] && ENV['ERT_VERSION'].include?('latest'))
+    elsif (ENV['ERT_VERSION'] && ENV['ERT_VERSION'].downcase.include?('latest'))
       options[:elastic_runtime] = get_latest_product_version('elastic-runtime', env['ERT_VERSION'])
     elsif ENV['ERT_VERSION']
       options[:elastic_runtime] = ENV['ERT_VERSION']
@@ -156,10 +156,10 @@ OptionParser.new do |opts|
   end
   opts.on('-p', '--print-latest [PRODUCT]') do |product|
     options[:print] = true
-    if product.include? 'ops-manager'
+    if product.downcase.include? 'ops-manager'
       version = product.gsub!('ops-manager', '')
       puts get_latest_product_version('ops-manager', version)
-    elsif product.include? 'elastic-runtime'
+    elsif product.downcase.include? 'elastic-runtime'
       version = product.gsub!('elastic-runtime', '')
       puts get_latest_product_version('elastic-runtime', version)
     else
@@ -193,7 +193,7 @@ if options.key?(:ops_manager)
     puts 'Could not find specified version of Ops Manager.'
   else
     options[:iaas] = 'vsphere' if options[:iaas].nil?
-    if ['vsphere', 'aws', 'openstack'].include?(options[:iaas])
+    if ['vsphere', 'aws', 'openstack'].include?(options[:iaas].downcase)
       puts "Downloading: Ops Manager - #{options[:ops_manager]} for Iaas - #{options[:iaas]}"
       download('ops-manager', options[:ops_manager], nil, options[:iaas])
     else
