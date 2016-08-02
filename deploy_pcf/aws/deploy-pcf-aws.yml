@@ -10,7 +10,7 @@ download_retry_attempts: &retry 3
 # === pivnet ===
 pivnet_token: &pivnet_token {{pivnet-token}}
 opsmgr_version: &opsmgr_version 1.7.9
-ert_version: &ert_version 1.7.9
+ert_version: &ert_version 1.7.13
 
 # ===environment config ===
 iaas: &iaas aws
@@ -18,8 +18,8 @@ iaas: &iaas aws
 environment_yml_git_repo: &environment_yml_git_repo git@github.com:<YOUR-ORG>/<YOUR-REPO>
 environment_yml_folder: &environment_yml_folder aws/environments/<ENVIRONMENT-NAME> # this is the path within your git repo
 
-aws_access_key_id: &aws_access_key_id {{aws-access-key-id}}
-aws_secret_access_key: &aws_secret_access_key {{aws-secret-access-key}}
+aws_access_key_id: &aws_access_key_id <AWS-ACCESS-KEY-ID>
+aws_secret_access_key: &aws_secret_access_key <AWS-SECRET-ACCESS-KEY>
 aws_environment_name: &aws_environment_name <ENVIRONMENT-NAME>
 aws_system_domain: &aws_system_domain <ENVIRONMENT-NAME>.example.com
 aws_key_pair_name: &aws_key_pair_name <ENVIRONMENT-KEY-PAIR-NAME>
@@ -30,9 +30,9 @@ aws_private_key_file_name: &aws_private_key_file_name <PRIVATE-KEY-FILENAME> # t
 aws_region: &aws_region <AWS-REGION>
 aws_s3_endpoint: &aws_s3_endpoint 'https://s3.amazonaws.com' # This varies per region: http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
 
-aws_route_53_access_key_id: &aws_route53_access_key_id {{aws-route53-access-key-id}}
-aws_route_53_secret_access_key: &aws_route53_secret_access_key {{aws-route53-secret-access-key}}
-aws_route_53_hosted_zone_id: &aws_route53_hosted_zone_id {{aws-route53-hosted-zone-id}}
+aws_route_53_access_key_id: &aws_route53_access_key_id <AWS-ROUTE53-ACCESS-KEY-ID>
+aws_route_53_secret_access_key: &aws_route53_secret_access_key <AWS-ROUTE53-SECRET-ACCESS-KEY>
+aws_route_53_hosted_zone_id: &aws_route53_hosted_zone_id <AWS-ROUTE53-HOSTED-ZONE-ID>
 ops_manager_fqdn: &ops_manager_fqdn <YOUR-OPSMANAGER-FQDN>
 
 ops_manager_password: &ops_manager_password <YOUR-OPSMANAGER-PASSWORD>
@@ -134,8 +134,6 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
-        passed: [generate-self-signed-cert]
-        trigger: true
     - task: download-cloudformation-script
       attempts: *retry
       tags: *worker_tag
