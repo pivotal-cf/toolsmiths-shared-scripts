@@ -90,16 +90,16 @@ variable "devbox_configs" {
 ######################################################################################
 
 provider "azurerm" {
-  subscription_id = "${var.azure_credentials['subscription_id']}"
-  client_id       = "${var.azure_credentials['client_id']}"
-  client_secret   = "${var.azure_credentials['client_secret']}"
-  tenant_id       = "${var.azure_credentials['tenant_id']}"
+  subscription_id = "${var.azure_credentials["subscription_id"]}"
+  client_id       = "${var.azure_credentials["client_id"]}"
+  client_secret   = "${var.azure_credentials["client_secret"]}"
+  tenant_id       = "${var.azure_credentials["tenant_id"]}"
 }
 
 provider "aws" {
   alias = "aws"
-  access_key = "${var.aws['access_key']}"
-  secret_key = "${var.aws['secret_key']}"
+  access_key = "${var.aws["access_key"]}"
+  secret_key = "${var.aws["secret_key"]}"
   region = "us-east-1"
 }
 
@@ -169,28 +169,28 @@ resource "azurerm_subnet" "boshsubnet" {
     name = "boshnetwork"
     resource_group_name = "${azurerm_resource_group.resourcegroup.name}"
     virtual_network_name = "${azurerm_virtual_network.virtualnetwork.name}"
-    address_prefix = "${var.subnets['bosh']}"
+    address_prefix = "${var.subnets["bosh"]}"
 }
 
 resource "azurerm_subnet" "cloudfoundrysubnet" {
     name = "cloudfoundrynetwork"
     resource_group_name = "${azurerm_resource_group.resourcegroup.name}"
     virtual_network_name = "${azurerm_virtual_network.virtualnetwork.name}"
-    address_prefix = "${var.subnets['cloudfoundry']}"
+    address_prefix = "${var.subnets["cloudfoundry"]}"
 }
 
 resource "azurerm_subnet" "diegosubnet" {
     name = "diegonetwork"
     resource_group_name = "${azurerm_resource_group.resourcegroup.name}"
     virtual_network_name = "${azurerm_virtual_network.virtualnetwork.name}"
-    address_prefix = "${var.subnets['diego']}"
+    address_prefix = "${var.subnets["diego"]}"
 }
 
 resource "azurerm_subnet" "mysqlsubnet" {
     name = "mysqlnetwork"
     resource_group_name = "${azurerm_resource_group.resourcegroup.name}"
     virtual_network_name = "${azurerm_virtual_network.virtualnetwork.name}"
-    address_prefix = "${var.subnets['mysql']}"
+    address_prefix = "${var.subnets["mysql"]}"
 }
 
 resource "azurerm_network_security_group" "boshsecuritygroup" {
@@ -302,7 +302,7 @@ resource "azurerm_network_interface" "devboxnic" {
         name = "devboxnic"
         subnet_id = "${azurerm_subnet.boshsubnet.id}"
         private_ip_address_allocation = "static"
-        private_ip_address = "${var.devbox_configs['private_ip']}"
+        private_ip_address = "${var.devbox_configs["private_ip"]}"
         public_ip_address_id = "${azurerm_public_ip.devboxpublicip.id}"
     }
 }
@@ -330,22 +330,22 @@ resource "azurerm_virtual_machine" "devboxvm" {
 
     os_profile {
         computer_name = "${var.environment_name}jumpbox"
-        admin_username = "${var.devbox_configs['username']}"
-        admin_password = "${var.devbox_configs['password']}"
+        admin_username = "${var.devbox_configs["username"]}"
+        admin_password = "${var.devbox_configs["password"]}"
     }
 
     os_profile_linux_config {
         disable_password_authentication = true
         ssh_keys {
-          path = "/home/${var.devbox_configs['username']}/.ssh/authorized_keys"
-          key_data = "${var.devbox_configs['publickey']}"
+          path = "/home/${var.devbox_configs["username"]}/.ssh/authorized_keys"
+          key_data = "${var.devbox_configs["publickey"]}"
         }
     }
 }
 
 resource "aws_route53_record" "jumpbox" {
   provider = "aws.aws"
-  zone_id = "${var.aws['route_53_zone']}"
+  zone_id = "${var.aws["route_53_zone"]}"
   name = "jb.${var.environment_name}.azure"
   type = "A"
   ttl = "60"
@@ -355,7 +355,7 @@ resource "aws_route53_record" "jumpbox" {
 
 resource "aws_route53_record" "wildcard" {
   provider = "aws.aws"
-  zone_id = "${var.aws['route_53_zone']}"
+  zone_id = "${var.aws["route_53_zone"]}"
   name = "*.${var.environment_name}.azure"
   type = "A"
   ttl = "60"
