@@ -185,15 +185,6 @@ storage_account_key=<your-storage-account-key>
 
 azure storage table create --account-name $storage_account_name --account-key $storage_account_key --table stemcell
 ```
-##### MANUAL STEP: create wildcard A record
-
-You will need to create the wildcard A record to point to the generate HA proxy public IP.
-
-You can find the HA Proxy public IP in your Concourse build logs (haproxy_public_ip). The A record should look like the following:
-
-```
-*.<YOUR-SYSTEM-DOMAIN> = <HA-PROXY-PUBLIC-IP>
-```
 
 ##### setup-devbox-upload-bosh-yml
 
