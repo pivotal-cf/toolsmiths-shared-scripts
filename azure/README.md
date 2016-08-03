@@ -14,7 +14,6 @@ This repo is a collection of tooling to deploy CF on Azure. It is a set of terra
 	2.	[Pipeline steps](#pipeline-steps)
 	    1. [bootstrap-azure](#bootstrap-azure)
 			1. [bootstrap-environment](#bootstrap-environment)
-			2. [MANUAL STEP: create storage table](#manual-step:-create-storage-table)
 			4. [setup-devbox-upload-bosh-yml](#setup-devbox-upload-bosh-yml)
 		2. [deploy-cf-azure](#deploy-cf-azure)
 			1. [deploy-bosh-generate-upload-deployment-ymls](#deploy-bosh-generate-upload-deployment-ymls)
@@ -140,51 +139,6 @@ After the terraform script is run, the devbox is set up to install common utilit
     your keys must be in the folder: `~/your-repo/azure/environment/banana/id_rsa_bosh(.pub)`
 
 * **Dev Box Password:** You can specify the devbox password to use by creating the file `devbox_password.txt` inside the repo/directory specified in your pipeline. (i.e. ~/your-repo/azure/environment/banana/devbox_password.txt)
-
-##### MANUAL STEP: create storage table
-
-We currently need to manually create the storage table (see: https://github.com/hashicorp/terraform/issues/7257).**Update:** This feature should be included in the terraform 0.7 release.
-
-Run the following commands:
-
-```
-azure login # Follow the instructions to login
-```
-
-Ensure you have the 'arm' mode configured with your azure CLI:
-
-```
-azure config mode arm
-```
-
-To fetch your storage account key, run the following commands and copy the 'Primary' key.
-
-```
-resource_group_name=<your-env-name>
-storage_account_name=<your-env-name>sa
-
-azure storage account keys list --resource-group $resource_group_name $storage_account_name
-```
-You can also get the storage account key via the Azure Portal
-
-Sample Output:
-
-```
-info:    Executing command storage account keys list
-Resource group name: bosh-res-group
-+ Getting storage account keys
-data:    Primary: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-data:    Secondary: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-info:    storage account keys list command OK
-```
-
-Create your storage table:
-
-```
-storage_account_key=<your-storage-account-key>
-
-azure storage table create --account-name $storage_account_name --account-key $storage_account_key --table stemcell
-```
 
 ##### setup-devbox-upload-bosh-yml
 
