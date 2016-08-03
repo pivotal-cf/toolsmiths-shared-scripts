@@ -1,8 +1,3 @@
-############################################################################
-# Notes: We currently need to manually create the storage table:
-# `azure storage table create --account-name $storage_account_name --account-key $storage_account_key --table stemcell`
-# https://github.com/hashicorp/terraform/issues/7257
-#
 ############################## UPDATE BELOW #################################
 
 # Follow instructions here to get credentials: http://bosh.io/docs/azure-resources.html
@@ -134,6 +129,12 @@ resource "azurerm_storage_container" "stemcellcontainer" {
     resource_group_name = "${azurerm_resource_group.resourcegroup.name}"
     storage_account_name = "${azurerm_storage_account.storageaccount.name}"
     container_access_type = "blob"
+}
+
+resource "azurerm_storage_table" "stemcelltable" {
+    name = "stemcell"
+    resource_group_name = "${azurerm_resource_group.resourcegroup.name}"
+    storage_account_name = "${azurerm_storage_account.storageaccount.name}"
 }
 
 resource "azurerm_public_ip" "haproxypublicip" {
@@ -365,10 +366,6 @@ resource "aws_route53_record" "wildcard" {
 
 output "devboxpublicip" {
   value = "${azurerm_public_ip.devboxpublicip.ip_address}"
-}
-
-output "notes" {
-  value = "We currently need to manually create the storage table:\nhttps://github.com/hashicorp/terraform/issues/7257\nhttps://github.com/hashicorp/terraform/issues/7257"
 }
 
 output "variables.yml" {
