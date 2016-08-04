@@ -146,7 +146,7 @@ OptionParser.new do |opts|
     elsif elastic_runtime
       options[:elastic_runtime] = elastic_runtime
     elsif (ENV['ERT_VERSION'] && ENV['ERT_VERSION'].downcase.include?('latest'))
-      options[:elastic_runtime] = get_latest_product_version('elastic-runtime', env['ERT_VERSION'])
+      options[:elastic_runtime] = get_latest_product_version('elastic-runtime', ENV['ERT_VERSION'])
     elsif ENV['ERT_VERSION']
       options[:elastic_runtime] = ENV['ERT_VERSION']
     end
