@@ -11,20 +11,26 @@ def get_latest_product_version(product_name, version='')
 
   product_versions.keep_if { |a| a=~ /^[0-9].[0-9].*$/}
 
+  product_versions = product_versions.sort_by do |x|
+    x.split(".").map {|i| i.to_i}
+  end
+
+  product_versions.reverse!
+
   if version == 'help'
-    return product_versions.sort! {|a,b| b <=> a }
+    return product_versions
   end
 
   if version == 'latest-stable'
-    product_versions.keep_if { |a| a=~ /^[0-9].[0-9](.\d)*$/}
+    product_versions.keep_if { |a| a=~ /^[0-9].[0-9](.\d+)*$/}
   else
     if version.downcase.include? 'latest-stable'
-      product_versions.keep_if { |a| a=~ /^#{version.gsub('latest-stable', '')}(.\d)*$/}
+      product_versions.keep_if { |a| a=~ /^#{version.gsub('latest-stable', '')}(.\d+)*$/}
     else
       product_versions.keep_if { |a| a=~ /^#{version.gsub('latest', '')}.*$/}
     end
   end
-  product_versions.sort! {|a,b| b <=> a }.first
+  product_versions.first
 end
 
 def make_get_request(endpoint)
