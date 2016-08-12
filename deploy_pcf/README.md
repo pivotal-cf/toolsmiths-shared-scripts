@@ -4,7 +4,7 @@
 
 This folder is a collection of scripts and Concourse pipeline that can help you easily deploy Pivotal Cloud Foundry.
 
-* `deploy-pcf.yml` - This is a Concourse CI pipeline that uses the tooling from above to automate a PCF installation
+* `deploy-pcf.yml` - This is a Concourse CI pipeline that uses the two scripts listed below to automate a PCF installation.
 * `deploy_pcf.rb` - This script can be used to deploy Ops Manager and ERT using the pivotal-cf/p-runtime gem
 * `download-from-pivnet.rb` - This script can be used to download Ops Manager and ERT using the Pivotal Network API
 
@@ -67,7 +67,7 @@ Usage: deploy_pcf.rb [options]
 ```
 
 - `-d` This option will print out the commands to be issued to p-runtime
-- `-D` This specifies the directory where your deployment manifest is. It defaults to `~/workspace/deployments-toolsmiths/vcenter/environments/config`.
+- `-D` This specifies the directory where your deployment manifest is. It defaults to `~/`.
 - `-N` This is the name of the environment you wish to deploy. It should also be the name of your deployment manifest. 
 - `-O` This is the full path to the Ops Manager OVA you wish to deploy.
 - `-V` This is the version of Ops Manager you wish to deploy. If -O <path to ova> is specified, the script will determine the version from the file name.
@@ -83,7 +83,7 @@ Usage: deploy_pcf.rb [options]
 ####Example:
 
 ```
-→ ./deploy_pcf.rb -D ~/workspace/deployments-toolsmiths/vcenter/environments/config/ -N trackseven -O ~/Downloads/pcf-vsphere-1.6.6.0.ova -V 1.6 -E ~/Downloads/cf-1.6.10.pivotal -W 1.6 -I
+→ ./deploy_pcf.rb -D ~/environments/config/ -N trackseven -O ~/Downloads/pcf-vsphere-1.6.6.0.ova -V 1.6 -E ~/Downloads/cf-1.6.10.pivotal -W 1.6 -I
 Do you want to run: (y/n)
   bundle exec rake opsmgr:destroy[trackseven]
 y

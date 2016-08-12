@@ -115,7 +115,7 @@ if options.empty?
 end
 
 environment = options[:environment_name]
-options[:environment_directory] ||= "#{ENV['HOME']}/workspace/deployments-toolsmiths/vcenter/environments/config"
+options[:environment_directory] ||= "#{ENV['HOME']}"
 options[:ops_manager_version] ||= ENV['OPSMGR_VERSION']
 options[:elastic_runtime_version] ||= ENV['ERT_VERSION']
 options[:iaas] ||= 'vsphere'
