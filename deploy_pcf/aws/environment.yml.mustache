@@ -82,6 +82,7 @@ ops_manager:
     name: cf
     system_domain: {{aws_system_domain}}
     apps_domain: {{aws_system_domain}}
+    tcp_domain: tcp.{{aws_system_domain}}
     elb_name: {{aws_environment_name}}-pcf-elb
     elb_dns_name: {{pcf_elb_dns_name}}
     ssh_elb_name: {{aws_environment_name}}-pcf-ssh-elb
