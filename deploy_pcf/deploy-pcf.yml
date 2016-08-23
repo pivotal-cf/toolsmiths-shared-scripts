@@ -1,7 +1,17 @@
+# To set your Concourse pipeline:
+
+# fly -t <your-concourse> set-pipeline \
+#  --config deploy-pcf.yml \
+#  --pipeline deploy-pcf \
+#  --var "opsmgr-version=1.6" \
+#  --var "ert-version=1.6" \
+#  --var "environment-name=<your-env-name>" \
+#  --var "pivnet-token=<your-pivnet-token>" \
+#  --var "github-key=$(cat <path-to-github-key>)"
 ---
-opsmgr_version: &opsmgr_version 1.7.7
-ert_version: &ert_version 1.7.6
-environment_name: &env_name stormwind
+opsmgr_version: &opsmgr_version {{opsmgr-version}}
+ert_version: &ert_version {{ert-version}}
+environment_name: &env_name {{environment-name}}
 env_app_url: &env_app_url environments.toolsmiths.cf-app.com
 pivnet_token: &pivnet_token {{pivnet-token}}
 worker_tag: &worker_tag [vsphere]
