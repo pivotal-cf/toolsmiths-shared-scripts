@@ -1,5 +1,5 @@
 # To set your Concourse pipeline:
-
+# WARNING: This file is used to create public pipelines. Set "make_public: false"
 # fly -t <your-concourse> set-pipeline \
 #  --config deploy-pcf.yml \
 #  --pipeline deploy-pcf \
@@ -17,6 +17,7 @@ pivnet_token: &pivnet_token {{pivnet-token}}
 worker_tag: &worker_tag [vsphere]
 github_key: &github_key {{github-key}}
 download_retry_attempts: &retry 3
+make_public: &make_public true
 
 groups:
 - name: deploy-pcf-vsphere
@@ -41,6 +42,7 @@ resources:
 
 jobs:
   - name: upload-om-pcf-vsphere
+    public: *make_public
     serial: true
     plan:
     - aggregate:
@@ -97,6 +99,7 @@ jobs:
         ENV_NAME: *env_name
         OPSMGR_VERSION: *opsmgr_version
   - name: configure-ops-manager
+    public: *make_public
     serial: true
     plan:
     - aggregate:
@@ -138,6 +141,7 @@ jobs:
         OPSMGR_VERSION: *opsmgr_version
         PIVNET_TOKEN: *pivnet_token
   - name: upload-elastic-runtime-pcf-vsphere
+    public: *make_public
     serial: true
     plan:
     - aggregate:
@@ -197,6 +201,7 @@ jobs:
         OPSMGR_VERSION: *opsmgr_version
         PIVNET_TOKEN: *pivnet_token
   - name: configure-elastic-runtime
+    public: *make_public
     serial: true
     plan:
     - aggregate:
@@ -239,6 +244,7 @@ jobs:
         ERT_VERSION: *ert_version
         PIVNET_TOKEN: *pivnet_token
   - name: trigger-install
+    public: *make_public
     serial: true
     plan:
     - aggregate:
