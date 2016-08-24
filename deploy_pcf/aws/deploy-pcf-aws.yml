@@ -37,6 +37,7 @@ ops_manager_fqdn: &ops_manager_fqdn <YOUR-OPSMANAGER-FQDN>
 
 ops_manager_password: &ops_manager_password <YOUR-OPSMANAGER-PASSWORD>
 
+# OPTIONAL: This is for setting up E-mail notifications. If you do not want to set this up, delete the values "<...>"
 smtp_from: &smtp_from <SMTP-FROM-ADDRESS>
 smtp_address: &smtp_address <SMTP-ADDRESS>
 smtp_port: &smtp_port <SMTP-PORT>
