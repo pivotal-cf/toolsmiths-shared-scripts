@@ -72,6 +72,7 @@ aws_route_53_secret_access_key: &aws_route53_secret_access_key {{aws-route53-sec
 aws_route_53_hosted_zone_id: &aws_route53_hosted_zone_id {{aws-route53-hosted-zone-id}}
 ops_manager_fqdn: &ops_manager_fqdn <YOUR-OPSMANAGER-FQDN>
 
+# OPTIONAL: This is for setting up E-mail notifications. If you do not want to set this up, delete the values "<...>"
 smtp_from: &smtp_from <SMTP-FROM-ADDRESS>
 smtp_address: &smtp_address <SMTP-ADDRESS>
 smtp_port: &smtp_port <SMTP-PORT>
