@@ -25,7 +25,17 @@ This Concourse pipeline is used to quickly spin up a PCF environment using the [
 * Github key that has access to pivotal-cf/p-runtime
 * Pivnet API token
 * Github repo for storing credentials and deployment manifest
-* an ssh keypair (aws_private_key_file_name) for AWS to use when deploying instances must be added to this repo 
+* an ssh keypair for AWS to use when deploying instances must be added to this repo.
+ **NOTE**: make sure your key-pair name (format: id_rsa_\<ENV_NAME\>)
+
+You can create a new keypair with the command:
+```
+$ ssh-keygen -t rsa -f $environment_yml_git_repo/$environment_yml_folder/$aws_private_key_file_name
+
+#Example:
+$ ssh-keygen -t rsa -f /Users/pivotal/workspace/deployments-toolsmiths/aws/environments/<ENV_NAME>/id_rsa_<ENV_NAME>
+
+```
 
 #### Caveats:
 
