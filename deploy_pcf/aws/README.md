@@ -24,6 +24,8 @@ This Concourse pipeline is used to quickly spin up a PCF environment using the [
 
 * Github key that has access to pivotal-cf/p-runtime
 * Pivnet API token
+* Github repo for storing credentials and deployment manifest
+* an ssh keypair (aws_private_key_file_name) for AWS to use when deploying instances must be added to this repo 
 
 #### Caveats:
 
