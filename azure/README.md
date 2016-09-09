@@ -489,8 +489,21 @@ bundle exec mustache ~/workspace/<ENV>/variables.yml cf.yml.mustache > ~/workspa
 Generate keys and certs if necessary
 
 ```
-./generate_cf_certs_and_keys.sh ~/workspace/<ENV>/cert_and_keys
+./generate_cf_certs_and_keys.sh <override option --yes or --no> ~/workspace/<ENV>/cert_and_keys <environment-name>
 ```
+Note: The certificate is generated with default metadata which can be overriden with environment variables
+
+```
+country_name = "US" # Override by setting SSL_COUNTRYNAME
+state = "California" # Override by setting SSL_STATE
+locality = "San Francisco" # Override by setting SSL_LOCALITY
+organisation = "Pivotal" # Override by setting SSL_ORG
+organisation_unit = "Cloud Foundry" # Override by setting SSL_ORG_UNIT
+subdomain = "cf-app.com" # Override by setting SSL_SUBDOMAIN
+common_name = <environment-name>.<subdomain> # This is created with the environment name and the subdomain
+```
+
+
 
 This will create the following keys and certs in the directory:
 
@@ -514,6 +527,7 @@ SCP the cf manifest to your dev box vm
 ```
 scp ~/workspace/<ENV>/cf.yml <devbox_username>@<devboxpublicip>:
 ```
+
 
 ### Deploy your CF cluster
 

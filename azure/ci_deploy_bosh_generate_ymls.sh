@@ -33,7 +33,7 @@ bundle exec mustache variables.yml ${AZURE_TEMPLATES}/mysql.yml.mustache > mysql
 bundle exec mustache variables.yml ${AZURE_TEMPLATES}/cf.yml.mustache > cf.yml
 bundle exec mustache variables.yml ${AZURE_TEMPLATES}/diego.yml.mustache > diego.yml
 
-${AZURE_TEMPLATES}/generate_cf_certs_and_keys.sh -n ./certs_and_keys
+${AZURE_TEMPLATES}/generate_cf_certs_and_keys.sh -n ./certs_and_keys $ENV_NAME
 ${AZURE_TEMPLATES}/insert_certs_and_keys_to_manifest.rb ./certs_and_keys/cf cf.yml
 
 ${AZURE_TEMPLATES}/generate_diego_certs_and_keys.sh -n ./certs_and_keys

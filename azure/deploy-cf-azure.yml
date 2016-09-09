@@ -16,6 +16,12 @@ azure_client_secret: &azure_client_secret {{azure_client_secret}}
 aws_shared_dns_access_key: &aws_shared_dns_access_key {{aws-shared-dns-access-key}}
 aws_shared_dns_access_secret: &aws_shared_dns_access_secret {{aws-shared-dns-access-secret}}
 aws_route53_zone_id: &aws_route53_zone_id Z1OE08QT9BJFFU  # this is cf-app.com
+ssl_countryname: &ssl_countryname "US"
+ssl_state: &ssl_state "California"
+ssl_locality: &ssl_locality "San Francisco"
+ssl_org: &ssl_org "Pivotal"
+ssl_org_unit: &ssl_org_unit "Cloud Foundry"
+ssl_subdomain: &ssl_subdomain "cf-app.com"
 
 groups:
 - name: bootstrap-azure
@@ -133,6 +139,12 @@ jobs:
         GIT_NAME: *git_name
         ENV_NAME: *environment_name
         ENV_DIR: *environment_dir
+        SSL_COUNTRYNAME: *ssl_countryname
+        SSL_STATE: *ssl_state
+        SSL_LOCALITY: *ssl_locality
+        SSL_ORG: *ssl_org
+        SSL_ORG_UNIT: *ssl_org_unit
+        SSL_SUBDOMAIN: *ssl_subdomain
     - put: azure_environments
       params:
         repository: environment
