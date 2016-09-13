@@ -54,7 +54,7 @@ def parse_variable_template(template_path, stack_data)
 
   if is_pcf_16
     template_var.delete('private_subnet2_id')
-    template_var.delete("aws-cli-iam_instance_profile")
+    template_var.delete("awscli-iam_instance_profile")
   end
 
   template_var
