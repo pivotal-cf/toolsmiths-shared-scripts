@@ -47,6 +47,13 @@ def get_cloudformation_stack(stack_name=nil)
   return parameters
 end
 
+def get_vms_security_group_name(security_group_id)
+  `aws ec2 describe-security-groups --group-ids #{security_group_id} > security_group.json`
+  security_group_data = JSON.parse(File.read('security_group.json'))['SecurityGroups'].first
+  security_group_name = security_group_data['GroupName']
+  return security_group_name
+end
+
 def parse_variable_template(template_path, stack_data)
   template_var = YAML.load_file(template_path)
 
@@ -55,6 +62,8 @@ def parse_variable_template(template_path, stack_data)
   if is_pcf_16
     template_var.delete('private_subnet2_id')
     template_var.delete("awscli-iam_instance_profile")
+  else
+    template_var.delete("awscli-vms_security_group_name")
   end
 
   template_var
@@ -78,7 +87,11 @@ def load_variable_template(template_path='variable_template.yml', env_directory=
       end
     elsif key.include? "awscli-"
       key_data = key.split("awscli-")[1]
-      variable_map[key_data] = send(value)
+      if key_data == "vms_security_group_name"
+        variable_map[key_data] = send(value, variable_map['vms_security_group_id'])
+      else
+        variable_map[key_data] = send(value)
+      end
     elsif key.include? "import-ssl"
       next if value != true
       add_ssl_cert_and_key("environment.yml.mustache", env_directory)

@@ -45,3 +45,5 @@ pcf_iam_secret_access_key: PcfIamUserSecretAccessKey
 awscli-iam_instance_profile: get_iam_profile_name
 awscli-ops_manager_public_ip: get_ops_manager_public_ip
 
+# for PCF 1.6
+awscli-vms_security_group_name: get_vms_security_group_name
