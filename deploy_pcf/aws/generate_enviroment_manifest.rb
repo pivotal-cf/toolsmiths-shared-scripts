@@ -47,9 +47,21 @@ def get_cloudformation_stack(stack_name=nil)
   return parameters
 end
 
-def load_variable_template(template_path='variable_template.yml', env_directory=nil)
+def parse_variable_template(template_path, stack_data)
   template_var = YAML.load_file(template_path)
+
+  is_pcf_16 = stack_data['PcfPrivateSubnet2Id'].nil?
+
+  if is_pcf_16
+    template_var.delete('private_subnet2_id')
+  end
+
+  template_var
+end
+
+def load_variable_template(template_path='variable_template.yml', env_directory=nil)
   stack_data = get_cloudformation_stack()
+  template_var = parse_variable_template(template_path, stack_data)
   variable_map = {}
   template_var.each do |key, value|
     if key.include?"env-"
