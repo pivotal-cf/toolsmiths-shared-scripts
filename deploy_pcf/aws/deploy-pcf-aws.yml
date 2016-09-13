@@ -102,7 +102,7 @@ jobs:
         - name: output
         run:
           path: /bin/bash
-          args: ['-c', 'git clone ./environment-ymls ./output/environment-ymls/ && mkdir -p ouput/environment-ymls/${ENV_FOLDER} && toolsmiths-shared-scripts/deploy_pcf/aws/generate_self_signed_cert.sh -n output/environment-ymls/${ENV_FOLDER} ${AWS_ENVIRONMENT_NAME} && pushd output/environment-ymls && git config --global user.email ${GIT_EMAIL} && git config --global user.name ${GIT_USER} && git add . && git commit -m"Adding self-signed certs for ${AWS_ENVIRONMENT_NAME}" || true && popd']
+          args: ['-c', 'git clone ./environment-ymls ./output/environment-ymls/ && mkdir -p output/environment-ymls/${ENV_FOLDER} && toolsmiths-shared-scripts/deploy_pcf/aws/generate_self_signed_cert.sh -n output/environment-ymls/${ENV_FOLDER} ${AWS_ENVIRONMENT_NAME} && pushd output/environment-ymls && git config --global user.email ${GIT_EMAIL} && git config --global user.name ${GIT_USER} && git add . && git commit -m"Adding self-signed certs for ${AWS_ENVIRONMENT_NAME}" || true && popd']
       params:
         AWS_ENVIRONMENT_NAME: *aws_environment_name
         ENV_FOLDER: *environment_yml_folder
@@ -232,7 +232,7 @@ jobs:
         - name: output
         run:
           path: /bin/bash
-          args: ['-c', 'git clone ./environment-ymls ./output/environment-ymls/ && mkdir -p ouput/environment-ymls/${ENV_FOLDER} && toolsmiths-shared-scripts/deploy_pcf/aws/verify_or_generate_environment_yml.sh output/environment-ymls/${ENV_FOLDER} && pushd output/environment-ymls && git config --global user.email ${GIT_EMAIL} && git config --global user.name ${GIT_USER} && git add . && git commit -m"Adding ${AWS_ENVIRONMENT_NAME} manifest" || true && popd']
+          args: ['-c', 'git clone ./environment-ymls ./output/environment-ymls/ && mkdir -p output/environment-ymls/${ENV_FOLDER} && toolsmiths-shared-scripts/deploy_pcf/aws/verify_or_generate_environment_yml.sh output/environment-ymls/${ENV_FOLDER} && pushd output/environment-ymls && git config --global user.email ${GIT_EMAIL} && git config --global user.name ${GIT_USER} && git add . && git commit -m"Adding ${AWS_ENVIRONMENT_NAME} manifest" || true && popd']
       params:
         ENV_FOLDER: *environment_yml_folder
         GIT_EMAIL: *github_email
