@@ -15,9 +15,9 @@ generate_environment_yml() {
 
     # PCF 1.6 does not have private_subnet2_id
     if cat variable.yml | grep private_subnet2_id; then
-      bundle exec mustache variable.yml environment16.yml.mustache > ${OLDPWD}/${AWS_ENVIRONMENT_NAME}.yml
-    else
       bundle exec mustache variable.yml environment.yml.mustache > ${OLDPWD}/${AWS_ENVIRONMENT_NAME}.yml
+    else
+      bundle exec mustache variable.yml environment16.yml.mustache > ${OLDPWD}/${AWS_ENVIRONMENT_NAME}.yml
     fi
   popd
   echo "Generated ${AWS_ENVIRONMENT_NAME}.yml:"
