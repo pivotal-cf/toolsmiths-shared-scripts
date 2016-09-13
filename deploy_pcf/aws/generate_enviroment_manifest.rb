@@ -26,7 +26,7 @@ def get_iam_profile_name(stack_name=nil)
       return profile_name
     end
   end
-  raise "No macthing InstanceProfileName found for: #{stack_name}"
+  raise "No matching InstanceProfileName found for: #{stack_name}"
 end
 
 def get_ops_manager_public_ip
@@ -54,6 +54,7 @@ def parse_variable_template(template_path, stack_data)
 
   if is_pcf_16
     template_var.delete('private_subnet2_id')
+    template_var.delete("aws-cli-iam_instance_profile")
   end
 
   template_var
