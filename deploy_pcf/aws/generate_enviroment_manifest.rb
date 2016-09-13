@@ -72,6 +72,13 @@ end
 def load_variable_template(template_path='variable_template.yml', env_directory=nil)
   stack_data = get_cloudformation_stack()
   template_var = parse_variable_template(template_path, stack_data)
+  is_pcf_16 = stack_data['PcfPrivateSubnet2Id'].nil?
+
+  if is_pcf_16
+    env_mustache_file = "environment16.yml.mustache"
+  else
+    env_mustache_file = "environment.yml.mustache"
+  end
   variable_map = {}
   template_var.each do |key, value|
     if key.include?"env-"
@@ -83,7 +90,7 @@ def load_variable_template(template_path='variable_template.yml', env_directory=
         key_data = key.split("key-")[1]
         #environment_yml_git_repo resource will be named as `environment-ymls` in the pipeline
         key_path =  env_directory + "/" + ENV[value]
-        add_ssh_private_key("environment.yml.mustache", key_path)
+        add_ssh_private_key(env_mustache_file, key_path)
       end
     elsif key.include? "awscli-"
       key_data = key.split("awscli-")[1]
@@ -94,7 +101,7 @@ def load_variable_template(template_path='variable_template.yml', env_directory=
       end
     elsif key.include? "import-ssl"
       next if value != true
-      add_ssl_cert_and_key("environment.yml.mustache", env_directory)
+      add_ssl_cert_and_key(env_mustache_file, env_directory)
     else
       data = stack_data[value]
       raise_missing_var_error(value, false) if data.nil?
