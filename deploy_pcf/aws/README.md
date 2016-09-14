@@ -1,11 +1,13 @@
 # deploy-pcf-aws
 ===
-
+### Supported PCF version:
+* 1.6
+* 1.7
+* 1.8
+===
 ## Overview
 
 This Concourse pipeline is used to quickly spin up a PCF environment using the [p-runtime gem](https://github.com/pivotal-cf/p-runtime). The purpose of this pipeline is to quickly provider test/development PCF environments on AWS.
-
-**Note: This pipeline does not work with ERT 1.6.**
 
 * The pipeline will deploy a single-az PCF environment on AWS with a self-signed cert.
 
