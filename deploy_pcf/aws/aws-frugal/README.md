@@ -3,7 +3,7 @@
 Tools to stop PCF instances on AWS during off-hours and automatically start all instance and run smoke tests before office starts.
 
 ### Supported PCF version:
-* 1.7 and above because of UAA dependencies in scripts for authentication with OPS Manager.
+* 1.7 and above because of UAA dependencies in scripts for OPS Manager authentication.
 
 ===
 ## Overview
