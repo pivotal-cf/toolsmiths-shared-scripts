@@ -90,7 +90,7 @@ Edit aws-frugal.yml in `toolsmiths-shared-scripts/deploy_pcf/aws/aws-frugal/pipe
 * Send slack notification to team channel with status.
 
 
-##### stop-instances
+##### start-instances
 * Use instace job-ids data file (instance_data.yml) to create start sequence
 * Authenticate with OPS Manager --> Get BOSH manifest --> Extract BOSH Director credentials.
 * Send BOSH target command to OPS Manager VM
