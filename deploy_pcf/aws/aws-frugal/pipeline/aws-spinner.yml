@@ -1,0 +1,264 @@
+---
+# NOTE: it only support OpsManager 1.7 and above because of UAA dependencies.
+
+#=== Credentials =====
+
+# NOTE: script paths change if you are moving to presonal repos
+bosh_director_cert_path: &bosh_director_cert_path "/var/tempest/workspaces/default/root_ca_certificate" #BOSH director default root cert path on OPS Manager
+
+# github info for storing state
+github_key: &github_key <GITHUB-KEY>
+github_username: &github_username <GITHUB-USERNAME> #for github commits to store state
+github_email: &github_email <GITHUB-EMAIL>
+env_repo:  &env_repo <ENVIRONMENT-REPO-TO-STORE-INSTANCE-DATA> # git@github.com:<YOUR-ORG>/<YOUR-REPO>
+env_state_folder: &env_state_folder <ENVIRONMENT-FOLDER> # this is the path within your git repo
+ops_manager_key_name: &ops_manager_key_name <OPS-MANAGER-KEY-NAME> # this will be the ssh-key to login into your OPS Manager should be in your ENVIRONMENT-FOLDER
+
+# cron schedule: https://github.com/pivotal-cf-experimental/cron-resource
+morning_start_trigger: *morning_start_trigger "0 7 * * 1-5"
+evening_stop_trigger: *evening_stop_trigger "0 18 * * 1-5"
+trigger_time_zone: *trigger_time_zone "America/New_York"
+
+# aws info
+aws_access_key_id: &aws_access_key_id <AWS-ACCESS-KEY-ID>
+aws_secret_access_key: &aws_secret_access_key <AWS-SECRET-ACCESS-KEY>
+region: &aws_region <AWS-REGION>
+deployment_name: &deployment_name <PCF-DEPLOYMENT-NAME> # something like cf-partition-9965d7cc1758828b974f
+
+# ops manager info
+ops_manager_hostname: &ops_manager_hostname <OPS-MANAGER-HOSTNAME> # ex: pcf.polwol.cf-app.com
+ops_manager_username: &ops_manager_username <OPS-MANAGER-USERNAME>
+ops_manager_password: &ops_manager_password <OPS-MANAGER-PASSWORD>
+
+# slack notification info
+# NOTE: if you want to remove slack-notificaiton, remove all slack-notification modules from tasks
+slack_url: &slack_url <SLACK-URL> #ex:  https://hooks.slack.com/services/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
+slack_channel: &slack_channel <SLACK-CHANNEL> # ex: "#toolsmiths"
+slack_username: &slack_username <SLACK-USERNAME> # username used for slack commnets
+slack_icon_url: &slack_icon_url "https://avatars1.githubusercontent.com/u/5589368?v=3&s=400"
+slack_start_failed_msg: &slack_start_failed_msg "Start:AllInstances:Failed, check pipeline for details: aws-frugal"
+slack_stop_failed_msg: &slack_stop_failed_msg "Stop:AllInstances:Failed, check pipeline for details: aws-frugal"
+
+groups:
+- name: aws-frugal
+  jobs:
+  - stop-instances
+  - start-instances
+
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+
+resources:
+- name: aws-frugal-repo
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/toolsmiths-shared-scripts.git
+    private_key: *github_key
+- name: environment-repo
+  type: git
+  source:
+    uri: *env_repo
+    private_key: *github_key
+    branch: master
+- name: slack-channel-notification
+  type: slack-notification
+  source:
+    url: *slack_url
+- name: 7AM-EST-trigger
+  type: cron
+  source:
+    expression: *morning_start_trigger
+    location: *trigger_time_zone
+- name: 5PM-EST-trigger
+  type: cron
+  source:
+    expression: *evening_stop_trigger
+    location: *trigger_time_zone
+
+jobs:
+- name: stop-instances
+  public: true
+  serial: true
+  plan:
+  - get: aws-frugal-repo
+  - get: environment-repo
+  - get: 5PM-EST-trigger
+    trigger: true
+  - task: target-bosh-director
+    privileged: true
+    config:
+      platform: linux
+      image: docker:///cftoolsmiths/aws_tools
+      inputs:
+      - name: aws-frugal-repo
+      - name: environment-repo
+      run:
+        path: /bin/bash
+        args: ['-c', 'gem install aws-sdk-v1 httparty && aws-frugal-repo/deploy_pcf/aws/aws-frugal/scripts/go_to_sleep.rb target_bosh']
+    params:
+      AWS_ACCESS_KEY_ID: *aws_access_key_id
+      AWS_SECRET_ACCESS_KEY: *aws_secret_access_key
+      REGION: *aws_region
+      DEPLOYMENT_NAME: *deployment_name
+      ENV_STATE_FOLDER: *env_state_folder
+      OPS_MANAGER_HOSTNAME: *ops_manager_hostname
+      OPS_MANAGER_USERNAME: *ops_manager_username
+      OPS_MANAGER_PASSWORD: *ops_manager_password
+      OPS_MANAGER_KEY_NAME: *ops_manager_key_name
+      BOSH_ROOT_CERT_PATH: *bosh_director_cert_path
+    on_failure:
+      put: slack-channel-notification
+      params:
+        text: "Stop:BOSHTarget:Failed, check pipeline: aws-frugal"
+        channel: *slack_channel
+        username: *slack_username
+        icon_url: *slack_icon_url
+  - task: stop-aws-instances
+    privileged: true
+    config:
+      platform: linux
+      image: docker:///cftoolsmiths/aws_tools
+      inputs:
+      - name: aws-frugal-repo
+      - name: environment-repo
+      outputs:
+      - name: output
+      run:
+        path: /bin/bash
+        args: ['-c', 'git clone environment-repo output/environment-repo && gem install aws-sdk-v1 httparty && aws-frugal-repo/deploy_pcf/aws/aws-frugal/scripts/go_to_sleep.rb stop']
+    params:
+      AWS_ACCESS_KEY_ID: *aws_access_key_id
+      AWS_SECRET_ACCESS_KEY: *aws_secret_access_key
+      REGION: *aws_region
+      ENV_STATE_FOLDER: *env_state_folder
+      DEPLOYMENT_NAME: *deployment_name
+      GITHUB_USERNAME: *github_username
+      GITHUB_EMAIL: *github_email
+      OPS_MANAGER_HOSTNAME: *ops_manager_hostname
+      OPS_MANAGER_USERNAME: *ops_manager_username
+      OPS_MANAGER_PASSWORD: *ops_manager_password
+      OPS_MANAGER_KEY_NAME: *ops_manager_key_name
+      BOSH_ROOT_CERT_PATH: *bosh_director_cert_path
+    ensure:
+      put: environment-repo
+      params: {rebase: true, repository: output/environment-repo}
+    on_success:
+      put: slack-channel-notification
+      params:
+        text: "StopAllInstances:Passed:Saving money, feed me"
+        channel: *slack_channel
+        username: *slack_username
+        icon_url: *slack_icon_url
+    on_failure:
+      put: slack-channel-notification
+      params:
+        text: *slack_stop_failed_msg
+        channel: *slack_channel
+        username: *slack_username
+        icon_url: *slack_icon_url
+- name: start-instances
+  public: true
+  serial: true
+  plan:
+  - get: aws-frugal-repo
+  - get: environment-repo
+  - get: 7AM-EST-trigger
+    trigger: true
+  - task: target-bosh-director
+    privileged: true
+    config:
+      platform: linux
+      image: docker:///cftoolsmiths/aws_tools
+      inputs:
+      - name: aws-frugal-repo
+      - name: environment-repo
+      run:
+        path: /bin/bash
+        args: ['-c', 'gem install aws-sdk-v1 httparty && aws-frugal-repo/deploy_pcf/aws/aws-frugal/scripts/go_to_sleep.rb target_bosh']
+    params:
+      AWS_ACCESS_KEY_ID: *aws_access_key_id
+      AWS_SECRET_ACCESS_KEY: *aws_secret_access_key
+      REGION: *aws_region
+      DEPLOYMENT_NAME: *deployment_name
+      ENV_STATE_FOLDER: *env_state_folder
+      OPS_MANAGER_HOSTNAME: *ops_manager_hostname
+      OPS_MANAGER_USERNAME: *ops_manager_username
+      OPS_MANAGER_PASSWORD: *ops_manager_password
+      OPS_MANAGER_KEY_NAME: *ops_manager_key_name
+      BOSH_ROOT_CERT_PATH: *bosh_director_cert_path
+    on_failure:
+      put: slack-channel-notification
+      params:
+        text: "Start:BOSH Target task failed, check pipeline: aws-frugal"
+        channel: *slack_channel
+        username: *slack_username
+        icon_url: *slack_icon_url
+  - task: start-aws-instances
+    privileged: true
+    config:
+      platform: linux
+      image: docker:///cftoolsmiths/aws_tools
+      inputs:
+      - name: aws-frugal-repo
+      - name: environment-repo
+      run:
+        path: /bin/bash
+        args: ['-c', 'gem install aws-sdk-v1 httparty && aws-frugal-repo/deploy_pcf/aws/aws-frugal/scripts/go_to_sleep.rb start']
+    params:
+      AWS_ACCESS_KEY_ID: *aws_access_key_id
+      AWS_SECRET_ACCESS_KEY: *aws_secret_access_key
+      REGION: *aws_region
+      DEPLOYMENT_NAME: *deployment_name
+      ENV_STATE_FOLDER: *env_state_folder
+      OPS_MANAGER_HOSTNAME: *ops_manager_hostname
+      OPS_MANAGER_USERNAME: *ops_manager_username
+      OPS_MANAGER_PASSWORD: *ops_manager_password
+      OPS_MANAGER_KEY_NAME: *ops_manager_key_name
+      BOSH_ROOT_CERT_PATH: *bosh_director_cert_path
+    on_failure:
+      put: slack-channel-notification
+      params:
+        text: *slack_start_failed_msg
+        channel: *slack_channel
+        username: *slack_username
+        icon_url: *slack_icon_url
+  - task: run-smoke-tests
+    privileged: true
+    config:
+      platform: linux
+      image: docker:///cftoolsmiths/aws_tools
+      inputs:
+      - name: aws-frugal-repo
+      - name: environment-repo
+      run:
+        path: /bin/bash
+        args: ['-c', 'gem install aws-sdk-v1 httparty && aws-frugal-repo/deploy_pcf/aws/aws-frugal/scripts/go_to_sleep.rb smoke_tests']
+    params:
+      AWS_ACCESS_KEY_ID: *aws_access_key_id
+      AWS_SECRET_ACCESS_KEY: *aws_secret_access_key
+      REGION: *aws_region
+      DEPLOYMENT_NAME: *deployment_name
+      ENV_STATE_FOLDER: *env_state_folder
+      OPS_MANAGER_HOSTNAME: *ops_manager_hostname
+      OPS_MANAGER_USERNAME: *ops_manager_username
+      OPS_MANAGER_PASSWORD: *ops_manager_password
+      OPS_MANAGER_KEY_NAME: *ops_manager_key_name
+      BOSH_ROOT_CERT_PATH: *bosh_director_cert_path
+    on_success:
+      put: slack-channel-notification
+      params:
+        text: "StartAllInstances -> SmokeTests :Completed:"
+        channel: *slack_channel
+        username: *slack_username
+        icon_url: *slack_icon_url
+    on_failure:
+      put: slack-channel-notification
+      params:
+        text: "SmokeTests:Failed, check pipeline for details: aws-frugal"
+        channel: *slack_channel
+        username: *slack_username
+        icon_url: *slack_icon_url
