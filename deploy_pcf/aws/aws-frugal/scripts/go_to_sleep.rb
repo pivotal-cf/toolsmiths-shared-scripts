@@ -176,7 +176,7 @@ if ARGV.length >= 1
     secret_access_key =  ENV['AWS_SECRET_ACCESS_KEY']
     region = ENV['REGION']
     deployment_name = ENV['DEPLOYMENT_NAME']
-    sequence_data = YAML.load_file( "#{ENV['PWD']}/aws-frugal/deploy_pcf/aws/aws_frugal/scripts/start_stop_sequence.yml")
+    sequence_data = YAML.load_file( "#{ENV['PWD']}/aws-frugal-repo/deploy_pcf/aws/aws_frugal/scripts/start_stop_sequence.yml")
   end
   if ARGV.length == 2 && (ARGV[1].downcase) == 'info'
     logger.level = Logger::INFO
