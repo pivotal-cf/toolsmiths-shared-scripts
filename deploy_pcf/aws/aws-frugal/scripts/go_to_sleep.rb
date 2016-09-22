@@ -121,7 +121,7 @@ def exec_cmd_on_ops_mgr(cmd, logger, bosh_cmd=true)
 end
 
 def target_bosh_director(logger)
-  bosh_director_ip_cmd = "#{ENV['PWD']}/aws-frugal/deploy_pcf/aws/aws_frugal/scripts/get_bosh_director_ip.sh #{ENV['OPS_MANAGER_HOSTNAME']} #{ENV['OPS_MANAGER_USERNAME']} #{ENV['OPS_MANAGER_PASSWORD']}"
+  bosh_director_ip_cmd = "#{ENV['PWD']}/aws-frugal/deploy_pcf/aws/aws-frugal/scripts/get_bosh_director_ip.sh #{ENV['OPS_MANAGER_HOSTNAME']} #{ENV['OPS_MANAGER_USERNAME']} #{ENV['OPS_MANAGER_PASSWORD']}"
   logger.debug("Targetting:BOSHDirector:#{bosh_director_ip_cmd}")
   stderr = false
   data, stderr, status = Open3.capture3(bosh_director_ip_cmd)
