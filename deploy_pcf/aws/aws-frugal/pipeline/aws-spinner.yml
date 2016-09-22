@@ -10,14 +10,14 @@ bosh_director_cert_path: &bosh_director_cert_path "/var/tempest/workspaces/defau
 github_key: &github_key <GITHUB-KEY>
 github_username: &github_username <GITHUB-USERNAME> #for github commits to store state
 github_email: &github_email <GITHUB-EMAIL>
-env_repo:  &env_repo <ENVIRONMENT-REPO-TO-STORE-INSTANCE-DATA> # git@github.com:<YOUR-ORG>/<YOUR-REPO>
+env_repo: &env_repo <ENVIRONMENT-REPO-TO-STORE-INSTANCE-DATA> # git@github.com:<YOUR-ORG>/<YOUR-REPO>
 env_state_folder: &env_state_folder <ENVIRONMENT-FOLDER> # this is the path within your git repo
 ops_manager_key_name: &ops_manager_key_name <OPS-MANAGER-KEY-NAME> # this will be the ssh-key to login into your OPS Manager should be in your ENVIRONMENT-FOLDER
 
 # cron schedule: https://github.com/pivotal-cf-experimental/cron-resource
-morning_start_trigger: *morning_start_trigger "0 7 * * 1-5"
-evening_stop_trigger: *evening_stop_trigger "0 18 * * 1-5"
-trigger_time_zone: *trigger_time_zone "America/New_York"
+morning_start_trigger: &morning_start_trigger "0 7 * * 1-5"
+evening_stop_trigger: &evening_stop_trigger "0 18 * * 1-5"
+trigger_time_zone: &trigger_time_zone "America/New_York"
 
 # aws info
 aws_access_key_id: &aws_access_key_id <AWS-ACCESS-KEY-ID>
