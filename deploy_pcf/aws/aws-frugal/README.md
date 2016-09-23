@@ -1,4 +1,7 @@
 # aws-frugal
+
+This is not a commercially supported approach to spinning down & spinning up PCF on AWS.
+
 ===
 Tools to stop PCF instances on AWS during off-hours and automatically start all instance and run smoke tests before office starts.
 
