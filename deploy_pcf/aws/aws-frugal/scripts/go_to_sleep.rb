@@ -165,12 +165,17 @@ def bosh_login(username, password, logger)
   logger.info("BOSHDirector:CleanUp:Complete")
 end
 
-if ARGV.length >= 1
+def go_to_sleep(command = nil, log_level = nil)
+  if command.nil?
+    raise "ARGMissing::start/stop Usage: ./aws_manager.rb <start/stop>"
+  end
+
   logger = Logger.new(STDOUT)
+
   if ENV['AWS_ACCESS_KEY_ID'].nil? or ENV['AWS_SECRET_ACCESS_KEY'].nil? or ENV['REGION'].nil? or ENV['DEPLOYMENT_NAME'].nil? or ENV['OPS_MANAGER_HOSTNAME'].nil? or ENV['OPS_MANAGER_KEY_NAME'].nil?
-   p "AWS:#{ENV['AWS_ACCESS_KEY_ID']}:#{ENV['AWS_SECRET_ACCESS_KEY']}:#{ENV['REGION']}:#{ENV['DEPLOYMENT_NAME']}"
-   p "OPS:#{ENV['OPS_MANAGER_HOSTNAME']}:#{ENV['OPS_MANAGER_KEY_PATH']}"
-   raise "ERROR:MissingConfig:AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY/REGION/DEPLOYMENT_NAME"
+    p "AWS:#{ENV['AWS_ACCESS_KEY_ID']}:#{ENV['AWS_SECRET_ACCESS_KEY']}:#{ENV['REGION']}:#{ENV['DEPLOYMENT_NAME']}"
+    p "OPS:#{ENV['OPS_MANAGER_HOSTNAME']}:#{ENV['OPS_MANAGER_KEY_PATH']}"
+    raise "ERROR:MissingConfig:AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY/REGION/DEPLOYMENT_NAME"
   else
     access_key_id = ENV['AWS_ACCESS_KEY_ID']
     secret_access_key =  ENV['AWS_SECRET_ACCESS_KEY']
@@ -178,11 +183,13 @@ if ARGV.length >= 1
     deployment_name = ENV['DEPLOYMENT_NAME']
     sequence_data = YAML.load_file( "#{ENV['PWD']}/aws-frugal-repo/deploy_pcf/aws/aws-frugal/scripts/start_stop_sequence.yml")
   end
-  if ARGV.length == 2 && (ARGV[1].downcase) == 'info'
+
+  if !log_level.nil? && (log_level.downcase) == 'info'
     logger.level = Logger::INFO
   end
+
   ec2_client = AWS::EC2.new(region: region, access_key_id: access_key_id, secret_key_id: secret_access_key)
-  case ARGV[0]
+  case command
   when 'start'
     target_bosh_director(logger)
     set_bosh_deployment(deployment_name, logger)
@@ -203,12 +210,14 @@ if ARGV.length >= 1
     logger.info("StartSequence:#{start_seq}")
     logger.info("StopSequence:#{stop_seq}")
   when 'exec'
-    exec_cmd_on_ops_mgr(ARGV[1], logger)
+    exec_cmd_on_ops_mgr(log_level, logger)
   when 'target_bosh'
     target_bosh_director(logger)
   else
     raise "ERROR:WrongArgument:: Usage: ./aws_manager.rb <start/stop>"
   end
-else
-  raise "ARGMissing::start/stop Usage: ./aws_manager.rb <start/stop>"
+end
+
+if __FILE__ == $PROGRAM_NAME
+  go_to_sleep(*ARGV)
 end
