@@ -156,7 +156,7 @@ def target_bosh_director(logger)
   username, password = director_credentials
   target_cmd = "-n --ca-cert #{ENV['BOSH_ROOT_CERT_PATH']} target #{director_ip}"
   exec_cmd_on_ops_mgr(target_cmd, logger)
-  bosh_login(bosh_cred[0], bosh_cred[1], logger)
+  bosh_login(username, password, logger)
 end
 
 def set_bosh_deployment(deployment_name,logger)
