@@ -122,7 +122,7 @@ end
 
 def bosh_manifest
   begin
-    YAML.load_file("old_bosh_data/BOSH_DIRECTOR_DATA.json")['manifest']
+    YAML.load_file("bosh_data/BOSH_DIRECTOR_DATA.json")['manifest']
   rescue JSON::ParserError => e
     raise "BOSHDirector:BadManifestFile:#{e}"
   end
