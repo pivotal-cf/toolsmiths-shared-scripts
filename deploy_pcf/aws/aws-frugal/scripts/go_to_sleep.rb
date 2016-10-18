@@ -240,3 +240,12 @@ end
 if __FILE__ == $PROGRAM_NAME
   go_to_sleep(*ARGV)
 end
+
+
+unless Hash.respond_to?(:dig)
+  class Hash
+    def dig(*keys)
+      keys.reduce(self){|val, key| val && val[key]}
+    end
+  end
+end
