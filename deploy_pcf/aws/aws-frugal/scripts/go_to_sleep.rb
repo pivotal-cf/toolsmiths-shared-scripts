@@ -120,6 +120,31 @@ def exec_cmd_on_ops_mgr(cmd, logger, bosh_cmd=true)
   end
 end
 
+def bosh_manifest
+  begin
+    YAML.load_file("old_bosh_data/BOSH_DIRECTOR_DATA.json")['manifest']
+  rescue JSON::ParserError => e
+    raise "BOSHDirector:BadManifestFile:#{e}"
+  end
+end
+
+def director_ip
+  jobs = bosh_manifest.dig('jobs') || raise("BOSHDirector:BadManifestFile:JobsNotFound")
+  jobs.first.dig('properties', 'director', 'address') || raise("BOSHDirector:BadManifestFile:DirectorIpNotFound")
+end
+
+def director_credentials
+  jobs = bosh_manifest.dig('jobs') || raise("BOSHDirector:BadManifestFile:NoJobsFound")
+  credentials = jobs.first.dig('properties', 'uaa', 'scim', 'users').first || raise("BOSHDirector:BadManifestFile:CredentiansNotFound")
+  if credentials.is_a?(String)
+    return credentials.split('|')[0..1]
+  elsif credentials.is_a?(Hash) && credentials.has_key?('name') && credentials.has_key?('password')
+    return credentials['name'], credentials['password']
+  else
+    raise "BOSHDirector:BadCredentials:#{credentials}"
+  end
+end
+
 def target_bosh_director(logger)
   bosh_director_ip_cmd = "#{ENV['PWD']}/aws-frugal-repo/deploy_pcf/aws/aws-frugal/scripts/get_bosh_director_ip.sh #{ENV['OPS_MANAGER_HOSTNAME']} #{ENV['OPS_MANAGER_USERNAME']} #{ENV['OPS_MANAGER_PASSWORD']}"
   logger.debug("Targetting:BOSHDirector:#{bosh_director_ip_cmd}")
@@ -128,16 +153,10 @@ def target_bosh_director(logger)
   if stderr.downcase.include? ('error')
     raise "OPSManager:GetIPError:#{stderr}"
   end
-  bosh_director_data = File.open("bosh_data/BOSH_DIRECTOR_DATA.txt", 'r').read
-  if bosh_director_data.lines.size == 2
-    bosh_ip = bosh_director_data.lines[0].gsub(/["\n]/,'').strip()
-    bosh_cred = bosh_director_data.lines[1].gsub(/["\n]/,'').strip().split("|")
-    target_cmd = "-n --ca-cert #{ENV['BOSH_ROOT_CERT_PATH']} target #{bosh_ip}"
-    exec_cmd_on_ops_mgr(target_cmd, logger)
-    bosh_login(bosh_cred[0], bosh_cred[1], logger)
-  else
-    raise "BOSHDirector:BadDataFile:#{bosh_director_data}"
-  end
+  username, password = director_credentials
+  target_cmd = "-n --ca-cert #{ENV['BOSH_ROOT_CERT_PATH']} target #{director_ip}"
+  exec_cmd_on_ops_mgr(target_cmd, logger)
+  bosh_login(bosh_cred[0], bosh_cred[1], logger)
 end
 
 def set_bosh_deployment(deployment_name,logger)
