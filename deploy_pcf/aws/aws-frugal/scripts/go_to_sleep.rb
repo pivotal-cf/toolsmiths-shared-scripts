@@ -115,7 +115,7 @@ def exec_cmd_on_ops_mgr(cmd, logger, bosh_cmd=true)
   end
   stdout, stderr, status = Open3.capture3(exec_cmd)
   logger.info("Open3:STDOUT:#{stdout}, Open3:STDERR:#{stderr}")
-  if stderr.downcase.include? ("error (exit code 1)") || stdout.downcase.include?("did not complete")
+  if stderr.downcase.include? ("error (exit code 1)") || stdout.downcase.include?("did not complete") || status.exitstatus != 0
      raise "BOSH:CMD:Failed:#{exec_cmd}"
   end
 end
