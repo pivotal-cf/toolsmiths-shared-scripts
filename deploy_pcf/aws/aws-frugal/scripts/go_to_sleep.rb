@@ -35,7 +35,7 @@ def list_sequence (seq_type, deployment_name, sequence, ec2_client, logger)
       job_name = component['job_name_prefix']
       # map is based on naming suffix used for instances:
       # default: bosh will add deployment IDs as <job_name>-partition-<deployment-id>/<job-index>
-      all_azs = instance_key_list.select{|instance| instance.match(/^#{job_name}(-\w+-\w+|_\w+)\/\d/)}
+      all_azs = instance_key_list.select{|instance| instance.match(/^#{job_name}(-\w+-\w+|_\w+)?\/\d/)}
       if !all_azs.empty?
         logger.debug("MappedInstances::ToStop:#{job_name}:#{all_azs}")
         sequence_map[job_name] = all_azs
