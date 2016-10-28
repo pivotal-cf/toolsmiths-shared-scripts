@@ -1,6 +1,8 @@
 # aws-frugal
 
-This is not a commercially supported approach to spinning down & spinning up PCF on AWS.
+**Please Note: The London Services team has developed an IAAS-agnostic set of tooling at: https://github.com/pivotal-cf-experimental/pcf_pause**  
+
+**I believe this will be a better solution moving forward and recommend you check it out.**
 
 ===
 Tools to stop PCF instances on AWS during off-hours and automatically start all instance and run smoke tests before office starts.
