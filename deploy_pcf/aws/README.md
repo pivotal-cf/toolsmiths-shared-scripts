@@ -1,6 +1,6 @@
 # deploy-pcf-aws
 
-The CloudFormation used in this repo is no longer supported, you may want to switch to https://github.com/pivotal-cf/terraforming-aws   There are currently a few teams that are working to use these terraform scripts, incorporate OM (https://github.com/pivotal-cf/om), then automate the ERT install. Toolsmiths will evaluate the need to update this repo in a few weeks after the other teams have completed the work to incorporate OM.
+This pipeline is longer supported, you may want to switch to https://github.com/pivotal-cf/terraforming-aws   There are currently a few teams that are working to use these terraform scripts, incorporate OM (https://github.com/pivotal-cf/om), then automate the ERT install. Toolsmiths will evaluate the need to update this repo in a few weeks after the other teams have completed the work to incorporate OM.
 
 ===
 ### Supported PCF version:
