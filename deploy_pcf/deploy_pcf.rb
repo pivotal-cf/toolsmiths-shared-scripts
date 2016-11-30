@@ -10,17 +10,27 @@ class String
   def cyan;           "\e[36m#{self}\e[0m" end
 end
 
+
+def execute_cmd(cmd)
+  pid = Process.spawn("time " + cmd)
+  trap('SIGINT') { Process.kill('HUP', pid) }
+  pid, status = waitpid2(pid)
+  status.exitstatus
+end
+
 def attempt(cmd)
   puts "*".cyan * 72
   puts "running #{cmd}...".cyan
   puts Time.now.to_s.cyan
   puts "*".cyan * 72
-
-  pid = Process.spawn("time " + cmd)
-  trap('SIGINT') { Process.kill('HUP', pid) }
-  pid, status = waitpid2(pid)
-  exit_status = status.exitstatus
-
+  if cmd.include?('patch_opsman')
+   toolsmiths_shared_directory = File.expand_path('../..', File.dirname(__FILE__)) + "/toolsmiths-shared-scripts/deploy_pcf/"
+   Dir.chdir(toolsmiths_shared_directory)
+   p "Switching directories: #{toolsmiths_shared_directory}"
+   p "Running network config patch"
+   cmd = "patch_opsman_netwetwork_config.sh"
+  end
+  exit_status = execute_cmd(cmd)
   case exit_status
     when 0
       puts "SUCCESS: #{cmd} completed".green
@@ -30,6 +40,9 @@ def attempt(cmd)
     else
       puts "Ooh, got a weird exit status: #{exit_status}".red
   end
+
+  p "Switching directories: #{run_time_dir}"
+  Dir.chdir(run_time_dir)
 end
 
 def download_stemcell(path_to_product_tarball,iaas)
@@ -143,6 +156,7 @@ cmds = [
   "bundle exec rake opsmgr:install[#{environment},#{options[:ops_manager]}]",
   "#{xvfb}bundle exec rake opsmgr:add_first_user[#{environment},#{options[:ops_manager_version]}]",
   "#{xvfb}bundle exec rake opsmgr:microbosh:configure[#{environment},#{options[:ops_manager_version]}]",
+  "patch_opsman_network_config.sh",
   "#{xvfb}bundle exec rake opsmgr:trigger_install[#{environment},#{options[:ops_manager_version]},240]",
   "#{xvfb}bundle exec rake opsmgr:product:upload_add[#{environment},#{options[:ops_manager_version]},#{options[:elastic_runtime]},cf]",
   "#{xvfb}bundle exec rake opsmgr:product:import_stemcell[#{environment},#{options[:ops_manager_version]},#{options[:stemcell]},cf]",
@@ -186,6 +200,7 @@ if options[:dry_run]
 end
 
 ENV['ENV_DIRECTORY'] = options[:environment_directory]
+default_directory = File.expand_path('../..')
 default_p_runtime_directory = File.expand_path('../..', File.dirname(__FILE__)) + "/p-runtime"
 runtime_dir = options.fetch(:p_runtime_directory, default_p_runtime_directory)
 

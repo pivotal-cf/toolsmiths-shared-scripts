@@ -338,6 +338,8 @@ jobs:
             dir: toolsmiths-shared-scripts/deploy_pcf
         params:
           ENV_NAME: *env_name
+          OPSMAN_USERNAME: *default_opsman_username
+          OPSMAN_PASSWORD: *default_opsman_password
           OPSMGR_VERSION: *opsmgr_version
           PIVNET_TOKEN: *pivnet_token
       - task: email-on-success
