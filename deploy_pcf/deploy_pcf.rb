@@ -41,8 +41,8 @@ def attempt(cmd)
       puts "Ooh, got a weird exit status: #{exit_status}".red
   end
 
-  p "Switching directories: #{run_time_dir}"
-  Dir.chdir(run_time_dir)
+  p "Switching directories: #{runtime_dir}"
+  Dir.chdir(runtime_dir)
 end
 
 def download_stemcell(path_to_product_tarball,iaas)
