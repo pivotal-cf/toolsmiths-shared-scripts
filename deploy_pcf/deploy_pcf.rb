@@ -41,8 +41,8 @@ def attempt(cmd)
       puts "Ooh, got a weird exit status: #{exit_status}".red
   end
 
-  p "Switching directories: #{runtime_dir}"
-  Dir.chdir(runtime_dir)
+  p "Switching directories: #{$runtime_dir}"
+  Dir.chdir($runtime_dir)
 end
 
 def download_stemcell(path_to_product_tarball,iaas)
@@ -202,9 +202,9 @@ end
 ENV['ENV_DIRECTORY'] = options[:environment_directory]
 default_directory = File.expand_path('../..')
 default_p_runtime_directory = File.expand_path('../..', File.dirname(__FILE__)) + "/p-runtime"
-runtime_dir = options.fetch(:p_runtime_directory, default_p_runtime_directory)
+$runtime_dir = options.fetch(:p_runtime_directory, default_p_runtime_directory)
 
-Dir.chdir(runtime_dir)
+Dir.chdir($runtime_dir)
 result = system("bundle")
 unless result
   puts "Couldn't run bundle".red
