@@ -19,6 +19,9 @@ github_key: &github_key {{github-key}}
 download_retry_attempts: &retry 3
 make_public: &make_public true
 
+default_opsman_username: &default_opsman_username {{default_opsman_username}}
+default_opsman_password: &default_opsman_password {{default_opsman_password}}
+
 #The following parameters are used to generate and email success and failure messages.
 pipeline_url: &pipeline_url {{pipeline-url}}
 ops_manager_url: &ops_manager_url {{ops-manager-url}}
@@ -192,7 +195,23 @@ jobs:
           ENV_NAME: *env_name
           OPSMGR_VERSION: *opsmgr_version
           PIVNET_TOKEN: *pivnet_token
-      on_failure: *email-on-failure      
+      - task: patch-network-config
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          inputs:
+          - name: toolsmiths-shared-scripts
+          run:
+            path: /bin/bash
+            args: ['-c', 'chmod +x patch_opsman_network_config.sh && ./patch_opsman_network_config.sh']
+            dir: toolsmiths-shared-scripts/deploy_pcf
+        params:
+          ENV_NAME: *env_name
+          OPSMAN_USERNAME: *default_opsman_username
+          OPSMAN_PASSWORD: *default_opsman_password
+      on_failure: *email-on-failure
   - name: upload-elastic-runtime-pcf-vsphere
     serial: true
     plan:
