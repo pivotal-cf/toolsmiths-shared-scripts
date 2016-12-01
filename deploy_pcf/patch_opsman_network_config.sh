@@ -12,4 +12,4 @@ curl -v -k "https://pcf.undercity.cf-app.com/api/v0/staged/products/${BOSH_GUID}
     -X PUT \
     -H "Authorization: Bearer ${UAA_ACCESS_TOKEN}" \
     -H "Content-type: application/json" \
-    --data '{"networks_and_azs":{"singleton_availability_zone":{"name":"default"},"other_availability_zones":[],"network":{"name":"default"}}}'
+    --data '{"networks_and_azs":{"singleton_availability_zone":{"name":"default"},"other_availability_zones":[{"name: "default"}],"network":{"name":"default"}}}'
