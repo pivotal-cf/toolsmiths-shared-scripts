@@ -90,6 +90,7 @@ resources:
       user: pivotal-cf
       repository: om
       access_token: *github_token
+
 resource_types:
   - name: email
     type: docker-image
@@ -345,6 +346,7 @@ jobs:
           OPSMAN_USERNAME: *default_opsman_username
           OPSMAN_PASSWORD: *default_opsman_password
       on_failure: *email-on-failure
+
   - name: configure-elastic-runtime
     serial: true
     plan:
@@ -389,6 +391,7 @@ jobs:
           ERT_VERSION: *ert_version
           PIVNET_TOKEN: *pivnet_token
       on_failure: *email-on-failure
+
   - name: trigger-install
     serial: true
     plan:
@@ -421,7 +424,7 @@ jobs:
                   sudo cp tool-om/om-linux /usr/local/bin
                   sudo chmod 755 /usr/local/bin/om-linux
                   echo "=============================================================================================="
-                  echo " Appling changes to https://pcf.$ENV_NAME.cf-app.com ..."
+                  echo " Applying changes to https://pcf.$ENV_NAME.cf-app.com ..."
                   echo "=============================================================================================="
                   om-linux --target https://pcf.${ENV_NAME}.cf-app.com -k \
                          --username "${OPSMAN_USERNAME}" \
