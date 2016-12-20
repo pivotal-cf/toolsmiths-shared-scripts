@@ -250,6 +250,7 @@ jobs:
           OPSMAN_USERNAME: *default_opsman_username
           OPSMAN_PASSWORD: *default_opsman_password
       on_failure: *email-on-failure
+
   - name: upload-elastic-runtime-pcf-vsphere
     serial: true
     plan:
@@ -308,7 +309,7 @@ jobs:
                         --product pivnet-downloads/cf*.pivotal
         params:
           ENV_NAME: *env_name
-          OPSMGR_USERNAME: *default_opsman_username
+          OPSMAN_USERNAME: *default_opsman_username
           OPSMAN_PASSWORD: *default_opsman_password
       - task: stage-elastic-runtime-using-om
         tags: *worker_tag
@@ -341,7 +342,7 @@ jobs:
                          --product-name cf --product-version ${cf_product_version}
         params:
           ENV_NAME: *env_name
-          OPSMGR_USERNAME: *default_opsman_username
+          OPSMAN_USERNAME: *default_opsman_username
           OPSMAN_PASSWORD: *default_opsman_password
       on_failure: *email-on-failure
   - name: configure-elastic-runtime
@@ -401,6 +402,7 @@ jobs:
           - "om-linux"
     - do:
       - task: apply-changes-using-om
+        tags: *worker_tag
         config:
           platform: linux
           image_resource:
@@ -409,7 +411,6 @@ jobs:
               repository: virtmerlin/c0-worker-gcp
           inputs:
             - name: tool-om
-            - name: toolsmiths-ci
           run:
             #path: toolsmiths-ci/scripts/gcp_pcf_upgrade/upload-ert.sh
             path: /bin/bash
@@ -420,7 +421,7 @@ jobs:
                   sudo cp tool-om/om-linux /usr/local/bin
                   sudo chmod 755 /usr/local/bin/om-linux
                   echo "=============================================================================================="
-                  echo " Appling changes to @ https://$OPSMAN_HOSTNAME ..."
+                  echo " Appling changes to https://pcf.$ENV_NAME.cf-app.com ..."
                   echo "=============================================================================================="
                   om-linux --target https://pcf.${ENV_NAME}.cf-app.com -k \
                          --username "${OPSMAN_USERNAME}" \
@@ -428,7 +429,7 @@ jobs:
                        apply-changes
         params:
           ENV_NAME: *env_name
-          OPSMGR_USERNAME: *default_opsman_username
+          OPSMAN_USERNAME: *default_opsman_username
           OPSMAN_PASSWORD: *default_opsman_password
       - task: email-on-success
         config:
