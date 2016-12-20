@@ -18,9 +18,9 @@ worker_tag: &worker_tag [vsphere]
 github_key: &github_key {{github-key}}
 download_retry_attempts: &retry 3
 make_public: &make_public true
-github-token: &github-token {{github-token}}
-default_opsman_username: &default_opsman_username {{default_opsman_username}}
-default_opsman_password: &default_opsman_password {{default_opsman_password}}
+github_token: &github_token {{github-token}}
+default_opsman_username: &default_opsman_username {{default-opsman-username}}
+default_opsman_password: &default_opsman_password {{default-opsman-password}}
 
 #The following parameters are used to generate and email success and failure messages.
 pipeline_url: &pipeline_url {{pipeline-url}}
@@ -89,7 +89,7 @@ resources:
     source:
       user: pivotal-cf
       repository: om
-      access_token: *github-token
+      access_token: *github_token
 resource_types:
   - name: email
     type: docker-image
@@ -207,14 +207,14 @@ jobs:
                   echo "=============================================================================================="
                   om-linux --target https://pcf.$ENV_NAME.cf-app.com -k \
                          configure-authentication \
-                           --username "$DEFAULT_OPSMGR_USERNAME" \
-                           --password "$DEFAULT_OPSMGR_PASSWORD" \
-                           --decryption-passphrase "$DEFAULT_OPSMGR_PASSWORD"
+                           --username "$DEFAULT_OPSMAN_USERNAME" \
+                           --password "$DEFAULT_OPSMAN_PASSWORD" \
+                           --decryption-passphrase "$DEFAULT_OPSMAN_PASSWORD"
             dir: tool-om
         params:
           ENV_NAME: *env_name
-          DEFAULT_OPSMGR_USERNAME: *default_opsmgr_username
-          DEFAULT_OPSMAN_PASSWORD: *default_opsmgr_password
+          DEFAULT_OPSMAN_USERNAME: *default_opsman_username
+          DEFAULT_OPSMAN_PASSWORD: *default_opsman_password
       - task: configure-bosh-director
         tags: *worker_tag
         privileged: true
@@ -308,8 +308,8 @@ jobs:
                         --product pivnet-downloads/cf*.pivotal
         params:
           ENV_NAME: *env_name
-          OPSMGR_USERNAME: *default_opsmgr_username
-          OPSMAN_PASSWORD: *default_opsmgr_password
+          OPSMGR_USERNAME: *default_opsman_username
+          OPSMAN_PASSWORD: *default_opsman_password
       - task: stage-elastic-runtime-using-om
         tags: *worker_tag
         privileged: true
@@ -341,8 +341,8 @@ jobs:
                          --product-name cf --product-version ${cf_product_version}
         params:
           ENV_NAME: *env_name
-          OPSMGR_USERNAME: *default_opsmgr_username
-          OPSMAN_PASSWORD: *default_opsmgr_password
+          OPSMGR_USERNAME: *default_opsman_username
+          OPSMAN_PASSWORD: *default_opsman_password
       on_failure: *email-on-failure
   - name: configure-elastic-runtime
     serial: true
@@ -401,35 +401,35 @@ jobs:
           - "om-linux"
     - do:
       - task: apply-changes-using-om
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: virtmerlin/c0-worker-gcp
-            inputs:
-              - name: tool-om
-              - name: toolsmiths-ci
-            run:
-              #path: toolsmiths-ci/scripts/gcp_pcf_upgrade/upload-ert.sh
-              path: /bin/bash
-              args:
-                - '-c'
-                - |
-                    set -e
-                    sudo cp tool-om/om-linux /usr/local/bin
-                    sudo chmod 755 /usr/local/bin/om-linux
-                    echo "=============================================================================================="
-                    echo " Appling changes to @ https://$OPSMAN_HOSTNAME ..."
-                    echo "=============================================================================================="
-                    om-linux --target https://pcf.${ENV_NAME}.cf-app.com -k \
-                           --username "${OPSMAN_USERNAME}" \
-                           --password "${OPSMAN_PASSWORD}" \
-                         apply-changes
-          params:
-            ENV_NAME: *env_name
-            OPSMGR_USERNAME: *default_opsmgr_username
-            OPSMAN_PASSWORD: *default_opsmgr_password
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: virtmerlin/c0-worker-gcp
+          inputs:
+            - name: tool-om
+            - name: toolsmiths-ci
+          run:
+            #path: toolsmiths-ci/scripts/gcp_pcf_upgrade/upload-ert.sh
+            path: /bin/bash
+            args:
+              - '-c'
+              - |
+                  set -e
+                  sudo cp tool-om/om-linux /usr/local/bin
+                  sudo chmod 755 /usr/local/bin/om-linux
+                  echo "=============================================================================================="
+                  echo " Appling changes to @ https://$OPSMAN_HOSTNAME ..."
+                  echo "=============================================================================================="
+                  om-linux --target https://pcf.${ENV_NAME}.cf-app.com -k \
+                         --username "${OPSMAN_USERNAME}" \
+                         --password "${OPSMAN_PASSWORD}" \
+                       apply-changes
+        params:
+          ENV_NAME: *env_name
+          OPSMGR_USERNAME: *default_opsman_username
+          OPSMAN_PASSWORD: *default_opsman_password
       - task: email-on-success
         config:
           platform: linux
