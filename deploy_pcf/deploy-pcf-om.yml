@@ -1,0 +1,452 @@
+# To set your Concourse pipeline:
+# WARNING: This file is used to create public pipelines. Set "make_public: false"
+# fly -t <your-concourse> set-pipeline \
+#  --config deploy-pcf.yml \
+#  --pipeline deploy-pcf \
+#  --var "opsmgr-version=1.6" \
+#  --var "ert-version=1.6" \
+#  --var "environment-name=<your-env-name>" \
+#  --var "pivnet-token=<your-pivnet-token>" \
+#  --var "github-key=$(cat <path-to-github-key>)"
+---
+opsmgr_version: &opsmgr_version {{opsmgr-version}}
+ert_version: &ert_version {{ert-version}}
+environment_name: &env_name {{environment-name}}
+env_app_url: &env_app_url environments.toolsmiths.cf-app.com
+pivnet_token: &pivnet_token {{pivnet-token}}
+worker_tag: &worker_tag [vsphere]
+github_key: &github_key {{github-key}}
+download_retry_attempts: &retry 3
+make_public: &make_public true
+github-token: &github-token {{github-token}}
+default_opsman_username: &default_opsman_username {{default_opsman_username}}
+default_opsman_password: &default_opsman_password {{default_opsman_password}}
+
+#The following parameters are used to generate and email success and failure messages.
+pipeline_url: &pipeline_url {{pipeline-url}}
+ops_manager_url: &ops_manager_url {{ops-manager-url}}
+contact_email: &contact_email {{contact-email}}
+smtp_server: &smtp_server {{smtp-server}}
+smtp_port: &smtp_port "25" # this must be a string
+smtp_username: &smtp_username {{smtp-username}}
+smtp_password: &smtp_password {{smtp-password}}
+from_email: &from_email {{from-email}}
+
+email_user_on_failure: &email-on-failure
+  do:
+  - task: generate email-file
+    config:
+      platform: linux
+      image: docker:///blang/alpine-bash
+      params:
+        ENV_NAME: *env_name
+        PIPELINE_URL: *pipeline_url
+        CONTACT_EMAIL: *contact_email
+      run:
+        path: /bin/bash
+        args:
+        - '-c'
+        - 'echo -e "Failed to deploy PCF on $ENV_NAME" > $PWD/pipeline-output/subject-file && echo -e "Hello $CONTACT_EMAIL,\n\nYour PCF deployment on $ENV_NAME failed. We will take a look at it as soon as possible. In the meantime, you can take a look at the pipeline to get an idea why it failed: $PIPELINE_URL.\n\nThanks,\n\nCF Toolsmiths Team" > $PWD/pipeline-output/body-file'
+      outputs:
+      - name: pipeline-output
+  - put: send-an-email
+    params:
+      subject: pipeline-output/subject-file
+      body: pipeline-output/body-file
+
+groups:
+- name: deploy-pcf-vsphere
+  jobs:
+  - upload-om-pcf-vsphere
+  - configure-ops-manager
+  - upload-elastic-runtime-pcf-vsphere
+  - configure-elastic-runtime
+  - trigger-install
+
+resources:
+  - name: toolsmiths-shared-scripts
+    type: git
+    source:
+      uri: https://github.com/pivotal-cf/toolsmiths-shared-scripts
+  - name: p-runtime
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/p-runtime.git
+      private_key: *github_key
+      branch: rel/1.8
+  - name: send-an-email
+    type: email
+    source:
+      smtp:
+        host: *smtp_server
+        port: *smtp_port
+        username: *smtp_username
+        password: *smtp_password
+      from: *from_email
+      to: [ *contact_email, 'cf-toolsmiths@pivotal.io' ]
+  - name: tool-om
+    type: github-release
+    source:
+      user: pivotal-cf
+      repository: om
+      access_token: *github-token
+resource_types:
+  - name: email
+    type: docker-image
+    source:
+      repository: pcfseceng/email-resource
+
+jobs:
+  - name: upload-om-pcf-vsphere
+    public: *make_public
+    serial: true
+    plan:
+    - aggregate:
+      - get: toolsmiths-shared-scripts
+      - get: p-runtime
+    - do:
+      - task: download-ops-manager-from-pivnet
+        attempts: *retry
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          inputs:
+          - name: toolsmiths-shared-scripts
+          outputs:
+          - name: pivnet-downloads
+          - name: pipeline-output
+          run:
+            path: /bin/bash
+            args: ['-c', 'export BUNDLE_GEMFILE=${PWD}/toolsmiths-shared-scripts/deploy_pcf/Gemfile && pushd pivnet-downloads && bundle install && bundle exec ../toolsmiths-shared-scripts/deploy_pcf/download-from-pivnet.rb -o']
+        params:
+          PIVNET_TOKEN: *pivnet_token
+          OPSMGR_VERSION: *opsmgr_version
+      - task: get-env-config
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          outputs:
+          - name: environment
+          run:
+            path: /bin/bash
+            args: ['-c', 'echo "Downloading manifest for resource_pool: ${ENV_NAME} from environment app: http://${ENV_APP_URL}" && wget http://${ENV_APP_URL}/engineering_environments/${ENV_NAME}/generate_with_name -O ${ENV_NAME}.yml']
+            dir: environment
+        params:
+          ENV_NAME: *env_name
+          ENV_APP_URL: *env_app_url
+      - task: deploy-ops-manager
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          inputs:
+          - name: toolsmiths-shared-scripts
+          - name: pivnet-downloads
+          - name: environment
+          - name: p-runtime
+          run:
+            path: /bin/bash
+            args: ['-c', 'bundle install && ./deploy_pcf.rb -D ../../environment -N ${ENV_NAME} -O $(ls ../../pivnet-downloads/*.ova) -H -C opsmgr:destroy,opsmgr:install']
+            dir: toolsmiths-shared-scripts/deploy_pcf
+        params:
+          ENV_NAME: *env_name
+          OPSMGR_VERSION: *opsmgr_version
+      on_failure: *email-on-failure
+
+  - name: configure-ops-manager
+    serial: true
+    plan:
+    - aggregate:
+      - get: toolsmiths-shared-scripts
+      - get: p-runtime
+        passed: [upload-om-pcf-vsphere]
+        trigger: true
+      - get: tool-om
+        params:
+          globs:
+          - "om-linux"
+    - do:
+      - task: get-env-config
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          outputs:
+          - name: environment
+          run:
+            path: /bin/bash
+            args: ['-c', 'echo "Downloading manifest for resource_pool: ${ENV_NAME} from environment app: http://${ENV_APP_URL}" && wget http://${ENV_APP_URL}/engineering_environments/${ENV_NAME}/generate_with_name -O ${ENV_NAME}.yml']
+            dir: environment
+        params:
+          ENV_NAME: *env_name
+          ENV_APP_URL: *env_app_url
+      - task: config-opsman-auth-using-om
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          inputs:
+          - name: tool-om
+          run:
+            path: /bin/bash
+            args:
+              - '-c'
+              - |
+                  #!/bin/bash
+                  set -e
+                  sudo chmod 755 om-linux
+                  echo "=============================================================================================="
+                  echo "Configuring OpsManager @ https://pcf.${ENV_NAME}.cf-app.com ..."
+                  echo "=============================================================================================="
+                  om-linux --target https://pcf.$ENV_NAME.cf-app.com -k \
+                         configure-authentication \
+                           --username "$DEFAULT_OPSMGR_USERNAME" \
+                           --password "$DEFAULT_OPSMGR_PASSWORD" \
+                           --decryption-passphrase "$DEFAULT_OPSMGR_PASSWORD"
+            dir: tool-om
+        params:
+          ENV_NAME: *env_name
+          DEFAULT_OPSMGR_USERNAME: *default_opsmgr_username
+          DEFAULT_OPSMAN_PASSWORD: *default_opsmgr_password
+      - task: configure-bosh-director
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          inputs:
+          - name: p-runtime
+          - name: toolsmiths-shared-scripts
+          - name: environment
+          run:
+            path: /bin/bash
+            args: ['-c', 'bundle && ./deploy_pcf.rb -D ../../environment -N ${ENV_NAME} -H -C opsmgr:microbosh:configure']
+            dir: toolsmiths-shared-scripts/deploy_pcf
+        params:
+          ENV_NAME: *env_name
+          OPSMGR_VERSION: *opsmgr_version
+          PIVNET_TOKEN: *pivnet_token
+      - task: patch-network-config
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          inputs:
+          - name: toolsmiths-shared-scripts
+          run:
+            path: /bin/bash
+            args: ['-c', 'chmod +x patch_opsman_network_config.sh && ./patch_opsman_network_config.sh']
+            dir: toolsmiths-shared-scripts/deploy_pcf
+        params:
+          ENV_NAME: *env_name
+          OPSMAN_USERNAME: *default_opsman_username
+          OPSMAN_PASSWORD: *default_opsman_password
+      on_failure: *email-on-failure
+  - name: upload-elastic-runtime-pcf-vsphere
+    serial: true
+    plan:
+    - aggregate:
+      - get: toolsmiths-shared-scripts
+      - get: p-runtime
+        passed: [configure-ops-manager]
+        trigger: true
+      - get: tool-om
+        params:
+          globs:
+          - "om-linux"
+    - do:
+      - task: download-elastic-runtime-from-pivnet
+        attempts: *retry
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          inputs:
+          - name: toolsmiths-shared-scripts
+          outputs:
+          - name: pivnet-downloads
+          run:
+            path: /bin/bash
+            args: ['-c', 'export BUNDLE_GEMFILE=${PWD}/toolsmiths-shared-scripts/deploy_pcf/Gemfile && pushd pivnet-downloads && bundle install && bundle exec ../toolsmiths-shared-scripts/deploy_pcf/download-from-pivnet.rb -e']
+        params:
+          PIVNET_TOKEN: *pivnet_token
+          ERT_VERSION: *ert_version
+      - task: upload-elastic-runtime-using-om
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          inputs:
+          - name: pivnet-downloads
+          - name: tool-om
+          run:
+            path: /bin/bash
+            args:
+              - '-c'
+              - |
+                  set -e
+                  sudo cp tool-om/om-linux /usr/local/bin
+                  sudo chmod 755 /usr/local/bin/om-linux
+                  echo "=============================================================================================="
+                  echo " Uploading ERT tile to @ https://pcf.$ENV_NAME.cf-app.com ..."
+                  echo "=============================================================================================="
+                  ##Upload ert Tile
+                  om-linux --target https://pcf.${ENV_NAME}.cf-app.com -k \
+                         --username "${OPSMAN_USERNAME}" \
+                         --password "${OPSMAN_PASSWORD}" \
+                        upload-product \
+                        --product pivnet-downloads/cf*.pivotal
+        params:
+          ENV_NAME: *env_name
+          OPSMGR_USERNAME: *default_opsmgr_username
+          OPSMAN_PASSWORD: *default_opsmgr_password
+      - task: stage-elastic-runtime-using-om
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          inputs:
+          - name: tool-om
+          - name: pivnet-downloads
+          run:
+            path: /bin/bash
+            args:
+              - '-c'
+              - |
+                  set -e
+                  sudo cp tool-om/om-linux /usr/local/bin
+                  sudo chmod 755 /usr/local/bin/om-linux
+                  cf_product_version=$(cd pivnet-downloads; find . -name "cf-*.pivotal" | sed -e 's/^.\/cf-//' -e 's/.pivotal$//')
+                  opsman_hostname="pcf.${ENV_NAME}.cf-app.com"
+                  echo "=============================================================================================="
+                  echo " Staging ERT tile (version ${cf_product_version}) to @ https://$opsman_hostname ..."
+                  echo "=============================================================================================="
+                  ##Get Uploaded Tile --product-version
+                  ##Move 'available product to 'staged'
+                  om-linux --target https://${opsman_hostname} -k \
+                         --username "${OPSMAN_USERNAME}" \
+                         --password "${OPSMAN_PASSWORD}" \
+                        stage-product \
+                         --product-name cf --product-version ${cf_product_version}
+        params:
+          ENV_NAME: *env_name
+          OPSMGR_USERNAME: *default_opsmgr_username
+          OPSMAN_PASSWORD: *default_opsmgr_password
+      on_failure: *email-on-failure
+  - name: configure-elastic-runtime
+    serial: true
+    plan:
+    - aggregate:
+      - get: toolsmiths-shared-scripts
+      - get: p-runtime
+        passed: [upload-elastic-runtime-pcf-vsphere]
+        trigger: true
+    - do:
+      - task: get-env-config
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          outputs:
+          - name: environment
+          run:
+            path: /bin/bash
+            args: ['-c', 'echo "Downloading manifest for resource_pool: ${ENV_NAME} from environment app: http://${ENV_APP_URL}" && wget http://${ENV_APP_URL}/engineering_environments/${ENV_NAME}/generate_with_name -O ${ENV_NAME}.yml']
+            dir: environment
+        params:
+          ENV_NAME: *env_name
+          ENV_APP_URL: *env_app_url
+      - task: configure-elastic-runtime
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere
+          inputs:
+          - name: toolsmiths-shared-scripts
+          - name: environment
+          - name: p-runtime
+          run:
+            path: /bin/bash
+            args: ['-c', 'bundle install && ./deploy_pcf.rb -D ../../environment -N ${ENV_NAME} -H -C ert:configure']
+            dir: toolsmiths-shared-scripts/deploy_pcf
+        params:
+          ENV_NAME: *env_name
+          OPSMGR_VERSION: *opsmgr_version
+          ERT_VERSION: *ert_version
+          PIVNET_TOKEN: *pivnet_token
+      on_failure: *email-on-failure
+  - name: trigger-install
+    serial: true
+    plan:
+    - aggregate:
+      - get: toolsmiths-shared-scripts
+        passed: [configure-elastic-runtime]
+        trigger: true
+      - get: tool-om
+        params:
+          globs:
+          - "om-linux"
+    - do:
+      - task: apply-changes-using-om
+          config:
+            platform: linux
+            image_resource:
+              type: docker-image
+              source:
+                repository: virtmerlin/c0-worker-gcp
+            inputs:
+              - name: tool-om
+              - name: toolsmiths-ci
+            run:
+              #path: toolsmiths-ci/scripts/gcp_pcf_upgrade/upload-ert.sh
+              path: /bin/bash
+              args:
+                - '-c'
+                - |
+                    set -e
+                    sudo cp tool-om/om-linux /usr/local/bin
+                    sudo chmod 755 /usr/local/bin/om-linux
+                    echo "=============================================================================================="
+                    echo " Appling changes to @ https://$OPSMAN_HOSTNAME ..."
+                    echo "=============================================================================================="
+                    om-linux --target https://pcf.${ENV_NAME}.cf-app.com -k \
+                           --username "${OPSMAN_USERNAME}" \
+                           --password "${OPSMAN_PASSWORD}" \
+                         apply-changes
+          params:
+            ENV_NAME: *env_name
+            OPSMGR_USERNAME: *default_opsmgr_username
+            OPSMAN_PASSWORD: *default_opsmgr_password
+      - task: email-on-success
+        config:
+          platform: linux
+          image: docker:///blang/alpine-bash
+          params:
+            ENV_NAME: *env_name
+            OPS_MANAGER_URL: *ops_manager_url
+            CONTACT_EMAIL: *contact_email
+          run:
+            path: /bin/bash
+            args:
+            - '-c'
+            - 'echo -e "Successfully deployed PCF on $ENV_NAME" > $PWD/pipeline-output/subject-file && echo -e "Hello $CONTACT_EMAIL,\n\nYour PCF deployment on $ENV_NAME succeeded. You can access your Ops Manager here: $OPS_MANAGER_URL.\n\nThanks,\n\nCF Toolsmiths Team" > $PWD/pipeline-output/body-file'
+          outputs:
+          - name: pipeline-output
+      - put: send-an-email
+        params:
+          subject: pipeline-output/subject-file
+          body: pipeline-output/body-file
+      on_failure: *email-on-failure
