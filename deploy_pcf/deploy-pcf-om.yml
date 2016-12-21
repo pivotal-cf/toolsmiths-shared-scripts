@@ -18,9 +18,9 @@ worker_tag: &worker_tag [vsphere]
 github_key: &github_key {{github-key}}
 download_retry_attempts: &retry 3
 make_public: &make_public true
-github_token: &github_token {{github-token}}
-default_opsman_username: &default_opsman_username {{default-opsman-username}}
-default_opsman_password: &default_opsman_password {{default-opsman-password}}
+github_token: &github_token {{gitbot-github-token}}
+default_opsman_username: &default_opsman_username {{default_opsman_username}}
+default_opsman_password: &default_opsman_password {{default_opsman_password}}
 
 #The following parameters are used to generate and email success and failure messages.
 pipeline_url: &pipeline_url {{pipeline-url}}
