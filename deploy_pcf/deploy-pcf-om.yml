@@ -380,6 +380,9 @@ jobs:
                 export DOMAIN="${ENV_NAME}.cf-app.com"
                 cd toolsmiths-shared-scripts/deploy_pcf
                 ./mk_ssl_cert_key.sh "$DOMAIN"
+
+                export DOMAIN_CRT=$(cat ${DOMAIN}.crt)
+                export DOMAIN_KEY=$(cat ${DOMAIN}.key)
                 erb ert-config.json.erb > ert-config.json
                 om-linux --target "https://pcf.${DOMAIN}" -k \
                         --username "${OPSMAN_USERNAME}" \
