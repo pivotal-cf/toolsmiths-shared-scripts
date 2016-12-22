@@ -21,6 +21,7 @@ make_public: &make_public true
 github_token: &github_token {{github-token}}
 default_opsman_username: &default_opsman_username {{default_opsman_username}}
 default_opsman_password: &default_opsman_password {{default_opsman_password}}
+haproxy_ip: &haproxy_ip {{haproxy_ip}}
 
 #The following parameters are used to generate and email success and failure messages.
 pipeline_url: &pipeline_url {{pipeline-url}}
@@ -258,7 +259,6 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
-      - get: p-runtime
         passed: [configure-ops-manager]
         trigger: true
       - get: tool-om
@@ -353,25 +353,13 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
-      - get: p-runtime
         passed: [upload-elastic-runtime-pcf-vsphere]
         trigger: true
-    - do:
-      - task: get-env-config
-        tags: *worker_tag
-        privileged: true
-        config:
-          platform: linux
-          image: docker:///cftoolsmiths/deploy-pcf-vsphere
-          outputs:
-          - name: environment
-          run:
-            path: /bin/bash
-            args: ['-c', 'echo "Downloading manifest for resource_pool: ${ENV_NAME} from environment app: http://${ENV_APP_URL}" && wget http://${ENV_APP_URL}/engineering_environments/${ENV_NAME}/generate_with_name -O ${ENV_NAME}.yml']
-            dir: environment
+      - get: tool-om
         params:
-          ENV_NAME: *env_name
-          ENV_APP_URL: *env_app_url
+          globs:
+          - "om-linux"
+    - do:
       - task: configure-elastic-runtime
         tags: *worker_tag
         privileged: true
@@ -380,17 +368,30 @@ jobs:
           image: docker:///cftoolsmiths/deploy-pcf-vsphere
           inputs:
           - name: toolsmiths-shared-scripts
-          - name: environment
-          - name: p-runtime
+          - name: tool-om
           run:
             path: /bin/bash
-            args: ['-c', 'bundle install && ./deploy_pcf.rb -D ../../environment -N ${ENV_NAME} -H -C ert:configure']
-            dir: toolsmiths-shared-scripts/deploy_pcf
+            args:
+            - '-c'
+            - |
+                set -e
+                sudo cp tool-om/om-linux /usr/local/bin
+                sudo chmod 755 /usr/local/bin/om-linux
+                export DOMAIN="${ENV_NAME}.cf-app.com"
+                cd toolsmiths-shared-scripts/deploy_pcf
+                ./mk_ssl_cert_key.sh "$DOMAIN"
+                erb ert-config.json.erb > ert-config.json
+                om-linux --target "https://pcf.${DOMAIN}" -k \
+                        --username "${OPSMAN_USERNAME}" \
+                        --password "${OPSMAN_PASSWORD}" \
+                        configure-product \
+                        --product-name cf \
+                        -p "$(cat ./ert-config.json)"
         params:
           ENV_NAME: *env_name
-          OPSMGR_VERSION: *opsmgr_version
-          ERT_VERSION: *ert_version
-          PIVNET_TOKEN: *pivnet_token
+          HAPROXY_IP: *haproxy_ip
+          OPSMAN_USERNAME: *default_opsman_username
+          OPSMAN_PASSWORD: *default_opsman_password
       on_failure: *email-on-failure
 
   - name: trigger-install
