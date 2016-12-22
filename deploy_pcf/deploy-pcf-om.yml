@@ -68,6 +68,7 @@ resources:
     type: git
     source:
       uri: https://github.com/pivotal-cf/toolsmiths-shared-scripts
+      branch: om
   - name: p-runtime
     type: git
     source:
