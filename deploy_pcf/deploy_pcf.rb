@@ -137,6 +137,9 @@ options[:ops_manager_version] = options[:ops_manager_version].match('[0-9]+\.[0-
 if (options[:ops_manager_version].to_s.include? "1.9") || (ENV['OPSMGR_VERSION'].include? "1.9")
   options[:ops_manager_version] = "1.8"
 end
+if (options[:elastic_runtime_version].to_s.include? "1.9") || (ENV['ERT_VERSION'].include? "1.9")
+   options[:elastic_runtime_version] = "1.8"
+end
 options[:elastic_runtime_version] = options[:elastic_runtime_version].match('[0-9]+\.[0-9]').to_s if options[:elastic_runtime_version]
 
 # xvfb server can only run one at a time - use -a flag to automatically find a free server number
