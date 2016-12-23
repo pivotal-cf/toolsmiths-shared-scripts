@@ -155,9 +155,9 @@ jobs:
               cd toolsmiths-shared-scripts/deploy_pcf
               erb opsman_settings.json.erb > opsman_settings.json
 
-              govc ls /${DATACENTER}/vm/${ENV_NAME}/* | xargs -I{} govc vm.destroy "{}"
-              govc ls /${DATACENTER}/vm/${ENV_NAME}_templates/* | xargs -I{} govc vm.destroy "{}"
-              govc ls /${DATACENTER}/vm/${ENV_NAME}_vms/* | xargs -I{} govc vm.destroy "{}"
+              govc ls /${GOVC_DATACENTER}/vm/${ENV_NAME}/* | xargs -I{} govc vm.destroy "{}"
+              govc ls /${GOVC_DATACENTER}/vm/${ENV_NAME}_templates/* | xargs -I{} govc vm.destroy "{}"
+              govc ls /${GOVC_DATACENTER}/vm/${ENV_NAME}_vms/* | xargs -I{} govc vm.destroy "{}"
 
               govc import.ova --options=opsman_settings.json --name=${OPSMAN_NAME} -k=true --folder=/${GOVC_DATACENTER}/vm/${ENV_NAME} ${CURR_DIR}/pivnet-downloads/*.ova
 
@@ -278,7 +278,6 @@ jobs:
     - aggregate:
       - get: toolsmiths-shared-scripts
         passed: [configure-ops-manager]
-        trigger: true
     - do:
       - task: download-elastic-runtime-from-pivnet
         attempts: *retry
