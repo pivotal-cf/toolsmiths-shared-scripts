@@ -1,0 +1,20 @@
+{
+  "DiskProvisioning":"thin",
+  "IPAllocationPolicy":"dhcpPolicy",
+  "IPProtocol":"IPv4",
+  "NetworkMapping": [{
+    "Name":"Network 1",
+    "Network":"<%= ENV.fetch('ENV_NAME') %>"
+  }],
+  "PropertyMapping":[
+    {"Key":"ip0","Value":"<%= ENV.fetch('OPSMAN_IP') %>"},
+    {"Key":"netmask0","Value":"<%= ENV.fetch('NETMASK') %>"},
+    {"Key":"gateway","Value":"<%= ENV.fetch('GATEWAY') %>"},
+    {"Key":"DNS","Value":"<%= ENV.fetch('DNS') %>"},
+    {"Key":"ntp_servers","Value":"<%= ENV.fetch('NTP') %>"},
+    {"Key":"admin_password","Value":"<%= ENV.fetch('OPSMAN_PASSWORD') %>"}
+  ],
+  "PowerOn":false,
+  "InjectOvfEnv":false,
+  "WaitForIP":false
+}
