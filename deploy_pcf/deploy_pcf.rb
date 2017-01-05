@@ -134,7 +134,7 @@ end
 options[:ops_manager_version] = options[:ops_manager_version].match('[0-9]+\.[0-9]').to_s if options[:ops_manager_version]
 
 #allows both pipeline and manuall script trigger to work
-if (options[:ops_manager_version].to_s.include? "1.9") || (ENV['OPSMGR_VERSION'].include? "1.9")
+if (options[:ops_manager_version].to_s.include? "1.9")  || (ENV['OPSMGR_VERSION'].to_s.include? "1.9")
   options[:ops_manager_version] = "1.8"
 end
 options[:elastic_runtime_version] = options[:elastic_runtime_version].match('[0-9]+\.[0-9]').to_s if options[:elastic_runtime_version]
