@@ -1,0 +1,20 @@
+{
+   "icmp_checks_enabled":true,
+   "networks":[
+      {
+         "name":"default",
+         "service_network":false,
+         "iaas_identifier": "<%= ENV.fetch('ENV_NAME') %>",
+         "subnets":[
+            {
+              "cidr":"<%= ENV.fetch('CIDR') %>",
+              "reserved_ip_ranges":"<%= ENV.fetch('RESERVED_IP_RANGES') %>",
+              "dns":"<%= ENV.fetch('DNS') %>",
+              "gateway":"<%= ENV.fetch('GATEWAY') %>",
+               "availability_zones": ["default"]
+            }
+         ]
+      }
+   ]
+}
+
