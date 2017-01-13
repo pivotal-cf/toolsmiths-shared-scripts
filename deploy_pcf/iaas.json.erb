@@ -1,0 +1,12 @@
+{
+  "vcenter_host": "<%= ENV.fetch('VC_URL') %>",
+  "vcenter_username": "<%= ENV.fetch('VC_USERNAME') %>",
+  "vcenter_password": "<%= ENV.fetch('VC_PASSWORD') %>",
+  "datacenter": "<%= ENV.fetch('VC_DATACENTER') %>",
+  "disk_type": "thin",
+  "ephemeral_datastores_string": "<%= ENV.fetch('VC_DATASTORE') %>",
+  "persistent_datastores_string": "<%= ENV.fetch('VC_DATASTORE') %>",
+  "bosh_vm_folder": "<%= ENV.fetch('ENV_NAME') %>_vms",
+  "bosh_template_folder": "<%= ENV.fetch('ENV_NAME') %>_templates",
+  "bosh_disk_path": "<%= ENV.fetch('ENV_NAME') %>_disks"
+}
