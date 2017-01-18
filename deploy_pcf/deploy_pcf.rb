@@ -28,7 +28,8 @@ def attempt(cmd)
       puts "FAILED:  #{cmd}".red
       exit 1
     else
-      puts "Ooh, got a weird exit status: #{exit_status}".red
+      puts "FAILED: Ooh, got a weird exit status: #{exit_status}".red
+      exit exit_status
   end
 end
 
