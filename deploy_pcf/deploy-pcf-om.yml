@@ -35,7 +35,7 @@ cidr: &cidr {{cidr}}
 reserved_ip_ranges: &reserved_ip_ranges {{reserved_ip_ranges}}
 dns: &dns {{dns}}
 ntp: &ntp {{ntp}}
-opsman_password: &opsman_password {{opsman_password}}
+ubuntu_password: &ubuntu_password {{ubuntu_password}}
 
 #The following parameters are used to generate and email success and failure messages.
 pipeline_url: &pipeline_url {{pipeline-url}}
@@ -173,7 +173,7 @@ jobs:
           GATEWAY: *gateway
           DNS: *dns
           NTP: *ntp
-          OPSMAN_PASSWORD: *opsman_password
+          UBUNTU_PASSWORD: *ubuntu_password
       on_failure: *email-on-failure
 
   - name: configure-ops-manager
@@ -320,14 +320,14 @@ jobs:
                   echo "=============================================================================================="
                   ##Upload ert Tile
                   om-linux --target https://pcf.${ENV_NAME}.cf-app.com -k \
-                          --username "${OPSMAN_USERNAME}" \
-                          --password "${OPSMAN_PASSWORD}" \
+                          --username "${DEFAULT_OPSMAN_USERNAME}" \
+                          --password "${DEFAULT_OPSMAN_PASSWORD}" \
                           upload-product \
                           --product pivnet-downloads/cf*.pivotal
         params:
           ENV_NAME: *env_name
-          OPSMAN_USERNAME: *default_opsman_username
-          OPSMAN_PASSWORD: *default_opsman_password
+          DEFAULT_OPSMAN_USERNAME: *default_opsman_username
+          DEFAULT_OPSMAN_PASSWORD: *default_opsman_password
       - task: stage-elastic-runtime-using-om
         tags: *worker_tag
         privileged: true
@@ -350,14 +350,14 @@ jobs:
                   ##Get Uploaded Tile --product-version
                   ##Move 'available product to 'staged'
                   om-linux --target https://${opsman_hostname} -k \
-                          --username "${OPSMAN_USERNAME}" \
-                          --password "${OPSMAN_PASSWORD}" \
+                          --username "${DEFAULT_OPSMAN_USERNAME}" \
+                          --password "${DEFAULT_OPSMAN_PASSWORD}" \
                           stage-product \
                           --product-name cf --product-version ${cf_product_version}
         params:
           ENV_NAME: *env_name
-          OPSMAN_USERNAME: *default_opsman_username
-          OPSMAN_PASSWORD: *default_opsman_password
+          DEFAULT_OPSMAN_USERNAME: *default_opsman_username
+          DEFAULT_OPSMAN_PASSWORD: *default_opsman_password
       on_failure: *email-on-failure
 
   - name: configure-elastic-runtime
@@ -389,16 +389,16 @@ jobs:
                 export DOMAIN_KEY=$(cat ${DOMAIN}.key)
                 erb ert-config.json.erb > ert-config.json
                 om-linux --target "https://pcf.${DOMAIN}" -k \
-                        --username "${OPSMAN_USERNAME}" \
-                        --password "${OPSMAN_PASSWORD}" \
+                        --username "${DEFAULT_OPSMAN_USERNAME}" \
+                        --password "${DEFAULT_OPSMAN_PASSWORD}" \
                         configure-product \
                         --product-name cf \
                         -p "$(cat ./ert-config.json)"
         params:
           ENV_NAME: *env_name
           HAPROXY_IP: *haproxy_ip
-          OPSMAN_USERNAME: *default_opsman_username
-          OPSMAN_PASSWORD: *default_opsman_password
+          DEFAULT_OPSMAN_USERNAME: *default_opsman_username
+          DEFAULT_OPSMAN_PASSWORD: *default_opsman_password
       on_failure: *email-on-failure
 
   - name: trigger-install
@@ -431,8 +431,8 @@ jobs:
                        echo "=============================================================================================="
                        om-linux --target https://pcf.${ENV_NAME}.cf-app.com -k \
                           --request-timeout 3600 \
-                          --username "${OPSMAN_USERNAME}" \
-                          --password "${OPSMAN_PASSWORD}" \
+                          --username "${DEFAULT_OPSMAN_USERNAME}" \
+                          --password "${DEFAULT_OPSMAN_PASSWORD}" \
                           apply-changes \
                        && break
                        tries=$[$tries+1]
@@ -440,8 +440,8 @@ jobs:
                   done
         params:
           ENV_NAME: *env_name
-          OPSMAN_USERNAME: *default_opsman_username
-          OPSMAN_PASSWORD: *default_opsman_password
+          DEFAULT_OPSMAN_USERNAME: *default_opsman_username
+          DEFAULT_OPSMAN_PASSWORD: *default_opsman_password
       - task: email-on-success
         config:
           platform: linux
