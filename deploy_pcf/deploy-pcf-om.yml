@@ -31,6 +31,8 @@ vcenter_datastore: &vcenter_datastore {{vcenter_datastore}}
 opsman_ip: &opsman_ip {{opsman_ip}}
 netmask: &netmask {{netmask}}
 gateway: &gateway {{gateway}}
+cidr: &cidr {{cidr}}
+reserved_ip_ranges: &reserved_ip_ranges {{reserved_ip_ranges}}
 dns: &dns {{dns}}
 ntp: &ntp {{ntp}}
 opsman_password: &opsman_password {{opsman_password}}
@@ -84,12 +86,6 @@ resources:
     source:
       uri: https://github.com/pivotal-cf/toolsmiths-shared-scripts
       branch: om
-  - name: p-runtime
-    type: git
-    source:
-      uri: git@github.com:pivotal-cf/p-runtime.git
-      private_key: *github_key
-      branch: rel/1.9
   - name: send-an-email
     type: email
     source:
@@ -186,28 +182,8 @@ jobs:
     - aggregate:
       - get: toolsmiths-shared-scripts
         passed: [upload-om-pcf-vsphere]
-      - get: p-runtime
-        trigger: false
+        trigger: true
     - do:
-      - task: get-env-config
-        tags: *worker_tag
-        privileged: true
-        config:
-          platform: linux
-          image: docker:///cftoolsmiths/deploy-pcf-vsphere-1.9
-          outputs:
-          - name: environment
-          run:
-            path: /bin/bash
-            args:
-            - '-c'
-            - |
-              echo "Downloading manifest for resource_pool: ${ENV_NAME} from environment app: http://${ENV_APP_URL}"
-              wget http://${ENV_APP_URL}/engineering_environments/${ENV_NAME}/generate_with_name -O ${ENV_NAME}.yml
-            dir: environment
-        params:
-          ENV_NAME: *env_name
-          ENV_APP_URL: *env_app_url
       - task: config-opsman-auth-using-om
         tags: *worker_tag
         privileged: true
@@ -223,11 +199,22 @@ jobs:
                   echo "=============================================================================================="
                   echo "Configuring OpsManager @ https://pcf.${ENV_NAME}.cf-app.com ..."
                   echo "=============================================================================================="
-                  om-linux --target https://pcf.$ENV_NAME.cf-app.com -k \
+                  tries=1
+                  until [ $tries -ge 4 ]
+                  do
+                      echo "=============================================================================================="
+                      echo "Attempt Number ${tries}: Configuring Ops Manager authentication ..."
+                      echo "=============================================================================================="
+                      om-linux --target https://pcf.$ENV_NAME.cf-app.com -k \
                           configure-authentication \
                           --username "$DEFAULT_OPSMAN_USERNAME" \
                           --password "$DEFAULT_OPSMAN_PASSWORD" \
-                          --decryption-passphrase "$DEFAULT_OPSMAN_PASSWORD"
+                          --decryption-passphrase "$DEFAULT_OPSMAN_PASSWORD"\
+                      && break
+                      tries=$[$tries+1]
+                      sleep 60
+                  done
+
         params:
           ENV_NAME: *env_name
           DEFAULT_OPSMAN_USERNAME: *default_opsman_username
@@ -239,37 +226,52 @@ jobs:
           platform: linux
           image: docker:///cftoolsmiths/deploy-pcf-vsphere-1.9
           inputs:
-          - name: p-runtime
           - name: toolsmiths-shared-scripts
-          - name: environment
           run:
             path: /bin/bash
             args:
             - '-c'
-            - 'bundle && ./deploy_pcf.rb -D ../../environment -N ${ENV_NAME} -H -C opsmgr:microbosh:configure'
+            - |
+                set -ex
+                echo "=============================================================================================="
+                echo "Configuring Bosh Director @ https://pcf.${ENV_NAME}.cf-app.com ..."
+                echo "=============================================================================================="
+                erb networks.json.erb > networks.json
+                erb iaas.json.erb > iaas.json
+                echo "Configuring the IAAS ..."
+                om-linux --target https://pcf.$ENV_NAME.cf-app.com -k --username "$DEFAULT_OPSMAN_USERNAME" \
+                         --password "$DEFAULT_OPSMAN_PASSWORD" \
+                         configure-bosh \
+                         --iaas-configuration "$(cat iaas.json)"
+                echo "Configuring the Director ..."
+                om-linux --target https://pcf.$ENV_NAME.cf-app.com -k --username "$DEFAULT_OPSMAN_USERNAME" \
+                         --password "$DEFAULT_OPSMAN_PASSWORD" \
+                         configure-bosh \
+                         --director-configuration "{\"ntp_servers_string\": \"ntp.svc.pivotal.io\"}"
+                echo "Configuring the Networks ..."
+                om-linux --target https://pcf.$ENV_NAME.cf-app.com -k --username "$DEFAULT_OPSMAN_USERNAME" \
+                         --password "$DEFAULT_OPSMAN_PASSWORD" \
+                         configure-bosh \
+                         --az-configuration "{\"availability_zones\":[{\"name\":\"default\", \"cluster\":\"$VC_CLUSTER\", \"resource_pool\":\"$ENV_NAME\"}]}" \
+                         --networks-configuration "$(cat networks.json)" \
+                         --network-assignment '{"singleton_availability_zone":"default","network":"default"}'
             dir: toolsmiths-shared-scripts/deploy_pcf
         params:
+          VC_URL: *vcenter_url
+          VC_USERNAME: *vcenter_username
+          VC_PASSWORD: *vcenter_password
+          VC_DATACENTER: *vcenter_datacenter
+          VC_CLUSTER: *vcenter_cluster
+          VC_DATASTORE: *vcenter_datastore
+          DEFAULT_OPSMAN_USERNAME: *default_opsman_username
+          DEFAULT_OPSMAN_PASSWORD: *default_opsman_password
           ENV_NAME: *env_name
           OPSMGR_VERSION: *opsmgr_version
           PIVNET_TOKEN: *pivnet_token
-      - task: patch-network-config
-        tags: *worker_tag
-        privileged: true
-        config:
-          platform: linux
-          image: docker:///cftoolsmiths/deploy-pcf-vsphere-1.9
-          inputs:
-          - name: toolsmiths-shared-scripts
-          run:
-            path: /bin/bash
-            args:
-            - '-c'
-            - 'chmod +x patch_opsman_network_config.sh && ./patch_opsman_network_config.sh'
-            dir: toolsmiths-shared-scripts/deploy_pcf
-        params:
-          ENV_NAME: *env_name
-          OPSMAN_USERNAME: *default_opsman_username
-          OPSMAN_PASSWORD: *default_opsman_password
+          GATEWAY: *gateway
+          DNS: *dns
+          CIDR: *cidr
+          RESERVED_IP_RANGES: *reserved_ip_ranges
       on_failure: *email-on-failure
 
   - name: upload-elastic-runtime-pcf-vsphere
@@ -278,6 +280,7 @@ jobs:
     - aggregate:
       - get: toolsmiths-shared-scripts
         passed: [configure-ops-manager]
+        trigger: true
     - do:
       - task: download-elastic-runtime-from-pivnet
         attempts: *retry
@@ -404,6 +407,7 @@ jobs:
     - aggregate:
       - get: toolsmiths-shared-scripts
         passed: [configure-elastic-runtime]
+        trigger: true
     - do:
       - task: apply-changes-using-om
         tags: *worker_tag
@@ -419,10 +423,21 @@ jobs:
                   echo "=============================================================================================="
                   echo " Applying changes to https://pcf.$ENV_NAME.cf-app.com ..."
                   echo "=============================================================================================="
-                  om-linux --target https://pcf.${ENV_NAME}.cf-app.com -k \
+                  tries=1
+                  until [ $tries -ge 4 ]
+                  do
+                       echo "=============================================================================================="
+                       echo "Attempt Number ${tries}: Apply-Changes ..."
+                       echo "=============================================================================================="
+                       om-linux --target https://pcf.${ENV_NAME}.cf-app.com -k \
+                          --request-timeout 3600 \
                           --username "${OPSMAN_USERNAME}" \
                           --password "${OPSMAN_PASSWORD}" \
-                          apply-changes
+                          apply-changes \
+                       && break
+                       tries=$[$tries+1]
+                       sleep 60
+                  done
         params:
           ENV_NAME: *env_name
           OPSMAN_USERNAME: *default_opsman_username
