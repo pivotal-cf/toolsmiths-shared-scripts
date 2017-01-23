@@ -85,7 +85,7 @@ resources:
     type: git
     source:
       uri: https://github.com/pivotal-cf/toolsmiths-shared-scripts
-      branch: om
+      branch: master
   - name: send-an-email
     type: email
     source:
