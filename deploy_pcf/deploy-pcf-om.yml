@@ -435,9 +435,11 @@ jobs:
                           --password "${DEFAULT_OPSMAN_PASSWORD}" \
                           apply-changes \
                        && break
+                       om_status=$?
                        tries=$[$tries+1]
                        sleep 60
                   done
+                  exit $om_status
         params:
           ENV_NAME: *env_name
           DEFAULT_OPSMAN_USERNAME: *default_opsman_username
