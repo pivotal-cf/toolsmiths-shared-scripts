@@ -16,7 +16,6 @@ env_app_url: &env_app_url environments.toolsmiths.cf-app.com
 pivnet_token: &pivnet_token {{pivnet-token}}
 worker_tag: &worker_tag []
 github_key: &github_key {{github-key}}
-download_retry_attempts: &retry 3
 make_public: &make_public true
 github_token: &github_token {{github-token}}
 default_opsman_username: &default_opsman_username {{default_opsman_username}}
@@ -71,14 +70,17 @@ email_user_on_failure: &email-on-failure
       subject: pipeline-output/subject-file
       body: pipeline-output/body-file
 
-groups:
-- name: deploy-pcf-vsphere
-  jobs:
-  - upload-om-pcf-vsphere
-  - configure-ops-manager
-  - upload-elastic-runtime-pcf-vsphere
-  - configure-elastic-runtime
-  - trigger-install
+resource_types:
+  - name: email
+    type: docker-image
+    source:
+      repository: pcfseceng/email-resource
+
+  - name: pivnet
+    type: docker-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
 
 resources:
   - name: toolsmiths-shared-scripts
@@ -86,6 +88,7 @@ resources:
     source:
       uri: https://github.com/pivotal-cf/toolsmiths-shared-scripts
       branch: master
+
   - name: send-an-email
     type: email
     source:
@@ -97,11 +100,30 @@ resources:
       from: *from_email
       to: [ *contact_email, 'cf-toolsmiths@pivotal.io' ]
 
-resource_types:
-  - name: email
-    type: docker-image
+  - name: pivnet-opsmgr
+    type: pivnet
     source:
-      repository: pcfseceng/email-resource
+      api_token: *pivnet_token
+      product_slug: ops-manager
+      product_version: *opsmgr_version
+      sort_by: semver
+
+  - name: pivnet-ert
+    type: pivnet
+    source:
+      api_token: *pivnet_token
+      product_slug: elastic-runtime
+      product_version: *ert_version
+      sort_by: semver
+
+groups:
+- name: deploy-pcf-vsphere
+  jobs:
+  - upload-om-pcf-vsphere
+  - configure-ops-manager
+  - upload-elastic-runtime-pcf-vsphere
+  - configure-elastic-runtime
+  - trigger-install
 
 jobs:
   - name: upload-om-pcf-vsphere
@@ -110,26 +132,11 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
-    - do:
-      - task: download-ops-manager-from-pivnet
-        attempts: *retry
-        tags: *worker_tag
-        privileged: true
-        config:
-          platform: linux
-          image: docker:///cftoolsmiths/deploy-pcf-vsphere-1.9
-          inputs:
-          - name: toolsmiths-shared-scripts
-          outputs:
-          - name: pivnet-downloads
-          run:
-            path: /bin/bash
-            args:
-            - '-c'
-            - 'cd pivnet-downloads; /usr/local/toolsmiths-shared-scripts/deploy_pcf/download-from-pivnet.rb -o'
+      - get: pivnet-opsmgr
         params:
-          PIVNET_TOKEN: *pivnet_token
-          OPSMGR_VERSION: *opsmgr_version
+          globs:
+          - '*vsphere*'
+    - do:
       - task: deploy-ops-manager
         tags: *worker_tag
         privileged: true
@@ -138,7 +145,7 @@ jobs:
           image: docker:///cftoolsmiths/deploy-pcf-vsphere-1.9
           inputs:
           - name: toolsmiths-shared-scripts
-          - name: pivnet-downloads
+          - name: pivnet-opsmgr
           run:
             path: /bin/bash
             args:
@@ -155,7 +162,7 @@ jobs:
               govc ls /${GOVC_DATACENTER}/vm/${ENV_NAME}_templates/* | xargs -I{} govc vm.destroy "{}"
               govc ls /${GOVC_DATACENTER}/vm/${ENV_NAME}_vms/* | xargs -I{} govc vm.destroy "{}"
 
-              govc import.ova --options=opsman_settings.json --name=${OPSMAN_NAME} -k=true --folder=/${GOVC_DATACENTER}/vm/${ENV_NAME} ${CURR_DIR}/pivnet-downloads/*.ova
+              govc import.ova --options=opsman_settings.json --name=${OPSMAN_NAME} -k=true --folder=/${GOVC_DATACENTER}/vm/${ENV_NAME} ${CURR_DIR}/pivnet-opsmgr/*.ova
 
               govc vm.change -c=2 -vm /${GOVC_DATACENTER}/vm/${ENV_NAME}/${OPSMAN_NAME}
               govc vm.power -on=true /${GOVC_DATACENTER}/vm/${ENV_NAME}/${OPSMAN_NAME}
@@ -281,26 +288,11 @@ jobs:
       - get: toolsmiths-shared-scripts
         passed: [configure-ops-manager]
         trigger: true
-    - do:
-      - task: download-elastic-runtime-from-pivnet
-        attempts: *retry
-        tags: *worker_tag
-        privileged: true
-        config:
-          platform: linux
-          image: docker:///cftoolsmiths/deploy-pcf-vsphere-1.9
-          inputs:
-          - name: toolsmiths-shared-scripts
-          outputs:
-          - name: pivnet-downloads
-          run:
-            path: /bin/bash
-            args:
-            - '-c'
-            - 'cd pivnet-downloads; /usr/local/toolsmiths-shared-scripts/deploy_pcf/download-from-pivnet.rb -e'
+      - get: pivnet-ert
         params:
-          PIVNET_TOKEN: *pivnet_token
-          ERT_VERSION: *ert_version
+          globs:
+          - '*pivotal'
+    - do:
       - task: upload-elastic-runtime-using-om
         tags: *worker_tag
         privileged: true
@@ -308,7 +300,7 @@ jobs:
           platform: linux
           image: docker:///cftoolsmiths/deploy-pcf-vsphere-1.9
           inputs:
-          - name: pivnet-downloads
+          - name: pivnet-ert
           run:
             path: /bin/bash
             args:
@@ -323,7 +315,7 @@ jobs:
                           --username "${DEFAULT_OPSMAN_USERNAME}" \
                           --password "${DEFAULT_OPSMAN_PASSWORD}" \
                           upload-product \
-                          --product pivnet-downloads/cf*.pivotal
+                          --product pivnet-ert/cf*.pivotal
         params:
           ENV_NAME: *env_name
           DEFAULT_OPSMAN_USERNAME: *default_opsman_username
@@ -335,14 +327,14 @@ jobs:
           platform: linux
           image: docker:///cftoolsmiths/deploy-pcf-vsphere-1.9
           inputs:
-          - name: pivnet-downloads
+          - name: pivnet-ert
           run:
             path: /bin/bash
             args:
               - '-c'
               - |
                   set -e
-                  cf_product_version=$(cd pivnet-downloads; find . -name "cf-*.pivotal" | sed -e 's/^.\/cf-//' -e 's/.pivotal$//')
+                  cf_product_version=$(cd pivnet-ert; find . -name "cf-*.pivotal" | sed -e 's/^.\/cf-//' -e 's/.pivotal$//')
                   opsman_hostname="pcf.${ENV_NAME}.cf-app.com"
                   echo "=============================================================================================="
                   echo " Staging ERT tile (version ${cf_product_version}) to @ https://$opsman_hostname ..."
