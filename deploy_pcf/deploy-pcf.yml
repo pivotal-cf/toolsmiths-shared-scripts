@@ -12,6 +12,7 @@
 opsmgr_version: &opsmgr_version {{opsmgr-version}}
 opsmgr_version_filter: &opsmgr_version_filter {{opsmgr-version-filter}}
 ert_version: &ert_version {{ert-version}}
+ert_version_filter: &ert_version_filter {{ert-version-filter}}
 environment_name: &env_name {{environment-name}}
 env_app_url: &env_app_url environments.toolsmiths.cf-app.com
 pivnet_token: &pivnet_token {{pivnet-token}}
@@ -96,7 +97,7 @@ resources:
     source:
       api_token: *pivnet_token
       product_slug: elastic-runtime
-      product_version: *ert_version
+      product_version: *ert_version_filter
       sort_by: semver
 
 resource_types:
