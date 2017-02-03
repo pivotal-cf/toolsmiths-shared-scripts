@@ -10,9 +10,7 @@
 #  --var "github-key=$(cat <path-to-github-key>)"
 ---
 opsmgr_version: &opsmgr_version {{opsmgr-version}}
-opsmgr_version_filter: &opsmgr_version_filter {{opsmgr-version-filter}}
 ert_version: &ert_version {{ert-version}}
-ert_version_filter: &ert_version_filter {{ert-version-filter}}
 environment_name: &env_name {{environment-name}}
 env_app_url: &env_app_url environments.toolsmiths.cf-app.com
 pivnet_token: &pivnet_token {{pivnet-token}}
@@ -107,7 +105,7 @@ resources:
     source:
       api_token: *pivnet_token
       product_slug: ops-manager
-      product_version: *opsmgr_version_filter
+      product_version: *opsmgr_version
       sort_by: semver
 
   - name: pivnet-ert
@@ -115,7 +113,7 @@ resources:
     source:
       api_token: *pivnet_token
       product_slug: elastic-runtime
-      product_version: *ert_version_filter
+      product_version: *ert_version
       sort_by: semver
 
 groups:
@@ -135,7 +133,6 @@ jobs:
     - aggregate:
       - get: toolsmiths-shared-scripts
       - get: pivnet-opsmgr
-        attempts: 3
         params:
           globs:
           - '*vsphere*'
@@ -292,7 +289,6 @@ jobs:
         passed: [configure-ops-manager]
         trigger: true
       - get: pivnet-ert
-        attempts: 3
         params:
           globs:
           - '*pivotal'
