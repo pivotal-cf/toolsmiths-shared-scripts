@@ -10,13 +10,14 @@
 #  --var "github-key=$(cat <path-to-github-key>)"
 ---
 opsmgr_version: &opsmgr_version {{opsmgr-version}}
+opsmgr_version_filter: &opsmgr_version_filter {{opsmgr-version-filter}}
 ert_version: &ert_version {{ert-version}}
+ert_version_filter: &ert_version_filter {{ert-version-filter}}
 environment_name: &env_name {{environment-name}}
 env_app_url: &env_app_url environments.toolsmiths.cf-app.com
 pivnet_token: &pivnet_token {{pivnet-token}}
 worker_tag: &worker_tag []
 github_key: &github_key {{github-key}}
-download_retry_attempts: &retry 3
 make_public: &make_public true
 
 default_opsman_username: &default_opsman_username {{default_opsman_username}}
@@ -84,12 +85,32 @@ resources:
         password: *smtp_password
       from: *from_email
       to: [ *contact_email, 'cf-toolsmiths@pivotal.io' ]
+  - name: pivnet-opsmgr
+    type: pivnet
+    source:
+      api_token: *pivnet_token
+      product_slug: ops-manager
+      product_version: *opsmgr_version_filter
+      sort_by: semver
+  - name: pivnet-ert
+    type: pivnet
+    source:
+      api_token: *pivnet_token
+      product_slug: elastic-runtime
+      product_version: *ert_version_filter
+      sort_by: semver
 
 resource_types:
   - name: email
     type: docker-image
     source:
       repository: pcfseceng/email-resource
+
+  - name: pivnet
+    type: docker-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
 
 jobs:
   - name: upload-om-pcf-vsphere
@@ -99,25 +120,12 @@ jobs:
     - aggregate:
       - get: toolsmiths-shared-scripts
       - get: p-runtime
-    - do:
-      - task: download-ops-manager-from-pivnet
-        attempts: *retry
-        tags: *worker_tag
-        privileged: true
-        config:
-          platform: linux
-          image: docker:///cftoolsmiths/deploy-pcf-vsphere
-          inputs:
-          - name: toolsmiths-shared-scripts
-          outputs:
-          - name: pivnet-downloads
-          - name: pipeline-output
-          run:
-            path: /bin/bash
-            args: ['-c', 'export BUNDLE_GEMFILE=${PWD}/toolsmiths-shared-scripts/deploy_pcf/Gemfile && pushd pivnet-downloads && bundle install && bundle exec ../toolsmiths-shared-scripts/deploy_pcf/download-from-pivnet.rb -o']
+      - get: pivnet-opsmgr
+        attempts: 3
         params:
-          PIVNET_TOKEN: *pivnet_token
-          OPSMGR_VERSION: *opsmgr_version
+          globs:
+          - '*vsphere*'
+    - do:
       - task: get-env-config
         tags: *worker_tag
         privileged: true
@@ -141,12 +149,12 @@ jobs:
           image: docker:///cftoolsmiths/deploy-pcf-vsphere
           inputs:
           - name: toolsmiths-shared-scripts
-          - name: pivnet-downloads
+          - name: pivnet-opsmgr
           - name: environment
           - name: p-runtime
           run:
             path: /bin/bash
-            args: ['-c', 'bundle install && ./deploy_pcf.rb -D ../../environment -N ${ENV_NAME} -O $(ls ../../pivnet-downloads/*.ova) -H -C opsmgr:destroy,opsmgr:install']
+            args: ['-c', 'bundle install && ./deploy_pcf.rb -D ../../environment -N ${ENV_NAME} -O $(ls ../../pivnet-opsmgr/*.ova) -H -C opsmgr:destroy,opsmgr:install']
             dir: toolsmiths-shared-scripts/deploy_pcf
         params:
           ENV_NAME: *env_name
@@ -220,27 +228,13 @@ jobs:
       - get: p-runtime
         passed: [configure-ops-manager]
         trigger: true
-    - do:
-      - task: download-elastic-runtime-from-pivnet
-        attempts: *retry
-        tags: *worker_tag
-        privileged: true
-        config:
-          platform: linux
-          image: docker:///cftoolsmiths/deploy-pcf-vsphere
-          inputs:
-          - name: toolsmiths-shared-scripts
-          outputs:
-          - name: pivnet-downloads
-          run:
-            path: /bin/bash
-            args: ['-c', 'export BUNDLE_GEMFILE=${PWD}/toolsmiths-shared-scripts/deploy_pcf/Gemfile && pushd pivnet-downloads && bundle install && bundle exec ../toolsmiths-shared-scripts/deploy_pcf/download-from-pivnet.rb -e']
+      - get: pivnet-ert
+        attempts: 3
         params:
-          PIVNET_TOKEN: *pivnet_token
-          ERT_VERSION: *ert_version
+          globs: ["*pivotal"]
+    - do:
       - task: get-env-config
         tags: *worker_tag
-        privileged: true
         config:
           platform: linux
           image: docker:///cftoolsmiths/deploy-pcf-vsphere
@@ -261,12 +255,12 @@ jobs:
           image: docker:///cftoolsmiths/deploy-pcf-vsphere
           inputs:
           - name: toolsmiths-shared-scripts
-          - name: pivnet-downloads
+          - name: pivnet-ert
           - name: environment
           - name: p-runtime
           run:
             path: /bin/bash
-            args: ['-c', 'bundle install && ./deploy_pcf.rb -D ../../environment -N ${ENV_NAME} -E $(ls ../../pivnet-downloads/*.pivotal) -H -C opsmgr:product:upload_add,opsmgr:product:import_stemcell']
+            args: ['-c', 'bundle install && ./deploy_pcf.rb -D ../../environment -N ${ENV_NAME} -E $(ls ../../pivnet-ert/*.pivotal) -H -C opsmgr:product:upload_add,opsmgr:product:import_stemcell']
             dir: toolsmiths-shared-scripts/deploy_pcf
         params:
           ENV_NAME: *env_name
