@@ -167,7 +167,7 @@ jobs:
 
               govc import.ova --options=opsman_settings.json --name=${OPSMAN_NAME} -k=true --folder=/${GOVC_DATACENTER}/vm/${ENV_NAME} ${CURR_DIR}/pivnet-opsmgr/*.ova
 
-              govc vm.change -c=2 -vm /${GOVC_DATACENTER}/vm/${ENV_NAME}/${OPSMAN_NAME}
+              govc vm.change -c=2 -m=8192 -vm /${GOVC_DATACENTER}/vm/${ENV_NAME}/${OPSMAN_NAME}
               govc vm.power -on=true /${GOVC_DATACENTER}/vm/${ENV_NAME}/${OPSMAN_NAME}
         params:
           ENV_NAME: *env_name
