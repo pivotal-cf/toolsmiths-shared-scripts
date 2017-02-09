@@ -324,7 +324,6 @@ jobs:
           ENV_NAME: *env_name
           DEFAULT_OPSMAN_USERNAME: *default_opsman_username
           DEFAULT_OPSMAN_PASSWORD: *default_opsman_password
-      on_failure: *email-on-failure
       - task: upload-stemcell-for-ert
         tags: *worker_tag
         privileged: true
@@ -357,7 +356,6 @@ jobs:
           DEFAULT_OPSMAN_USERNAME: *default_opsman_username
           DEFAULT_OPSMAN_PASSWORD: *default_opsman_password
           PIVNET_TOKEN: *pivnet_token
-      on_failure: *email-on-failure
       - task: stage-elastic-runtime-using-om
         tags: *worker_tag
         privileged: true
