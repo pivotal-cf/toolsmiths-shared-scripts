@@ -324,6 +324,39 @@ jobs:
           ENV_NAME: *env_name
           DEFAULT_OPSMAN_USERNAME: *default_opsman_username
           DEFAULT_OPSMAN_PASSWORD: *default_opsman_password
+        - task: upload-stemcell-for-ert
+        tags: *worker_tag
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere-1.9
+          inputs:
+          - name: pivnet-ert
+          run:
+            path: /bin/bash
+            args:
+              - '-c'
+              - |
+                  set -e
+                  cf_product_version=$(cd pivnet-ert; find . -name "cf-*.pivotal" | sed -e 's/^.\/cf-//' -e 's/.pivotal$//' -e 's/-.*//')
+                  opsman_hostname="pcf.${ENV_NAME}.cf-app.com"
+                  echo "=============================================================================================="
+                  echo " Determine ERT Stemcell dependency ... "
+                  echo "=============================================================================================="
+                  pivnet login --api-token="${PIVNET_TOKEN}"
+                  ERT_STEMCELL=$(pivnet release-dependencies -p elastic-runtime -r $cf_product_version | grep -i stemcells | xargs | cut -d' ' -f4)
+                  wget https://bosh.io/d/stemcells/bosh-vsphere-esxi-ubuntu-trusty-go_agent?v=${ERT_STEMCELL} -O bosh-stemcell-${ERT_STEMCELL}-vsphere-esxi-ubuntu-trusty-go_agent.tgz
+                  om-linux --target https://${opsman_hostname} -k \
+                          --username "${DEFAULT_OPSMAN_USERNAME}" \
+                          --password "${DEFAULT_OPSMAN_PASSWORD}" \
+                          upload-stemcell \
+                          -s bosh-stemcell-${ERT_STEMCELL}-vsphere-esxi-ubuntu-trusty-go_agent.tgz
+        params:
+          ENV_NAME: *env_name
+          DEFAULT_OPSMAN_USERNAME: *default_opsman_username
+          DEFAULT_OPSMAN_PASSWORD: *default_opsman_password
+          PIVNET_TOKEN: *pivnet_token
+      on_failure: *email-on-failure
       - task: stage-elastic-runtime-using-om
         tags: *worker_tag
         privileged: true
