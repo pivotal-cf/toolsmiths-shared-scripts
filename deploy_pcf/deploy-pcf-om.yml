@@ -171,6 +171,7 @@ jobs:
           ENV_NAME: *env_name
           OPSMGR_VERSION: *opsmgr_version
           GOVC_URL: *vcenter_url
+          GOVC_INSECURE: 1
           GOVC_USERNAME: *vcenter_username
           GOVC_PASSWORD: *vcenter_password
           GOVC_DATACENTER: *vcenter_datacenter
