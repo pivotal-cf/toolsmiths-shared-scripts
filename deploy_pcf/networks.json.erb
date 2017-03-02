@@ -4,9 +4,9 @@
       {
          "name":"default",
          "service_network":false,
-         "iaas_identifier": "<%= ENV.fetch('ENV_NAME') %>",
          "subnets":[
             {
+              "iaas_identifier": "<%= ENV.fetch('ENV_NAME') %>",
               "cidr":"<%= ENV.fetch('CIDR') %>",
               "reserved_ip_ranges":"<%= ENV.fetch('RESERVED_IP_RANGES') %>",
               "dns":"<%= ENV.fetch('DNS') %>",
