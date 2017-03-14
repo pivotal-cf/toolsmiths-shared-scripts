@@ -119,8 +119,11 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
+        tags: *worker_tag
       - get: p-runtime
+        tags: *worker_tag
       - get: pivnet-opsmgr
+        tags: *worker_tag
         attempts: 3
         params:
           globs:
@@ -166,7 +169,9 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
+        tags: *worker_tag
       - get: p-runtime
+        tags: *worker_tag
         passed: [upload-om-pcf-vsphere]
         trigger: true
     - do:
@@ -225,10 +230,13 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
+        tags: *worker_tag
       - get: p-runtime
+        tags: *worker_tag
         passed: [configure-ops-manager]
         trigger: true
       - get: pivnet-ert
+        tags: *worker_tag
         attempts: 3
         params:
           globs: ["*pivotal"]
@@ -272,7 +280,9 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
+        tags: *worker_tag
       - get: p-runtime
+        tags: *worker_tag
         passed: [upload-elastic-runtime-pcf-vsphere]
         trigger: true
     - do:
@@ -316,7 +326,9 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
+        tags: *worker_tag
       - get: p-runtime
+        tags: *worker_tag
         passed: [configure-elastic-runtime]
         trigger: true
     - do:
