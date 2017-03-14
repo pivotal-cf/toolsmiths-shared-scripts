@@ -16,7 +16,7 @@ ert_version_filter: &ert_version_filter {{ert-version-filter}}
 environment_name: &env_name {{environment-name}}
 env_app_url: &env_app_url environments.toolsmiths.cf-app.com
 pivnet_token: &pivnet_token {{pivnet-token}}
-worker_tag: &worker_tag [{{worker-tag}}]
+worker_tag: &worker_tag []
 github_key: &github_key {{github-key}}
 make_public: &make_public true
 
@@ -119,11 +119,8 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
-        tags: *worker_tag
       - get: p-runtime
-        tags: *worker_tag
       - get: pivnet-opsmgr
-        tags: *worker_tag
         attempts: 3
         params:
           globs:
@@ -169,9 +166,7 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
-        tags: *worker_tag
       - get: p-runtime
-        tags: *worker_tag
         passed: [upload-om-pcf-vsphere]
         trigger: true
     - do:
@@ -230,13 +225,10 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
-        tags: *worker_tag
       - get: p-runtime
-        tags: *worker_tag
         passed: [configure-ops-manager]
         trigger: true
       - get: pivnet-ert
-        tags: *worker_tag
         attempts: 3
         params:
           globs: ["*pivotal"]
@@ -280,9 +272,7 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
-        tags: *worker_tag
       - get: p-runtime
-        tags: *worker_tag
         passed: [upload-elastic-runtime-pcf-vsphere]
         trigger: true
     - do:
@@ -326,9 +316,7 @@ jobs:
     plan:
     - aggregate:
       - get: toolsmiths-shared-scripts
-        tags: *worker_tag
       - get: p-runtime
-        tags: *worker_tag
         passed: [configure-elastic-runtime]
         trigger: true
     - do:
