@@ -15,7 +15,7 @@ ert_version_filter: &ert_version_filter {{ert-version-filter}}
 environment_name: &env_name {{environment-name}}
 env_app_url: &env_app_url environments.toolsmiths.cf-app.com
 pivnet_token: &pivnet_token {{pivnet-token}}
-worker_tag: &worker_tag {{worker-tag}}
+worker_tag: &worker_tag [{{worker-tag}}]
 github_key: &github_key {{github-key}}
 make_public: &make_public true
 default_opsman_username: &default_opsman_username {{default_opsman_username}}
