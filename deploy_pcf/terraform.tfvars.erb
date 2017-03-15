@@ -7,5 +7,5 @@ dns_suffix = "cf-app.com"
 ssl_cert = "<%= File.read("./#{ENV.fetch('ENV_NAME')}.cf-app.com.crt").gsub("\n", '\n') %>"
 ssl_cert_private_key = "<%= File.read("./#{ENV.fetch('ENV_NAME')}.cf-app.com.key").gsub("\n", '\n') %>"
 service_account_key = <<SERVICE_ACCOUNT_KEY
-<%= ENV.fetch('GCP_SERVICE_ACCOUNT_KEY') %>
+<%= ENV.fetch('GCP_SERVICE_ACCOUNT_KEY').strip %>
 SERVICE_ACCOUNT_KEY
