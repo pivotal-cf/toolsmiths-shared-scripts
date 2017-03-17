@@ -1,0 +1,20 @@
+<% name_servers = [] -%>
+<% File.readlines('/tmp/google_name_servers.txt').each do |line| -%>
+<% name_servers << "{\"Value\": \"#{line.strip}\"}" -%>
+<% end -%>
+{
+  "Comment": "Adds NS record for <%= ENV.fetch('ENV_NAME') %>.cf-app.com",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "<%= ENV.fetch('ENV_NAME') %>.cf-app.com.",
+        "Type": "NS",
+        "TTL": 300,
+        "ResourceRecords": [
+          <%= name_servers.join(',') %>
+        ]
+      }
+    }
+  ]
+}
