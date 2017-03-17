@@ -1,5 +1,5 @@
 <% name_servers = [] -%>
-<% File.readlines('/tmp/google_name_servers.txt').each do |line| -%>
+<% File.readlines('google_name_servers.txt').each do |line| -%>
 <% name_servers << "{\"Value\": \"#{line.strip}\"}" -%>
 <% end -%>
 {
