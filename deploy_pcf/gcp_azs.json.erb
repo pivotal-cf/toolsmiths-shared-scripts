@@ -1,0 +1,5 @@
+<% azs=`terraform output azs`.strip.split(",\n") -%>
+<% azs_hash=azs.map { |az| "{\"name\": \"#{az}\"}" }.flatten.join(',') -%>
+{
+  "availability_zones": [<%= azs_hash %>]
+}
