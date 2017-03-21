@@ -1,0 +1,22 @@
+{
+  "tcp_router": {
+    "elb_names": [
+      "tcp:$(terraform output tcp_router_pool)"
+    ]
+  },
+  "router": {
+    "instances": 3,
+    "elb_names": [
+      "http:$(terraform output http_lb_backend_name)",
+      "tcp:$(terraform output ws_router_pool)"
+    ]
+  },
+  "diego_brain": {
+    "elb_names": [
+      "tcp:$(terraform output ssh_router_pool)"
+    ]
+  },
+  "diego_cell": {
+    "instances": 1
+  }
+}
