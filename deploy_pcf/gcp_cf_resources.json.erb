@@ -1,19 +1,24 @@
+<% tcp_router=`terraform output tcp_router_pool`.strip
+ http_lb=`terraform output http_lb_backend_name`.strip
+ ws_router=`terraform output ws_router_pool`.strip
+ ssh_router=`terraform output ssh_router_pool`.strip %>
+
 {
   "tcp_router": {
     "elb_names": [
-      "tcp:$(terraform output tcp_router_pool)"
+      "tcp:<%= tcp_router %>"
     ]
   },
   "router": {
     "instances": 3,
     "elb_names": [
-      "http:$(terraform output http_lb_backend_name)",
-      "tcp:$(terraform output ws_router_pool)"
+      "http:<%= http_lb %>",
+      "tcp:<%= ws_router %>"
     ]
   },
   "diego_brain": {
     "elb_names": [
-      "tcp:$(terraform output ssh_router_pool)"
+      "tcp:<%= ssh_router %>"
     ]
   },
   "diego_cell": {

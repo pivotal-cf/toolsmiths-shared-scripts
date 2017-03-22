@@ -1,7 +1,11 @@
-<% packages_bucket=`terraform output packages_bucket` -%>
-<% droplets_bucket=`terraform output droplets_bucket` -%>
-<% resources_bucket=`terraform output resources_bucket` -%>
-<% buildpacks_bucket=`terraform output buildpacks_bucket` -%>
+<% packages_bucket=`terraform output packages_bucket`.strip
+ droplets_bucket=`terraform output droplets_bucket`.strip
+ resources_bucket=`terraform output resources_bucket`.strip
+ buildpacks_bucket=`terraform output buildpacks_bucket`.strip 
+
+ cert_pem=`awk '$1=$1' ORS='\\n' $ENV_DIR/*.crt`.strip
+ private_key_pem=`awk '$1=$1' ORS='\\n' $ENV_DIR/*.key`.strip
+ %>
 {
   ".cloud_controller.system_domain": {
     "value": "sys.<%= ENV.fetch('DOMAIN') %>"
@@ -17,35 +21,15 @@
   },
   ".properties.networking_point_of_entry.external_ssl.ssl_rsa_certificate": {
     "value": {
-      "cert_pem": "$(awk '$1=$1' ORS='\\n' $ENV_DIR/$ENV-certificate.pem)",
-      "private_key_pem": "$(awk '$1=$1' ORS='\\n' $ENV_DIR/$ENV-certificate-private-key.pem)"
+      "cert_pem": "<%= cert_pem %>",
+      "private_key_pem": "<%= private_key_pem %>"
     }
   },
   ".properties.security_acknowledgement": {
     "value": "X"
   },
   ".properties.system_blobstore": {
-    "value": "external_gcs"
-  },
-  ".properties.system_blobstore.external_gcs.packages_bucket": {
-    "value": "<%= packages_bucket %>"
-  },
-  ".properties.system_blobstore.external_gcs.droplets_bucket": {
-    "value": "<%= droplets_bucket %>"
-  },
-  ".properties.system_blobstore.external_gcs.resources_bucket": {
-    "value": "<%= resources_bucket %>"
-  },
-  ".properties.system_blobstore.external_gcs.buildpacks_bucket": {
-    "value": "<%= buildpacks_bucket %>"
-  },
-  ".properties.system_blobstore.external_gcs.access_key": {
-    "value": $(jq .access_key ../storage.key.json)
-  },
-  ".properties.system_blobstore.external_gcs.secret_key": {
-    "value": {
-      "secret": $(jq .secret_key ../storage.key.json)
-    }
+    "value": "internal"
   },
   ".properties.tcp_routing": {
     "value": "enable"
