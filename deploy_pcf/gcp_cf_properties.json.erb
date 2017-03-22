@@ -3,8 +3,8 @@
  resources_bucket=`terraform output resources_bucket`.strip
  buildpacks_bucket=`terraform output buildpacks_bucket`.strip 
 
- cert_pem=`awk '$1=$1' ORS='\\n' $ENV_DIR/*.crt`.strip
- private_key_pem=`awk '$1=$1' ORS='\\n' $ENV_DIR/*.key`.strip
+ cert_pem=`awk '$1=$1' ORS='\\n' *.crt`.strip
+ private_key_pem=`awk '$1=$1' ORS='\\n' *.key`.strip
  %>
 {
   ".cloud_controller.system_domain": {
