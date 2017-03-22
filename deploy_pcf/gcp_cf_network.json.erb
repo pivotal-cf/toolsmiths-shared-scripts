@@ -1,11 +1,11 @@
 <% cf_az=`terraform output azs`.strip.split(',')[0] %>
 {
   "singleton_availability_zone": {
-    "name": "<%= cf_az %>")
+    "name": "<%= cf_az %>"
   },
   "other_availability_zones": [
     {
-      "name": "<%= cf_az %>")
+      "name": "<%= cf_az %>"
     }
   ],
   "network": {
