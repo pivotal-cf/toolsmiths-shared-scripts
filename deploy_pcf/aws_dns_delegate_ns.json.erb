@@ -6,7 +6,7 @@
   "Comment": "Adds NS record for <%= ENV.fetch('ENV_NAME') %>.cf-app.com",
   "Changes": [
     {
-      "Action": "UPSERT",
+      "Action": "<%= ENV['ACTION'] || 'UPSERT' %>",
       "ResourceRecordSet": {
         "Name": "<%= ENV.fetch('ENV_NAME') %>.cf-app.com.",
         "Type": "NS",
