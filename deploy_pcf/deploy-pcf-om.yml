@@ -1,5 +1,4 @@
 # To set your Concourse pipeline:
-# WARNING: This file is used to create public pipelines. Set "make_public: false"
 # fly -t <your-concourse> set-pipeline \
 #  --config deploy-pcf.yml \
 #  --pipeline deploy-pcf \
@@ -17,7 +16,6 @@ env_app_url: &env_app_url environments.toolsmiths.cf-app.com
 pivnet_token: &pivnet_token {{pivnet-token}}
 worker_tag: &worker_tag [{{worker-tag}}]
 github_key: &github_key {{github-key}}
-make_public: &make_public true
 default_opsman_username: &default_opsman_username {{default_opsman_username}}
 default_opsman_password: &default_opsman_password {{default_opsman_password}}
 haproxy_ip: &haproxy_ip {{haproxy_ip}}
@@ -127,7 +125,6 @@ groups:
 
 jobs:
   - name: upload-om-pcf-vsphere
-    public: *make_public
     serial: true
     plan:
     - aggregate:
