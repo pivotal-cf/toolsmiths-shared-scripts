@@ -358,6 +358,39 @@ jobs:
           ENV_NAME: *env_name
           DEFAULT_OPSMAN_USERNAME: *default_opsman_username
           DEFAULT_OPSMAN_PASSWORD: *default_opsman_password
+      - task: upload-stemcell-for-ert
+        tags: *worker_tag
+        config:
+          platform: linux
+          image: docker:///cftoolsmiths/deploy-pcf-vsphere-1.9
+          inputs:
+          - name: pivnet-ert
+          run:
+            path: /bin/bash
+            args:
+            - -c
+            - |
+                set -e
+
+                stemcell_version=$(unzip -c "pivnet-ert/cf-*.pivotal" metadata/cf.yml | grep -A3 stemcell | grep version | grep -oE "[0-9\.]+")
+                echo "=============================================================================================="
+                echo " Downloading stemcell version ${stemcell_version} ... "
+                echo "=============================================================================================="
+                stemcell_url="https://bosh.io/d/stemcells/bosh-vsphere-esxi-ubuntu-trusty-go_agent?v=${stemcell_version}"
+                curl -L "$stemcell_url" -o "/tmp/bosh-stemcell-${stemcell_version}-vsphere-esxi-ubuntu-trusty-go_agent.tgz"
+                echo
+                echo "=============================================================================================="
+                echo " Uploading stemcell version ${stemcell_version} ... "
+                echo "=============================================================================================="
+                om-linux --target https://pcf.${ENV_NAME}.cf-app.com -k \
+                         --username "${DEFAULT_OPSMAN_USERNAME}" \
+                         --password "${DEFAULT_OPSMAN_PASSWORD}" \
+                         upload-stemcell \
+                         -s "/tmp/bosh-stemcell-${stemcell_version}-vsphere-esxi-ubuntu-trusty-go_agent.tgz"
+        params:
+          ENV_NAME: *env_name
+          DEFAULT_OPSMAN_USERNAME: *default_opsman_username
+          DEFAULT_OPSMAN_PASSWORD: *default_opsman_password
       on_failure: *email-on-failure
 
   - name: configure-elastic-runtime
