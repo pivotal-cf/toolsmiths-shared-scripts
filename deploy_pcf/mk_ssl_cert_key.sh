@@ -1,8 +1,27 @@
-#! /bin/bash
+#!/bin/bash
+set -e
 
-set -ex 
+[[ ${1} ]] && DOMAIN=${1}
+: ${DOMAIN:?must be set the DNS domain root (ex: example.cf-app.com)}
+: ${KEY_BITS:=2048}
+: ${DAYS:=365}
 
-DOMAIN=$1
+openssl req -new -x509 -nodes -sha256 -newkey rsa:${KEY_BITS} -days ${DAYS} -keyout ${DOMAIN}.key -out ${DOMAIN}.crt -config <( cat << EOF
+[ req ]
+prompt = no
+distinguished_name    = dn
+x509_extensions = alternate_names
 
+[ dn ]
+C  = US
+O = Pivotal
+CN = *.${DOMAIN}
 
-openssl req -x509 -newkey rsa:2048 -keyout ${DOMAIN}.key -out ${DOMAIN}.crt -days 3650 -nodes -subj "/C=US/ST=California/L=San Francisco/O=Pivotal Software Inc./CN=*.${DOMAIN}/emailAddress=cf-toolsmiths@pivotal.io/subjectAltName=DNS.1=${DOMAIN},DNS.2=*.uaa.${DOMAIN},DNS.3=*.login.${DOMAIN}"
+[ alternate_names ]
+keyUsage = critical, digitalSignature
+extendedKeyUsage = clientAuth, serverAuth
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid, issuer
+subjectAltName = DNS:*.${DOMAIN}, DNS:*.login.${DOMAIN}, DNS:*.uaa.${DOMAIN}
+EOF
+)
