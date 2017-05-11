@@ -25,8 +25,8 @@
   },
   ".properties.networking_point_of_entry.haproxy.ssl_rsa_certificate": {
     "value": {
-      "private_key_pem": <%= ENV.fetch('DOMAIN_KEY') %>,
-      "cert_pem": <%= ENV.fetch('DOMAIN_CRT') %>
+      "private_key_pem": <%= ENV.fetch('DOMAIN_KEY').dump %>,
+      "cert_pem": <%= ENV.fetch('DOMAIN_CRT').dump %>
     }
   }
 }
