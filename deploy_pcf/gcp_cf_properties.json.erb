@@ -1,10 +1,7 @@
 <% packages_bucket=`terraform output packages_bucket`.strip
  droplets_bucket=`terraform output droplets_bucket`.strip
  resources_bucket=`terraform output resources_bucket`.strip
- buildpacks_bucket=`terraform output buildpacks_bucket`.strip 
-
- cert_pem=`awk '$1=$1' ORS='\\n' *.crt`.strip
- private_key_pem=`awk '$1=$1' ORS='\\n' *.key`.strip
+ buildpacks_bucket=`terraform output buildpacks_bucket`.strip
  %>
 {
   ".cloud_controller.system_domain": {
@@ -21,8 +18,8 @@
   },
   ".properties.networking_point_of_entry.external_ssl.ssl_rsa_certificate": {
     "value": {
-      "cert_pem": <%= cert_pem.dump %>,
-      "private_key_pem": <%= private_key_pem.dump %>
+      "cert_pem": <%= ENV.fetch('DOMAIN_CRT').dump %>,
+      "private_key_pem": <%= ENV.fetch('DOMAIN_KEY').dump %>
     }
   },
   ".properties.security_acknowledgement": {
@@ -39,5 +36,11 @@
   },
   ".mysql_monitor.recipient_email": {
     "value": "test@example.com"
+  },
+  ".uaa.service_provider_key_credentials": {
+    "value": {
+      "cert_pem": <%= ENV.fetch('DOMAIN_CRT').dump %>,
+      "private_key_pem": <%= ENV.fetch('DOMAIN_KEY').dump %>
+    }
   }
 }
