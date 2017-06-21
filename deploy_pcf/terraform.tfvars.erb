@@ -1,9 +1,20 @@
-<% region = ENV.fetch('ENV_REGION', 'us-central1') %>
+<% 
+  region = ENV.fetch('ENV_REGION', 'us-central1') 
+
+  case region
+  	when 'us-central1'
+  		zones = ['us-central1-a', 'us-central1-b', 'us-central1-c']
+  	when 'europe-west1'
+  		zones = ['europe-west1-b', 'europe-west1-c', 'europe-west1-d']
+  	else
+  		zones = [ "#{region}-a"]
+   end 
+%>
 
 env_name = "<%= ENV.fetch('ENV_NAME') %>"
 region = "<%= region %>"
 opsman_image_url = "https://storage.googleapis.com/<%= ENV.fetch('ops_man_image') %>"
-zones = ["<%= region %>-a", "<%= region %>-b", "<%= region %>-c"]
+zones = <%= zones %>
 project = "<%= ENV.fetch('GCP_PROJECT_NAME') %>"
 dns_suffix = "cf-app.com"
 ssl_cert = "<%= File.read("./#{ENV.fetch('ENV_NAME')}.cf-app.com.crt").gsub("\n", '\n') %>"
