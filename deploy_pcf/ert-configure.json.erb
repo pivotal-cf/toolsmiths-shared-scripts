@@ -9,11 +9,11 @@
   },
   ".cloud_controller.system_domain": {
     "type": "wildcard_domain",
-    "value": "<%= ENV.fetch('DOMAIN') %>"
+    "value": "sys.<%= ENV.fetch('DOMAIN') %>"
   },
   ".cloud_controller.apps_domain": {
     "type": "wildcard_domain",
-    "value": "<%= ENV.fetch('DOMAIN') %>"
+    "value": "apps.<%= ENV.fetch('DOMAIN') %>"
   },
   ".ha_proxy.static_ips": {
     "type": "ip_ranges",
