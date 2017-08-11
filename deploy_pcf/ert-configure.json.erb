@@ -23,7 +23,11 @@
     "type": "boolean",
     "value": true
   },
+  <%- if ENV.fetch('ERT_VERSION').gsub('/','').to_f >= 1.12 -%>
+  ".properties.networking_poe_ssl_cert": {
+  <%- else -%>
   ".properties.networking_point_of_entry.haproxy.ssl_rsa_certificate": {
+  <%- end -%>
     "value": {
       "private_key_pem": <%= ENV.fetch('DOMAIN_KEY').dump %>,
       "cert_pem": <%= ENV.fetch('DOMAIN_CRT').dump %>
