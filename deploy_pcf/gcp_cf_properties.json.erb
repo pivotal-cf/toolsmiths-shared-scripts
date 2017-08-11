@@ -16,7 +16,11 @@
   ".properties.networking_point_of_entry": {
     "value": "external_ssl"
   },
+  <%- if ENV.fetch('ERT_VERSION').gsub('/','').to_f >= 1.12 -%>
+  ".properties.networking_poe_ssl_cert": {
+  <%- else -%>
   ".properties.networking_point_of_entry.external_ssl.ssl_rsa_certificate": {
+  <%- end -%>
     "value": {
       "cert_pem": <%= ENV.fetch('DOMAIN_CRT').dump %>,
       "private_key_pem": <%= ENV.fetch('DOMAIN_KEY').dump %>
