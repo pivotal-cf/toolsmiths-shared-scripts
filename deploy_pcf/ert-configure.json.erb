@@ -23,8 +23,7 @@
     "type": "boolean",
     "value": true
   },
-  <%- ert_version = ENV.fetch('ERT_VERSION').gsub('\\','')
-    if ert_version.split(".")[0].to_i >= 1 and ert_version.split(".")[1].to_i >= 12 -%>
+  <%- if Gem::Version.new(ENV.fetch('ERT_VERSION').gsub('\\','')) >= Gem::Version.new('1.12') -%>
   ".properties.networking_poe_ssl_cert": {
   <%- else -%>
   ".properties.networking_point_of_entry.haproxy.ssl_rsa_certificate": {
