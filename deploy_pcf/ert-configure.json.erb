@@ -23,7 +23,8 @@
     "type": "boolean",
     "value": true
   },
-  <%- if ENV.fetch('ERT_VERSION').gsub('\\','').to_f >= 1.12 -%>
+  <%- ert_version = ENV.fetch('ERT_VERSION').gsub('\\','')
+    if ert_version.split(".")[0].to_i >= 1 and ert_version.split(".")[1].to_i >= 12 -%>
   ".properties.networking_poe_ssl_cert": {
   <%- else -%>
   ".properties.networking_point_of_entry.haproxy.ssl_rsa_certificate": {
