@@ -17,6 +17,9 @@
     "value": "external_ssl"
   },
   <%- if Gem::Version.new(ENV.fetch('ERT_VERSION').gsub('\\','').gsub('..*','')) >= Gem::Version.new('1.12') -%>
+  ".properties.haproxy_forward_tls": {
+    "value": "disable"
+  },
   ".properties.networking_poe_ssl_cert": {
   <%- else -%>
   ".properties.networking_point_of_entry.external_ssl.ssl_rsa_certificate": {
