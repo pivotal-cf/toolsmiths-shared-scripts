@@ -27,11 +27,19 @@
   ".properties.haproxy_forward_tls": {
     "value": "disable"
   },
-  <%- end -%>
-  ".properties.networking_point_of_entry.haproxy.ssl_rsa_certificate": {
+  ".properties.networking_poe_ssl_certs": [
     "value": {
+      "name": "self-signed",
       "private_key_pem": <%= ENV.fetch('DOMAIN_KEY').dump %>,
       "cert_pem": <%= ENV.fetch('DOMAIN_CRT').dump %>
     }
-  }
+  ]
+  <%- else -%>
+    ".properties.networking_point_of_entry.haproxy.ssl_rsa_certificate": {
+      "value": {
+        "private_key_pem": <%= ENV.fetch('DOMAIN_KEY').dump %>,
+        "cert_pem": <%= ENV.fetch('DOMAIN_CRT').dump %>
+      }
+    }
+    <%- end -%>
 }
