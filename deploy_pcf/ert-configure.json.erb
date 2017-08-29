@@ -31,7 +31,7 @@
     "value": [{
       "name": "self-signed",
       "private_key": <%= ENV.fetch('DOMAIN_KEY').dump %>,
-      "cert_chain": <%= ENV.fetch('DOMAIN_CRT').dump %>
+      "cert_chain": <%= (ENV.fetch('DOMAIN_CRT') + "\n").dump %>
     }]
   }
   <%- else -%>
