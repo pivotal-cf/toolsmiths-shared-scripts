@@ -28,11 +28,10 @@
     "value": "disable"
   },
   ".properties.networking_poe_ssl_certs": {
-    "type": "collection",
     "value": [{
-      "name": { "value": "self-signed" },
-      "private_key": { "value": <%= ENV.fetch('DOMAIN_KEY').dump %> },
-      "cert_chain": { "value": <%= ENV.fetch('DOMAIN_CRT').dump %> }
+      "name": "self-signed",
+      "private_key": <%= ENV.fetch('DOMAIN_KEY').dump %>,
+      "cert_chain": <%= ENV.fetch('DOMAIN_CRT').dump %>
     }]
   }
   <%- else -%>
