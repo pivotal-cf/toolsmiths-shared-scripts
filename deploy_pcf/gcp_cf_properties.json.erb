@@ -32,7 +32,7 @@
     "value": {
       "private_key_pem": <%= ENV.fetch('DOMAIN_KEY').dump %>,
       "cert_pem": <%= ENV.fetch('DOMAIN_CRT').dump %>
-    },
+    }
   },
   <%- end -%>
   ".properties.security_acknowledgement": {
