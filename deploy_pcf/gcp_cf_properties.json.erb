@@ -20,15 +20,21 @@
   ".properties.haproxy_forward_tls": {
     "value": "disable"
   },
-  ".properties.networking_poe_ssl_cert": {
+  ".properties.networking_poe_ssl_certs": {
+    "value": [{
+      "name": "self-signed",
+      "private_key": <%= ENV.fetch('DOMAIN_KEY').dump %>,
+      "cert_chain": <%= (ENV.fetch('DOMAIN_CRT') + "\n").dump %>
+    }]
+  },
   <%- else -%>
   ".properties.networking_point_of_entry.external_ssl.ssl_rsa_certificate": {
-  <%- end -%>
     "value": {
-      "cert_pem": <%= ENV.fetch('DOMAIN_CRT').dump %>,
-      "private_key_pem": <%= ENV.fetch('DOMAIN_KEY').dump %>
-    }
+      "private_key_pem": <%= ENV.fetch('DOMAIN_KEY').dump %>,
+      "cert_pem": <%= ENV.fetch('DOMAIN_CRT').dump %>
+    },
   },
+  <%- end -%>
   ".properties.security_acknowledgement": {
     "value": "X"
   },
