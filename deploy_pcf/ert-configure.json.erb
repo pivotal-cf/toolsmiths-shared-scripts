@@ -27,6 +27,12 @@
   ".properties.haproxy_forward_tls": {
     "value": "disable"
   },
+  ".properties.gorouter_ssl_ciphers": {
+    "value": "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"
+  },
+  ".properties.haproxy_ssl_ciphers": {
+    "value": "DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"
+  },
   ".properties.networking_poe_ssl_cert": {
   <%- else -%>
   ".properties.networking_point_of_entry.haproxy.ssl_rsa_certificate": {
