@@ -23,7 +23,7 @@
     "type": "boolean",
     "value": true
   },
-  <%- if Gem::Version.new(ENV.fetch('ERT_VERSION').gsub('\\','').gsub('..*','')) >= Gem::Version.new('1.12') -%>
+  <%- if Gem::Version.new(ENV.fetch('ERT_VERSION')) > Gem::Version.new('1.11.9999') -%>
   ".properties.haproxy_forward_tls": {
     "value": "disable"
   },
