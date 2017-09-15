@@ -1,4 +1,5 @@
-<% cf_azs=`terraform output azs`.strip.split(",\n") %>
+<% cf_azs=`terraform output azs`.strip.split(",\n") 
+ert_subnet_name=`terraform output ert_subnet_name`.strip %>
 {
   "singleton_availability_zone": {
     "name": "<%= cf_azs[0] %>"
