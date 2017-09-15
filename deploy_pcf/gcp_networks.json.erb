@@ -17,7 +17,7 @@
   "icmp_checks_enabled": false,
   "networks": [
     {
-      "name": "opsman-network",
+      "name": "<%= management_subnet_name %>",
       "subnets": [{
         "iaas_identifier": "<%= network_name %>/<%= management_subnet_name %>/<%= region %>",
         "cidr": "<%= management_subnet_cidrs %>",
@@ -28,7 +28,7 @@
       }]
     },
     {
-      "name": "ert-network",
+      "name": "<%= ert_subnet_name %>",
       "subnets": [{
         "iaas_identifier": "<%= network_name %>/<%= ert_subnet_name %>/<%= region %>",
         "cidr": "<%= ert_subnet_cidrs %>",
@@ -39,7 +39,7 @@
       }]
     },
     {
-      "name": "services-network",
+      "name": "<%= services_subnet_name %>",
       "service_network": true,
       "subnets": [{
         "iaas_identifier": "<%= network_name %>/<%= services_subnet_name %>/<%= region %>",

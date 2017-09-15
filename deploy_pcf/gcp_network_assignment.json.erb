@@ -1,5 +1,5 @@
 <% azs=`terraform output azs`.strip.split(",\n") -%>
 {
   "singleton_availability_zone": "<%= azs[0] %>",
-  "network": "opsman-network"
+  "network": "<%= management_subnet_name %>"
 }
