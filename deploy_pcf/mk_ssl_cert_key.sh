@@ -22,6 +22,6 @@ keyUsage = critical, digitalSignature
 extendedKeyUsage = clientAuth, serverAuth
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid, issuer
-subjectAltName = DNS:*.${DOMAIN}, DNS:*.apps.${DOMAIN}, DNS:*.sys.${DOMAIN}, DNS:*.login.${DOMAIN}, DNS:*.uaa.${DOMAIN}
+subjectAltName = DNS:*.${DOMAIN}, DNS:*.apps.${DOMAIN}, DNS:*.sys.${DOMAIN}, DNS:*.login.sys.${DOMAIN}, DNS:*.uaa.sys.${DOMAIN}
 EOF
 )
