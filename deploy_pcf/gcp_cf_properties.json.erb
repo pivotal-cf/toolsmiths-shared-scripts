@@ -1,8 +1,3 @@
-<% packages_bucket=`terraform output packages_bucket`.strip
- droplets_bucket=`terraform output droplets_bucket`.strip
- resources_bucket=`terraform output resources_bucket`.strip
- buildpacks_bucket=`terraform output buildpacks_bucket`.strip
- %>
 {
   ".cloud_controller.system_domain": {
     "value": "sys.<%= ENV.fetch('DOMAIN') %>"
