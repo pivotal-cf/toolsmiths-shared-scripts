@@ -23,7 +23,7 @@
     "type": "boolean",
     "value": true
   },
-  <%- if Gem::Version.new(ENV.fetch('ERT_VERSION')) > Gem::Version.new('1.9.9999') -%>
+  <%- if ( Gem::Version.new(ENV.fetch('ERT_VERSION')) > Gem::Version.new('1.9.9999')) && Gem::Version.new(ENV.fetch('ERT_VERSION')) < Gem::Version.new('1.11.9999')) -%>
   ".properties.networking_point_of_entry.haproxy.ssl_ciphers": {
     "value": "DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"
   },
