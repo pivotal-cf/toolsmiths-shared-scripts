@@ -30,9 +30,11 @@
       "cert_pem": <%= ENV.fetch('DOMAIN_CRT').dump %>
     }
   },
-  <%- if ( Gem::Version.new(ENV.fetch('ERT_VERSION')) > Gem::Version.new('1.9.9999')) && ( Gem::Version.new(ENV.fetch('ERT_VERSION')) < Gem::Version.new('1.11.9999')) -%>
-  ".properties.networking_point_of_entry.external_ssl.ssl_ciphers": {
-    "value": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+  <%- if ( Gem::Version.new(ENV.fetch('ERT_VERSION')) > Gem::Version.new('1.9.9999')) -%>
+  ".properties.credhub_key_encryption_password": {
+    "value": {
+      "secret": <%= ENV.fetch('DEFAULT_OPSMAN_PASSWORD').dump %>
+    }
   },
   <%- end -%>
   ".properties.security_acknowledgement": {
