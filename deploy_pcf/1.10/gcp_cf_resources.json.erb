@@ -1,0 +1,61 @@
+<% tcp_router=`terraform output tcp_router_pool`.strip
+ http_lb=`terraform output http_lb_backend_name`.strip
+ ws_router=`terraform output ws_router_pool`.strip
+ ssh_router=`terraform output ssh_router_pool`.strip %>
+
+{
+  "tcp_router": {
+    "elb_names": [
+      "tcp:<%= tcp_router %>"
+    ]
+  },
+  "consul_server": {
+    "instances": 1
+  },
+  "nats": {
+    "instances": 1
+  },
+  "nfs_server": {
+    "instances": 1
+  },
+  "mysql_proxy": {
+    "instances": 1
+  },
+  "diego_database": {
+    "instances": 1
+  },
+  "mysql": {
+    "instances": 1
+  },
+  "uaa": {
+    "instances": 1
+  },
+  "cloud_controller": {
+    "instances": 1
+  },
+  "cloud_controller_worker": {
+    "instances": 1
+  },
+  "loggregator_trafficcontroller": {
+    "instances": 1
+  },
+  "doppler": {
+    "instances": 1
+  },
+  "router": {
+    "instances": 1,
+    "elb_names": [
+      "http:<%= http_lb %>",
+      "tcp:<%= ws_router %>"
+    ]
+  },
+  "diego_brain": {
+    "instances": 1,
+    "elb_names": [
+      "tcp:<%= ssh_router %>"
+    ]
+  },
+  "diego_cell": {
+    "instances": 1
+  }
+}

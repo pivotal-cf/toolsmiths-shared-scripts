@@ -1,0 +1,24 @@
+<% http_lb=`terraform output http_lb_backend_name`.strip
+ ws_router=`terraform output ws_router_pool`.strip
+ ssh_router=`terraform output ssh_router_pool`.strip %>
+
+{
+  "backup-prepare": {
+    "instances": 0
+  },
+  "mysql_monitor": {
+    "instances": 0
+  },
+  "router": {
+    "instances": 1,
+    "elb_names": [
+      "http:<%= http_lb %>",
+      "tcp:<%= ws_router %>"
+    ]
+  },
+  "control": {
+    "elb_names": [
+      "tcp:<%= ssh_router %>"
+    ]
+  }
+}
