@@ -28,11 +28,6 @@
       }
     ]
   },
-  ".properties.credhub_key_encryption_password": {
-    "value": {
-      "secret": <%= (ENV.fetch('DEFAULT_OPSMAN_PASSWORD') * 3)[0..25].dump %>
-    }
-  },
   ".properties.security_acknowledgement": {
     "value": "X"
   },
