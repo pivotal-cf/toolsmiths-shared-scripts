@@ -23,6 +23,11 @@
     "type": "boolean",
     "value": true
   },
+  ".properties.credhub_key_encryption_password": {
+    "value": {
+      "secret": <%= (ENV.fetch('DEFAULT_OPSMAN_PASSWORD') * 3)[0..25].dump %>
+    }
+  },
   ".properties.haproxy_forward_tls": {
     "value": "disable"
   },
