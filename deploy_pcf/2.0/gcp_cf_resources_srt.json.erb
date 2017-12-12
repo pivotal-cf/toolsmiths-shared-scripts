@@ -10,12 +10,14 @@
     "instances": 0
   },
   "router": {
+    "instances": 1,
     "elb_names": [
       "http:<%= http_lb %>",
       "tcp:<%= ws_router %>"
     ]
   },
   "control": {
+    "instances": 1,
     "elb_names": [
       "tcp:<%= ssh_router %>"
     ]

@@ -10,12 +10,14 @@
     ]
   },
   "router": {
+    "instances": 1,
     "elb_names": [
       "http:<%= http_lb %>",
       "tcp:<%= ws_router %>"
     ]
   },
   "diego_brain": {
+    "instances": 1,
     "elb_names": [
       "tcp:<%= ssh_router %>"
     ]
