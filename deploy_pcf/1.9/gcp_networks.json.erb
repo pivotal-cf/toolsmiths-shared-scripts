@@ -22,7 +22,7 @@
         "iaas_identifier": "<%= network_name %>/<%= management_subnet_name %>/<%= region %>",
         "cidr": "<%= management_subnet_cidrs %>",
         "reserved_ip_ranges": "<%= management_subnet_base_addr %>.0-<%= management_subnet_base_addr %>.4",
-        "dns": "8.8.8.8",
+        "dns": "169.254.169.254",
         "gateway": "<%= management_subnet_gateway %>",
         "availability_zones": <%= azs %>
       }]
@@ -33,7 +33,7 @@
         "iaas_identifier": "<%= network_name %>/<%= ert_subnet_name %>/<%= region %>",
         "cidr": "<%= ert_subnet_cidrs %>",
         "reserved_ip_ranges": "<%= ert_subnet_base_addr %>.0-<%= ert_subnet_base_addr %>.4",
-        "dns": "8.8.8.8",
+        "dns": "169.254.169.254",
         "gateway": "<%= ert_subnet_gateway %>",
         "availability_zones": <%= azs %>
       }]
@@ -45,7 +45,7 @@
         "iaas_identifier": "<%= network_name %>/<%= services_subnet_name %>/<%= region %>",
         "cidr": "<%= services_subnet_cidrs %>",
         "reserved_ip_ranges": "<%= services_subnet_base_addr %>.0-<%= services_subnet_base_addr %>.4",
-        "dns": "8.8.8.8",
+        "dns": "169.254.169.254",
         "gateway": "<%= services_subnet_gateway %>",
         "availability_zones": <%= azs %>
       }]
