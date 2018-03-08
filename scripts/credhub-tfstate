@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+require 'zlib'
+
+def usage
+  puts "Usage:"
+  puts "    Gzips and uuencode/decodes Terraform tfstate and stores/retrieves from credhub"
+  puts "    Requires ENV_NAME environment variable"
+  puts "    credhub-tfstate set|get"
+end
+
+if ARGV.length() == 1 && !(ENV['ENV_NAME'].nil?())
+  if ARGV[0] == "set"
+    tfstate = File.read("terraform.tfstate", tfstate)
+    gzipped_tfstate = ""
+
+    gzipped_writer = StringIO.new(gzipped_tfstate)
+    gzw = Zlib::GzipWriter.new(gzipped_writer)
+    gzw.write(tfstate)
+    gzw.close()
+
+    encoded_tfstate = [gzipped_tfstate].pack('u')
+
+    #Store in an env var to get around funky Ruby interpolation issues.
+    ENV['ENCODED_TFSTATE'] = encoded_tfstate
+
+    `credhub set -t value -n "$ENV_NAME/tfstate_gz_uu" -v "$ENCODED_TFSTATE"`
+
+  elsif ARGV[0] == "get"
+    encoded_tfstate = `credhub get -n "$ENV_NAME/tfstate_gz_uu" --output-json | jq -r '.["value"]'`
+
+    #uudecode the data
+    decoded_tfstate = encoded_tfstate.unpack("u")
+    tfstate_reader = StringIO.new(decoded_tfstate[0])
+
+    #Gunzip the data
+    gz = Zlib::GzipReader.new(tfstate_reader)
+    tfstate = gz.read()
+    gz.close()
+
+    File.write("terraform.tfstate",tfstate)
+  end
+else
+  usage()
+  exit 1
+end
