@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'zlib'
+require 'stringio'
 
 def usage
   puts "Usage:"
