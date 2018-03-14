@@ -1,5 +1,5 @@
 <% cf_azs=`terraform output azs`.strip.split(",\n") 
-pas_subnet_name=`terraform output pas_subnet_name`.strip %>
+ert_subnet_name=`terraform output ert_subnet_name`.strip %>
 {
   "singleton_availability_zone": {
     "name": "<%= cf_azs[1] %>"
@@ -10,6 +10,6 @@ pas_subnet_name=`terraform output pas_subnet_name`.strip %>
     { "name": "<%= cf_azs[2] %>" }
   ],
   "network": {
-    "name": "<%= pas_subnet_name %>"
+    "name": "<%= ert_subnet_name %>"
   }
 }

@@ -5,10 +5,10 @@
  management_subnet_base_addr=management_subnet_cidrs[/[1..223].[0..255].[0..255]./] 
  management_subnet_gateway=`terraform output management_subnet_gateway`.strip 
  azs=`terraform output azs`.strip.split(",\n") 
- pas_subnet_name=`terraform output pas_subnet_name`.strip 
- pas_subnet_cidrs=`terraform output pas_subnet_cidrs`.strip 
- pas_subnet_base_addr=pas_subnet_cidrs[/[1..223].[0..255].[0..255]./] 
- pas_subnet_gateway=`terraform output pas_subnet_gateway`.strip 
+ ert_subnet_name=`terraform output ert_subnet_name`.strip 
+ ert_subnet_cidrs=`terraform output ert_subnet_cidrs`.strip 
+ ert_subnet_base_addr=ert_subnet_cidrs[/[1..223].[0..255].[0..255]./] 
+ ert_subnet_gateway=`terraform output ert_subnet_gateway`.strip 
  services_subnet_name=`terraform output services_subnet_name`.strip 
  services_subnet_cidrs=`terraform output services_subnet_cidrs`.strip 
  services_subnet_base_addr=services_subnet_cidrs[/[1..223].[0..255].[0..255]./] 
@@ -28,13 +28,13 @@
       }]
     },
     {
-      "name": "<%= pas_subnet_name %>",
+      "name": "<%= ert_subnet_name %>",
       "subnets": [{
-        "iaas_identifier": "<%= network_name %>/<%= pas_subnet_name %>/<%= region %>",
-        "cidr": "<%= pas_subnet_cidrs %>",
-        "reserved_ip_ranges": "<%= pas_subnet_base_addr %>.0-<%= pas_subnet_base_addr %>.4",
+        "iaas_identifier": "<%= network_name %>/<%= ert_subnet_name %>/<%= region %>",
+        "cidr": "<%= ert_subnet_cidrs %>",
+        "reserved_ip_ranges": "<%= ert_subnet_base_addr %>.0-<%= ert_subnet_base_addr %>.4",
         "dns": "8.8.8.8",
-        "gateway": "<%= pas_subnet_gateway %>",
+        "gateway": "<%= ert_subnet_gateway %>",
         "availability_zones": <%= azs %>
       }]
     },
