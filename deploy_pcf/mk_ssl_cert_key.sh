@@ -6,7 +6,7 @@ set -e
 : ${KEY_BITS:=2048}
 : ${DAYS:=365}
 
-openssl req -new -x509 -nodes -sha256 -newkey rsa:${KEY_BITS} -days ${DAYS} -keyout ${ENV_NAME}.ca.key -out ${ENV_NAME}.ca.crt -config <( cat << EOF
+openssl req -new -x509 -nodes -sha256 -newkey rsa:${KEY_BITS} -days ${DAYS} -keyout ${ENV_NAME}.ca.key.pkcs8 -out ${ENV_NAME}.ca.crt -config <( cat << EOF
 [ req ]
 prompt = no
 distinguished_name    = dn
@@ -17,3 +17,5 @@ O = Pivotal
 
 EOF
 )
+
+openssl rsa -in ${ENV_NAME}.ca.key.pkcs8 -out ${ENV_NAME}.ca.key
