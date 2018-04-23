@@ -1,0 +1,23 @@
+[
+  {
+    name: "toolsmiths.n1-highmem-2.128",
+    ram: 13312,
+    cpu: 2,
+    ephemeral_disk: 131072,
+    builtin: false
+  },
+  {
+    name: "toolsmiths.custom-1-2.32",
+    ram: 2048,
+    cpu: 1,
+    ephemeral_disk: 32768,
+    builtin: false
+  },
+  {
+    name: "toolsmiths.custom-1-4.32",
+    ram: 4096,
+    cpu: 1,
+    ephemeral_disk: 32768,
+    builtin: false
+  }
+]
