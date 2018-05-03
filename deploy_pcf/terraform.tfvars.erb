@@ -17,7 +17,7 @@ opsman_image_url = "https://storage.googleapis.com/<%= ENV.fetch('ops_man_image'
 zones = <%= zones %>
 project = "<%= ENV.fetch('GCP_PROJECT_NAME') %>"
 dns_suffix = "cf-app.com"
-create_gcs_buckets = false
+create_gcs_buckets = true
 ssl_cert = "<%= File.read("./#{ENV.fetch('ENV_NAME')}.cf-app.com.crt").gsub("\n", '\n') %>"
 ssl_private_key = "<%= File.read("./#{ENV.fetch('ENV_NAME')}.cf-app.com.key").gsub("\n", '\n') %>"
 service_account_key = <<SERVICE_ACCOUNT_KEY
