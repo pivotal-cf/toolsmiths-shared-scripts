@@ -52,28 +52,7 @@
     "value": "X"
   },
   ".properties.system_blobstore": {
-    "value": "external_gcs_service_account"
-  },
-  ".properties.system_blobstore.external_gcs_service_account.buildpacks_bucket": {
-    "value": "<%= buildpacks_bucket %>"
-  },
-  ".properties.system_blobstore.external_gcs_service_account.droplets_bucket": {
-    "value": "<%= droplets_bucket %>"
-  },
-  ".properties.system_blobstore.external_gcs_service_account.packages_bucket": {
-    "value": "<%= packages_bucket %>"
-  },
-  ".properties.system_blobstore.external_gcs_service_account.resources_bucket": {
-    "value": "<%= resources_bucket %>"
-  },
-  ".properties.system_blobstore.external_gcs_service_account.project_id": {
-    "value": "<%= project %>"
-  },
-  ".properties.system_blobstore.external_gcs_service_account.service_account_email": {
-    "value": "<%= service_account_email %>"
-  },
-  ".properties.system_blobstore.external_gcs_service_account.service_account_json_key": {
-    "value": <%= ENV.fetch('GCP_SERVICE_ACCOUNT_KEY').dump %>
+    "value": "internal"
   },
   ".properties.tcp_routing": {
     "value": "disable"
