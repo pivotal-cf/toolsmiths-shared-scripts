@@ -1,6 +1,10 @@
 <% azs=`terraform output azs`.strip.split(",\n") 
 management_subnet_name=`terraform output management_subnet_name`.strip -%>
 {
-  "singleton_availability_zone": "<%= azs[1] %>",
-  "network": "<%= management_subnet_name %>"
+  "singleton_availability_zone": {
+    "name": "<%= azs[1] %>"
+  },
+  "network": {
+    "name": "<%= management_subnet_name %>"
+  }
 }
