@@ -24,7 +24,7 @@
         "reserved_ip_ranges": "<%= management_subnet_base_addr %>.0-<%= management_subnet_base_addr %>.4",
         "dns": "8.8.8.8",
         "gateway": "<%= management_subnet_gateway %>",
-        "availability_zones": <%= azs %>
+        "availability_zone_names": <%= azs %>
       }]
     },
     {
@@ -35,7 +35,7 @@
         "reserved_ip_ranges": "<%= pas_subnet_base_addr %>.0-<%= pas_subnet_base_addr %>.4",
         "dns": "8.8.8.8",
         "gateway": "<%= pas_subnet_gateway %>",
-        "availability_zones": <%= azs %>
+        "availability_zone_names": <%= azs %>
       }]
     },
     {
@@ -46,7 +46,7 @@
         "reserved_ip_ranges": "<%= services_subnet_base_addr %>.0-<%= services_subnet_base_addr %>.4",
         "dns": "169.254.169.254",
         "gateway": "<%= services_subnet_gateway %>",
-        "availability_zones": <%= azs %>
+        "availability_zone_names": <%= azs %>
       }]
     }
   ]
