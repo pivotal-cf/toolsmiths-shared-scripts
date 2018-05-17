@@ -4,7 +4,7 @@ username = "<%= ENV.fetch('USERNAME') %>"
 password = "<%= ENV.fetch('PASSWORD') %>"
 region = "<%= ENV.fetch('ENV_REGION') %>"
 az = "<%= ENV.fetch('AZ') %>"
-dns_nameservers = "<%= ENV.fetch('DNS') %>"
+dns_nameservers = <%= ENV.fetch('DNS').split(',') %>
 auth_url = "<%= ENV.fetch('AUTH_URL') %>"
 keypair = "<%= ENV.fetch('KEYPAIR') %>"
 external_network_name = "<%= ENV.fetch('EXTERNAL_NET_NAME') %>"
