@@ -1,0 +1,34 @@
+---
+iaas-configuration:
+  identity_endpoint: <%= ENV.fetch('AUTH_URL') %>
+  username: <%= ENV.fetch('USERNAME') %>
+  password: <%= ENV.fetch('PASSWORD') %>
+  tenant: <%= ENV.fetch('ENV_NAME') %>
+  security_group: <%= ENV.fetch('ENV_NAME') %>-ops-manager
+  key_pair_name: <%= ENV.fetch('KEYPAIR') %>
+  ssh_private_key: <%= ENV.fetch('SSH_PRIVATE_KEY') %>
+  region: <%= ENV.fetch('ENV_REGION') %>
+  ignore_server_availability_zone: false
+  disable_dhcp: false
+  networking_model: nova
+director-configuration:
+  ntp_servers_string: ntp.svc.pivotal.io
+az-configuration:
+- name: <%= ENV.fetch('AZ') %>
+networks-configuration:
+  icmp_checks_enabled: true
+  networks:
+  - name: <%= ENV.fetch('ENV_NAME') %>-pas-internal-network
+    subnets:
+    - iaas_identifier: <%= ENV.fetch('INTERNAL_NETWORK_ID') %>
+      cidr: <%= ENV.fetch('INTERNAL_CIDR') %>
+      dns: <%= ENV.fetch('DNS') %>
+      gateway: <%= ENV.fetch('INTERNAL_GATEWAY') %>
+      reserved_ip_ranges: <%= ENV.fetch('INTERNAL_RESERVED_IPS') %>
+      availability_zone_names:
+      - <%= ENV.fetch('AZ') %>
+network-assignment:
+  singleton_availability_zone:
+    name: <%= ENV.fetch('AZ') %>
+  network:
+    name: <%= ENV.fetch('ENV_NAME') %>-pas-internal-network
