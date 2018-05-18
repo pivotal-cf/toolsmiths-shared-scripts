@@ -6,7 +6,7 @@ iaas-configuration:
   tenant: <%= ENV.fetch('ENV_NAME') %>
   security_group: <%= ENV.fetch('ENV_NAME') %>-ops-manager
   key_pair_name: <%= ENV.fetch('KEYPAIR') %>
-  ssh_private_key: <%= ENV.fetch('SSH_PRIVATE_KEY') %>
+  ssh_private_key: "<%= ENV.fetch('SSH_PRIVATE_KEY').gsub(/\n/,'\\n') %>"
   region: <%= ENV.fetch('ENV_REGION') %>
   ignore_server_availability_zone: false
   disable_dhcp: false
