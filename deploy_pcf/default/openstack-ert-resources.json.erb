@@ -1,5 +1,6 @@
 {
   "ha_proxy": {
-    "floating_ips": <%= ENV.fetch('HAPROXY_PUBLIC_IP') %>
+    "floating_ips": <%= ENV.fetch('HAPROXY_PUBLIC_IP').dump %>,
+    "instances": 1
   }
 }
