@@ -1,6 +1,6 @@
 {
   "ha_proxy": {
-    "floating_ips": <%= ENV.fetch('HAPROXY_PUBLIC_IP').dump %>,
+    "floating_ips": <%= `terraform output ha_proxy_floating_ip`.strip %>,
     "instances": 1
   }
 }
