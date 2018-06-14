@@ -1,0 +1,38 @@
+<% cf_azs=`terraform output azs`.strip.split(",\n")
+pas_subnet_name=`terraform output pas_subnet_name`.strip %>
+
+product-properties:
+  .cloud_controller.system_domain:
+    value: sys.<%= ENV.fetch('DOMAIN') %>
+  .cloud_controller.apps_domain:
+    value: apps.<%= ENV.fetch('DOMAIN') %>
+  .ha_proxy.skip_cert_verify:
+    value: true
+  .properties.networking_point_of_entry:
+    value: external_ssl
+  .properties.networking_point_of_entry.external_ssl.ssl_rsa_certificate:
+    value:
+      private_key_pem: <%= ENV.fetch('DOMAIN_KEY').dump %>
+      cert_pem: <%= ENV.fetch('DOMAIN_CRT').dump %>
+  .properties.security_acknowledgement:
+    value: X
+  .properties.system_blobstore:
+    value: internal
+  .properties.tcp_routing:
+    value: disable
+  .mysql_monitor.recipient_email:
+    value: test@example.com
+  .uaa.service_provider_key_credentials:
+    value:
+      cert_pem: <%= ENV.fetch('DOMAIN_CRT').dump %>
+      private_key_pem: <%= ENV.fetch('DOMAIN_KEY').dump %>
+network-properties:
+  singleton_availability_zone:
+    name: <%= cf_azs[1] %>
+  other_availability_zones:
+     - name: <%= cf_azs[0] %>
+     - name: <%= cf_azs[1] %>
+     - name: <%= cf_azs[2] %>
+  network:
+    name: <%= pas_subnet_name %>
+

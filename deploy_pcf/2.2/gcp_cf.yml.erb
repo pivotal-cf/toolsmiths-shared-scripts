@@ -1,0 +1,72 @@
+<% buildpacks_bucket=`terraform output buildpacks_bucket`.strip
+ droplets_bucket=`terraform output droplets_bucket`.strip
+ packages_bucket=`terraform output packages_bucket`.strip
+ resources_bucket=`terraform output resources_bucket`.strip
+ project=`terraform output project`.strip
+ service_account_email=`terraform output service_account_email`.strip %>
+<% cf_azs=`terraform output azs`.strip.split(",\n")
+pas_subnet_name=`terraform output pas_subnet_name`.strip %>
+
+product-properties:
+  .cloud_controller.system_domain:
+    value: sys.<%= ENV.fetch('DOMAIN') %>
+  .cloud_controller.apps_domain:
+    value: apps.<%= ENV.fetch('DOMAIN') %>
+  .ha_proxy.skip_cert_verify:
+    value: true
+  .properties.haproxy_forward_tls:
+    value: disable
+  .properties.gorouter_ssl_ciphers:
+    value: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+  .properties.haproxy_ssl_ciphers:
+    value: DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384
+  .properties.networking_poe_ssl_certs:
+    value:
+     - name: certificate
+       certificate:
+         private_key_pem: <%= ENV.fetch('DOMAIN_KEY').dump %>
+         cert_pem: <%= ENV.fetch('DOMAIN_CRT').dump %>
+  .properties.credhub_key_encryption_passwords:
+    value:
+     - name: primary-encryption-key
+       key:
+         secret: <%= (ENV.fetch('DEFAULT_OPSMAN_PASSWORD') * 3)[0..25].dump %>
+       primary: true
+  .properties.secure_service_instance_credentials:
+    type: boolean
+    value: true
+  .properties.security_acknowledgement:
+    value: X
+  .properties.system_blobstore:
+    value: external_gcs_service_account
+  .properties.system_blobstore.external_gcs_service_account.buildpacks_bucket:
+    value: <%= buildpacks_bucket %>
+  .properties.system_blobstore.external_gcs_service_account.droplets_bucket:
+    value: <%= droplets_bucket %>
+  .properties.system_blobstore.external_gcs_service_account.packages_bucket:
+    value: <%= packages_bucket %>
+  .properties.system_blobstore.external_gcs_service_account.resources_bucket:
+    value: <%= resources_bucket %>
+  .properties.system_blobstore.external_gcs_service_account.project_id:
+    value: <%= project %>
+  .properties.system_blobstore.external_gcs_service_account.service_account_email:
+    value: <%= service_account_email %>
+  .properties.system_blobstore.external_gcs_service_account.service_account_json_key:
+    value: <%= ENV.fetch('GCP_SERVICE_ACCOUNT_KEY').dump %>
+  .properties.tcp_routing:
+    value: disable
+  .mysql_monitor.recipient_email:
+    value: test@example.com
+  .uaa.service_provider_key_credentials:
+    value:
+      cert_pem: <%= ENV.fetch('DOMAIN_CRT').dump %>
+      private_key_pem: <%= ENV.fetch('DOMAIN_KEY').dump %>
+network-properties:
+  singleton_availability_zone:
+    name: <%= cf_azs[1] %>
+  other_availability_zones:
+     - name: <%= cf_azs[0] %>
+     - name: <%= cf_azs[1] %>
+     - name: <%= cf_azs[2] %>
+  network:
+    name: <%= pas_subnet_name %>
