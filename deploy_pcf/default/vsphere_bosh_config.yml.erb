@@ -1,0 +1,33 @@
+az-configuration:
+  - name: default
+    cluster: <%= ENV.fetch('VC_CLUSTER') %>
+    resource_pool: <%= ENV.fetch('ENV_NAME') %>
+director-configuration:
+  ntp_servers_string: ntp.svc.pivotal.io
+network-assignment:
+  singleton_availability_zone:
+    name: default
+  network:
+    name: default
+networks-configuration:
+   icmp_checks_enabled: false
+   networks:
+     - name: default
+       subnets:
+         - iaas_identifier: <%= ENV.fetch('ENV_NAME') %>
+           cidr: <%= ENV.fetch('CIDR') %>
+           reserved_ip_ranges: <%= ENV.fetch('RESERVED_IP_RANGES') %>
+           dns: <%= ENV.fetch('DNS') %>
+           gateway: <%= ENV.fetch('GATEWAY') %>
+           availability_zone_names: [default]
+iaas-configuration:
+  vcenter_host: <%= ENV.fetch('VC_URL') %>
+  vcenter_username: <%= ENV.fetch('VC_USERNAME') %>
+  vcenter_password: <%= ENV.fetch('VC_PASSWORD') %>
+  datacenter: <%= ENV.fetch('VC_DATACENTER') %>
+  disk_type: thin
+  ephemeral_datastores_string: <%= ENV.fetch('VC_DATASTORE') %>
+  persistent_datastores_string: <%= ENV.fetch('VC_DATASTORE') %>
+  bosh_vm_folder: <%= ENV.fetch('ENV_NAME') %>_vms
+  bosh_template_folder: <%= ENV.fetch('ENV_NAME') %>_templates
+  bosh_disk_path: <%= ENV.fetch('ENV_NAME') %>_disks
