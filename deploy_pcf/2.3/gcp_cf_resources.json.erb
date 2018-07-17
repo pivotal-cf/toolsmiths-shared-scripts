@@ -1,0 +1,48 @@
+<% tcp_router=`terraform output tcp_router_pool`.strip
+ http_lb=`terraform output http_lb_backend_name`.strip
+ ws_router=`terraform output ws_router_pool`.strip
+ ssh_router=`terraform output ssh_router_pool`.strip %>
+
+{
+  "tcp_router": {
+    "elb_names": [
+      "tcp:<%= tcp_router %>"
+    ]
+  },
+  "router": {
+    "instances": 3,
+    "elb_names": [
+      "tcp:<%= ws_router %>"
+    ]
+  },
+  "diego_brain": {
+    "instances": 1,
+    "elb_names": [
+      "tcp:<%= ssh_router %>"
+    ]
+  },
+  "ha_proxy": {
+    "instances": 0
+  },
+  "diego_cell": {
+    "instances": 1,
+    "instance_type": {
+      "id": "toolsmiths.n1-highmem-2.128"
+    }
+  },
+  "uaa": {
+    "instances": 1,
+    "instance_type": {
+      "id": "toolsmiths.custom-1-2.32"
+    }
+  },
+  "cloud_controller": {
+    "instances": 1,
+    "instance_type": {
+      "id": "toolsmiths.custom-1-4.32"
+    }
+  },
+  "credhub": {
+    "instances": 1
+  }
+}
