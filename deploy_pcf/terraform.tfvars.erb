@@ -25,3 +25,4 @@ service_account_key = <<SERVICE_ACCOUNT_KEY
 SERVICE_ACCOUNT_KEY
 create_iam_service_account_members = false
 create_blobstore_service_account_key = false
+pks = <%= ENV.key?('PKS_VERSION_FILTER') %>
