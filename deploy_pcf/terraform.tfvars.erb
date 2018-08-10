@@ -23,3 +23,5 @@ ssl_private_key = "<%= File.read("./#{ENV.fetch('ENV_NAME')}.cf-app.com.key").gs
 service_account_key = <<SERVICE_ACCOUNT_KEY
 <%= ENV.fetch('GCP_SERVICE_ACCOUNT_KEY').strip %>
 SERVICE_ACCOUNT_KEY
+create_iam_service_account_members = false
+create_blobstore_service_account_key = false
