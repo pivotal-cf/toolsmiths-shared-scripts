@@ -1,0 +1,57 @@
+<% pks_azs=`terraform output azs`.strip.split(",\n")
+ project=`terraform output project`.strip
+ network=`terraform output network_name`.strip
+ pks_lb_backend_name=`terraform output pks_lb_backend_name`.strip
+ pks_subnet_name=`terraform output pks_subnet_name`.strip
+ pks_services_subnet_name=`terraform output pks_services_subnet_name`.strip %>
+
+network-properties:
+  singleton_availability_zone:
+    name: <%= pks_azs[1] %>
+  other_availability_zones:
+     - name: <%= pks_azs[0] %>
+     - name: <%= pks_azs[1] %>
+     - name: <%= pks_azs[2] %>
+  network:
+    name: <%= pks_subnet_name %>
+  service_network:
+    name: <%= pks_services_subnet_name %>
+
+product-properties:
+  .properties.pks_api_hostname:
+    value: api.pks.<%= ENV.fetch('DOMAIN') %>
+  .pivotal-container-service.pks_tls:
+    value:
+      cert_pem: <%= ENV.fetch('DOMAIN_CRT').dump %>
+      private_key_pem: <%= ENV.fetch('DOMAIN_KEY').dump %>
+  .properties.plan1_selector.active.master_az_placement:
+    value:
+      - <%= pks_azs[1] %>
+  .properties.plan1_selector.active.worker_az_placement:
+    value:
+      - <%= pks_azs[0] %>
+      - <%= pks_azs[1] %>
+      - <%= pks_azs[2] %>
+  .properties.plan2_selector:
+    value: "Plan Inactive"
+  .properties.plan3_selector:
+    value: "Plan Inactive"
+  .properties.cloud_provider:
+    value: "GCP"
+  .properties.cloud_provider.gcp.project_id:
+    value: <%= project %>
+  .properties.cloud_provider.gcp.network:
+    value: <%= network %>
+  .properties.cloud_provider.gcp.master_service_account:
+    value: <%= ENV.fetch('MASTER_SERVICE_ACCOUNT_EMAIL') %>
+  .properties.cloud_provider.gcp.worker_service_account:
+    value: <%= ENV.fetch('WORKER_SERVICE_ACCOUNT_EMAIL') %>
+  .properties.vm_extensions:
+    value:
+      - "public_ip"
+  .properties.telemetry_selector:
+    value: "disabled"
+resource-config:
+  pivotal-container-service:
+    elb_names:
+      - tcp:<%= pks_lb_backend_name %>
