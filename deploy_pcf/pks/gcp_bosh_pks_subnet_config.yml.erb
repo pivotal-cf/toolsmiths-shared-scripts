@@ -4,12 +4,12 @@
  region=`terraform output region`.strip
  azs=`terraform output azs`.strip.split(",\n")
  pks_subnet_name=`terraform output pks_subnet_name`.strip
- pks_subnet_cidrs=IPAddr.new `terraform output pks_subnet_cidrs`.strip
- pks_subnet_range=pks_subnet_cidrs.to_range()
+ pks_subnet_cidrs=`terraform output pks_subnet_cidrs`.strip
+ pks_subnet_range=IPAddr.new(pks_subnet_cidr).to_range()
  pks_subnet_gateway=`terraform output pks_subnet_gateway`.strip
  pks_services_subnet_name=`terraform output pks_services_subnet_name`.strip
- pks_services_subnet_cidrs=IPAddr.new `terraform output pks_services_subnet_cidrs`.strip
- pks_services_subnet_range=pks_services_subnet_cidrs.to_range()
+ pks_services_subnet_cidrs=`terraform output pks_services_subnet_cidrs`.strip
+ pks_services_subnet_range=IPAddr.new(pks_services_subnet_cidrs).to_range()
  pks_services_subnet_gateway=`terraform output pks_services_subnet_gateway`.strip
 %>
    - name: <%= pks_subnet_name %>
