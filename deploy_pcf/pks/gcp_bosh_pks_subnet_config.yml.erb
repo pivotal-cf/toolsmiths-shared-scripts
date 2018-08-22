@@ -16,7 +16,7 @@
      subnets:
        - iaas_identifier: <%= network_name %>/<%= pks_subnet_name %>/<%= region %>
          cidr: <%= pks_subnet_cidrs %>
-      reserved_ip_ranges: <%= pks_subnet_range.entries[1] %>-<%= pks_subnet_range.entries[9] %>
+         reserved_ip_ranges: <%= pks_subnet_range.entries[1] %>-<%= pks_subnet_range.entries[9] %>
          dns: 169.254.169.254
          gateway: <%= pks_subnet_gateway %>
          availability_zone_names: <%= azs %>
