@@ -1,5 +1,5 @@
-<% 
-  region = ENV.fetch('ENV_REGION', 'us-central1') 
+<%
+  region = ENV.fetch('ENV_REGION', 'us-central1')
 
   case region
   	when 'us-central1'
@@ -8,7 +8,17 @@
   		zones = ['europe-west1-b', 'europe-west1-c', 'europe-west1-d']
   	else
   		zones = [ "#{region}-a"]
-   end 
+   end
+%>
+
+<%
+  ert_version = ENV.fetch('CONFIGURATION_FOLDER')
+
+	if ert_version.to_f >= 2.2
+		create_buckets = true
+	else
+		create_buckets = false
+	end
 %>
 
 env_name = "<%= ENV.fetch('ENV_NAME') %>"
@@ -26,3 +36,4 @@ SERVICE_ACCOUNT_KEY
 create_iam_service_account_members = false
 create_blobstore_service_account_key = false
 pks = <%= ENV.key?('PKS_VERSION_FILTER') %>
+create_gcs_buckets = <%= create_buckets %>
