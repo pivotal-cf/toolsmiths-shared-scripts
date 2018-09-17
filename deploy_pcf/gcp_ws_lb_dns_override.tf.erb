@@ -1,11 +1,12 @@
 <%
 ert_version = ENV.fetch('CONFIGURATION_FOLDER')
 
-if ert_version.to_f != 2.0
-  load_balancer = 'google_compute_address.cf-ws.address'
-else
-  load_balancer = 'google_compute_global_address.cf.address'
-end
+  case ert_version.to_f
+    when 2.0, 2.2
+      load_balancer = 'google_compute_global_address.cf.address'
+    else
+      load_balancer = 'google_compute_address.cf-ws.address'
+   end
 %>
 resource "google_dns_record_set" "wildcard-sys-dns" {
   rrdatas = ["${<%= load_balancer %>}"]

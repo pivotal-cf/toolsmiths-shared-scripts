@@ -10,7 +10,7 @@
     "instances": 0
   },
   "router": {
-    "instances": 1,
+    "instances": 8,
     "elb_names": [
       "http:<%= http_lb %>",
       "tcp:<%= ws_router %>"
@@ -23,7 +23,7 @@
     ]
   },
   "compute": {
-    "instances": 1,
+    "instances": 3,
     "instance_type": {
       "id": "toolsmiths.n1-highmem-2.128"
     }
