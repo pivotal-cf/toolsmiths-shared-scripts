@@ -11,16 +11,6 @@
    end
 %>
 
-<%
-  ert_version = ENV.fetch('CONFIGURATION_FOLDER')
-
-	if ert_version.to_f > 2.3
-		create_buckets = true
-	else
-		create_buckets = false
-	end
-%>
-
 env_name = "<%= ENV.fetch('ENV_NAME') %>"
 region = "<%= region %>"
 opsman_image_url = "https://storage.googleapis.com/<%= ENV.fetch('ops_man_image') %>"
@@ -36,4 +26,4 @@ SERVICE_ACCOUNT_KEY
 create_iam_service_account_members = false
 create_blobstore_service_account_key = false
 pks = <%= ENV.key?('PKS_VERSION_FILTER') %>
-create_gcs_buckets = <%= create_buckets %>
+create_gcs_buckets = false
