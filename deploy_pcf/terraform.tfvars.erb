@@ -14,7 +14,7 @@
 <%
   ert_version = ENV.fetch('CONFIGURATION_FOLDER')
 
-	if ert_version.to_f >= 2.3
+	if ert_version.to_f > 2.3
 		create_buckets = true
 	else
 		create_buckets = false
