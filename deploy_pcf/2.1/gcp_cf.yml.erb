@@ -26,7 +26,7 @@ product-properties:
        certificate:
          private_key_pem: <%= ENV.fetch('DOMAIN_KEY').dump %>
          cert_pem: <%= ENV.fetch('DOMAIN_CRT').dump %>
-  .properties.networking.router.frontend_idle_timeout:
+  .router.frontend_idle_timeout:
     value: 540
   .properties.credhub_key_encryption_passwords:
     value:
