@@ -6,8 +6,6 @@ product-properties:
     value: sys.<%= ENV.fetch('DOMAIN') %>
   .cloud_controller.apps_domain:
     value: apps.<%= ENV.fetch('DOMAIN') %>
-  .ha_proxy.skip_cert_verify:
-    value: true
   .properties.networking_point_of_entry:
     value: external_ssl
   .properties.networking_point_of_entry.external_ssl.ssl_rsa_certificate:

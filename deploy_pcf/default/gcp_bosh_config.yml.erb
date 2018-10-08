@@ -58,3 +58,5 @@ networks-configuration:
          dns: 169.254.169.254
          gateway: <%= services_subnet_gateway %>
          availability_zone_names: <%= azs %>
+security-configuration:
+  trusted_certificates: <%= ENV.fetch('OM_CA_CERT').dump %>

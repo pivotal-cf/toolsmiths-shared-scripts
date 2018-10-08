@@ -12,8 +12,6 @@ product-properties:
     value: sys.<%= ENV.fetch('DOMAIN') %>
   .cloud_controller.apps_domain:
     value: apps.<%= ENV.fetch('DOMAIN') %>
-  .ha_proxy.skip_cert_verify:
-    value: true
   .properties.haproxy_forward_tls:
     value: disable
   .properties.gorouter_ssl_ciphers:
