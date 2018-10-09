@@ -18,6 +18,8 @@
  services_subnet_gateway=`terraform output services_subnet_gateway`.strip
 -%>
 
+security-configuration:
+  trusted_certificates: <%= ENV.fetch('OM_CA_CERT', "").dump %>
 director-configuration:
   ntp_servers_string: "169.254.169.254"
 az-configuration:
@@ -58,5 +60,3 @@ networks-configuration:
          dns: 169.254.169.254
          gateway: <%= services_subnet_gateway %>
          availability_zone_names: <%= azs %>
-security-configuration:
-  trusted_certificates: <%= ENV.fetch('OM_CA_CERT').dump %>
