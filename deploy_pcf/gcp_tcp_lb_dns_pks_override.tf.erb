@@ -1,6 +1,9 @@
 <%
   env_name = ENV.fetch('ENV_NAME')
   cluster_name = "#{env_name}-pks-cluster-1"
+  dns_zone_name = "#{env_name}-zone"
+  dns_zone_dns_name = "#{env_name}.cf-app.com."
+  dns_record_set_name  = "cluster-1.#{dns_zone_dns_name}"
 %>
 
 resource "google_compute_address" "pks-tcp" {
@@ -20,11 +23,11 @@ resource "google_compute_forwarding_rule" "pks-tcp" {
 }
 
 resource "google_dns_record_set" "pks-tcp" {
-  name  = "${var.env_name}-pks-cluster-1.${var.dns_zone_dns_name}."
+  name  = "<%= dns_record_set_name %>"
   type  = "A"
   ttl   = 300
 
-  managed_zone = "${var.dns_zone_name}"
+  managed_zone = "<%= dns_zone_name %>"
 
   rrdatas = ["${google_compute_address.pks-tcp.address}"]
 }
