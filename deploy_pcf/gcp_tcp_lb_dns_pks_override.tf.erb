@@ -1,0 +1,20 @@
+<%
+  env_name = ENV.fetch('ENV_NAME')
+  cluster_name = "#{env_name}-pks-cluster-1"
+%>
+
+resource "google_compute_address" "pks-tcp" {
+  name = "<%= cluster_name %>"
+}
+
+resource "google_compute_target_pool" "pks-tcp" {
+  name = "<%= cluster_name %>"
+}
+
+resource "google_compute_forwarding_rule" "pks-tcp" {
+  name        = "<%= cluster_name %>"
+  target      = "${google_compute_target_pool.pks-tcp.self_link}"
+  port_range  = "8443"
+  ip_protocol = "TCP"
+  ip_address  = "${google_compute_address.pks-tcp.address}"
+}
