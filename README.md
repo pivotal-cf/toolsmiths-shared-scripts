@@ -17,3 +17,9 @@ update pcf_versions
 set script_version = 'v1.0.12'
 where script_version = 'v1.0.11'
 ```
+AND
+```
+update pks_versions
+set script_version = 'v1.0.12'
+where script_version = 'v1.0.11'
+```
