@@ -7,6 +7,7 @@
 
 ```
 git tag v1.0.12 11866e5a5e68ab4f292d0d99f2c183d086dd2a4a
+git push
 git push --tags
 ```
 
