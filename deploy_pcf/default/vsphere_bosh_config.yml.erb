@@ -3,7 +3,7 @@ az-configuration:
     cluster: <%= ENV.fetch('VC_CLUSTER') %>
     resource_pool: <%= ENV.fetch('ENV_NAME') %>
 director-configuration:
-  ntp_servers_string: ntp.svc.pivotal.io
+  ntp_servers_string: ntp1.svc.pivotal.io
 network-assignment:
   singleton_availability_zone:
     name: default
