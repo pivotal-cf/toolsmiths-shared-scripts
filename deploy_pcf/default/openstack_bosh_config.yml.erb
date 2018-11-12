@@ -11,8 +11,9 @@ iaas-configuration:
   ignore_server_availability_zone: false
   disable_dhcp: false
   networking_model: nova
+  keystone_version: <%= ENV.fetch('KEYSTONE_VERSION', 'v2.0') %>
 director-configuration:
-  ntp_servers_string: ntp1.svc.pivotal.io
+  ntp_servers_string: <%= ENV.fetch('NTP_SERVERS_STRING', 'ntp1.svc.pivotal.io') %>
 az-configuration:
 - name: <%= ENV.fetch('AZ') %>
 networks-configuration:
