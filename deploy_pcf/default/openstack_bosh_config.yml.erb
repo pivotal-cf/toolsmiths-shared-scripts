@@ -1,3 +1,6 @@
+<%
+    keystone_version = ENV.fetch('KEYSTONE_VERSION', 'v2.0')
+%>
 ---
 iaas-configuration:
   identity_endpoint: <%= ENV.fetch('AUTH_URL') %>
@@ -11,8 +14,10 @@ iaas-configuration:
   ignore_server_availability_zone: false
   disable_dhcp: false
   networking_model: nova
-  keystone_version: <%= ENV.fetch('KEYSTONE_VERSION', 'v2.0') %>
-  domain: admin_domain
+  keystone_version: <%= keystone_version %>
+<% if keystone_version != 'v2.0' -%>
+  domain: <%= ENV.fetch('KEYSTONE_DOMAIN') %>
+<% end -%>
 director-configuration:
   ntp_servers_string: <%= ENV.fetch('NTP_SERVERS_STRING', 'ntp1.svc.pivotal.io') %>
 az-configuration:
