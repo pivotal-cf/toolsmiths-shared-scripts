@@ -12,6 +12,7 @@ iaas-configuration:
   disable_dhcp: false
   networking_model: nova
   keystone_version: <%= ENV.fetch('KEYSTONE_VERSION', 'v2.0') %>
+  domain: admin_domain
 director-configuration:
   ntp_servers_string: <%= ENV.fetch('NTP_SERVERS_STRING', 'ntp1.svc.pivotal.io') %>
 az-configuration:
