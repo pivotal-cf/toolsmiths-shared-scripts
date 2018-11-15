@@ -19,10 +19,40 @@ resource "aws_route53_record" "pcf" {
     "${openstack_networking_floatingip_v2.ops_manager.address}"]
 }
 
-resource "aws_route53_record" "wildcard" {
+resource "aws_route53_record" "sys wildcard" {
   provider = "aws.aws"
   zone_id = "${var.aws_hosted_zone_id}"
-  name = "*.${var.project}"
+  name = "*.sys.${var.project}"
+  type = "A"
+  ttl = "60"
+  records = [
+    "${openstack_networking_floatingip_v2.ha_proxy.address}"]
+}
+
+resource "aws_route53_record" "apps wildcard" {
+  provider = "aws.aws"
+  zone_id = "${var.aws_hosted_zone_id}"
+  name = "*.apps.${var.project}"
+  type = "A"
+  ttl = "60"
+  records = [
+    "${openstack_networking_floatingip_v2.ha_proxy.address}"]
+}
+
+resource "aws_route53_record" "uaa wildcard" {
+  provider = "aws.aws"
+  zone_id = "${var.aws_hosted_zone_id}"
+  name = "*.uaa.sys.${var.project}"
+  type = "A"
+  ttl = "60"
+  records = [
+    "${openstack_networking_floatingip_v2.ha_proxy.address}"]
+}
+
+resource "aws_route53_record" "login wildcard" {
+  provider = "aws.aws"
+  zone_id = "${var.aws_hosted_zone_id}"
+  name = "*.login.sys.${var.project}"
   type = "A"
   ttl = "60"
   records = [
