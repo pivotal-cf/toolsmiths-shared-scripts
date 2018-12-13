@@ -1,11 +1,11 @@
 <%
   region = ENV.fetch('ENV_REGION', 'us-central1')
-
+  tries = ENV.fetch('TRIES', 0).to_i
   case region
   	when 'us-central1'
       zones = ['us-central1-b', 'us-central1-f', 'us-central1-c']
   	when 'europe-west1'
-  		zones = ['europe-west1-b', 'europe-west1-c', 'europe-west1-d']
+      zones = ['europe-west1-b', 'europe-west1-c', 'europe-west1-d']
   	else
       raise "Unsupported region '#{region}'"
    end
@@ -14,7 +14,7 @@
 env_name = "<%= ENV.fetch('ENV_NAME') %>"
 region = "<%= region %>"
 opsman_image_url = "https://storage.googleapis.com/<%= ENV.fetch('ops_man_image') %>"
-zones = <%= zones %>
+zones = <%= zones.rotate!(tries) %>
 project = "<%= ENV.fetch('GCP_PROJECT_NAME') %>"
 dns_suffix = "cf-app.com"
 create_gcs_buckets = true
