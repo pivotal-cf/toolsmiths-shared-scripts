@@ -3,9 +3,10 @@
  packages_bucket=`terraform output packages_bucket`.strip
  resources_bucket=`terraform output resources_bucket`.strip
  project=`terraform output project`.strip
- service_account_email=`terraform output service_account_email`.strip %>
-<% cf_azs=`terraform output azs`.strip.split(",\n")
-pas_subnet_name=`terraform output pas_subnet_name`.strip %>
+ service_account_email=`terraform output service_account_email`.strip
+ cf_azs=`terraform output azs`.strip.split(",\n")
+ cf_azs.rotate!(1)
+ pas_subnet_name=`terraform output pas_subnet_name`.strip %>
 
 product-properties:
   .cloud_controller.system_domain:
@@ -49,7 +50,7 @@ product-properties:
       private_key_pem: <%= ENV.fetch('DOMAIN_KEY').dump %>
 network-properties:
   singleton_availability_zone:
-    name: <%= cf_azs[1] %>
+    name: <%= cf_azs[0] %>
   other_availability_zones:
      - name: <%= cf_azs[0] %>
      - name: <%= cf_azs[1] %>
