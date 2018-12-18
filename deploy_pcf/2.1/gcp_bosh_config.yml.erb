@@ -19,7 +19,7 @@
 -%>
 
 security-configuration:
-  opsmanager_root_ca_trusted_certs: true
+  trusted_certificates: <%= ENV.fetch('OM_CA_CERT', "").dump %>
 director-configuration:
   ntp_servers_string: "169.254.169.254"
 az-configuration:
