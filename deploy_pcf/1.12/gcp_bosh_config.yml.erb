@@ -1,7 +1,7 @@
 <%
  require 'ipaddr'
  azs=`terraform output azs`.strip.split(",\n")
- azs_hash=azs.map{ |az| "{\"name\": \"#{az}\"}" }.flatten.join(',')
+ azs.rotate!(1)
  region=`terraform output region`.strip
  network_name=`terraform output network_name`.strip
  management_subnet_name=`terraform output management_subnet_name`.strip
@@ -21,14 +21,16 @@
 director-configuration:
   ntp_servers_string: "169.254.169.254"
 az-configuration:
-  [<%= azs_hash %>]
+  - name: <%= azs[0] %>
+  - name: <%= azs[1] %>
+  - name: <%= azs[2] %>
 iaas-configuration:
   project: <%= ENV.fetch('GCP_PROJECT_NAME') %>
   default_deployment_tag: <%= ENV.fetch('DEFAULT_DEPLOYMENT_TAG') %>
   auth_json: <%= ENV.fetch('GCP_SERVICE_ACCOUNT_KEY').inspect %>
 network-assignment:
   singleton_availability_zone:
-    name: <%= azs[1] %>
+    name: <%= azs[0] %>
   network:
     name: <%= management_subnet_name %>
 networks-configuration:
