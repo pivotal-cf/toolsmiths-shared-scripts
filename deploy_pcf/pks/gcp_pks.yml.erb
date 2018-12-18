@@ -1,4 +1,5 @@
 <% pks_azs=`terraform output azs`.strip.split(",\n")
+ pks_azs.rotate!(1)
  project=`terraform output project`.strip
  network=`terraform output network_name`.strip
  pks_lb_backend_name=`terraform output pks_lb_backend_name`.strip
@@ -7,7 +8,7 @@
 
 network-properties:
   singleton_availability_zone:
-    name: <%= pks_azs[1] %>
+    name: <%= pks_azs[0] %>
   other_availability_zones:
      - name: <%= pks_azs[0] %>
      - name: <%= pks_azs[1] %>
@@ -28,10 +29,10 @@ product-properties:
     value: "Plan Active"
   .properties.plan1_selector.active.master_az_placement:
     value:
-      - <%= pks_azs[1] %>
+      - <%= pks_azs[0] %>
   .properties.plan1_selector.active.worker_az_placement:
     value:
-      - <%= pks_azs[1] %>
+      - <%= pks_azs[0] %>
   .properties.plan1_selector.active.master_instances:
     value: 1
   .properties.plan1_selector.active.worker_instances:
@@ -44,10 +45,10 @@ product-properties:
     value: "Plan Active"
   .properties.plan2_selector.active.master_az_placement:
     value:
-      - <%= pks_azs[1] %>
+      - <%= pks_azs[0] %>
   .properties.plan2_selector.active.worker_az_placement:
     value:
-      - <%= pks_azs[1] %>
+      - <%= pks_azs[0] %>
   .properties.plan2_selector.active.master_instances:
     value: 3
   .properties.plan2_selector.active.worker_instances:
@@ -60,10 +61,10 @@ product-properties:
     value: "Plan Active"
   .properties.plan3_selector.active.master_az_placement:
     value:
-      - <%= pks_azs[1] %>
+      - <%= pks_azs[0] %>
   .properties.plan3_selector.active.worker_az_placement:
     value:
-      - <%= pks_azs[1] %>
+      - <%= pks_azs[0] %>
   .properties.plan3_selector.active.master_instances:
     value: 1
   .properties.plan3_selector.active.worker_instances:
