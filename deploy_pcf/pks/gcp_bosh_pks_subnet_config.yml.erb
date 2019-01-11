@@ -12,6 +12,8 @@
  pks_services_subnet_range=IPAddr.new(pks_services_subnet_cidrs).to_range()
  pks_services_subnet_gateway=`terraform output pks_services_subnet_gateway`.strip
 %>
+networks-configuration:
+  networks:
    - name: <%= pks_subnet_name %>
      subnets:
        - iaas_identifier: <%= network_name %>/<%= pks_subnet_name %>/<%= region %>
