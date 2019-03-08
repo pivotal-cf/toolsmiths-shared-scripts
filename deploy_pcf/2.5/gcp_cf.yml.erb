@@ -48,6 +48,8 @@ product-properties:
     value:
       cert_pem: <%= ENV.fetch('DOMAIN_CRT').dump %>
       private_key_pem: <%= ENV.fetch('DOMAIN_KEY').dump %>
+  .properties.stack_migration_acknowledgement:
+    value: X
 network-properties:
   singleton_availability_zone:
     name: <%= cf_azs[0] %>
