@@ -84,7 +84,19 @@ echo
 echo "=============================================================================================="
 echo " Downloding ERT tile to @ https://pcf.$ENV_NAME.cf-app.com ..."
 echo "=============================================================================================="
-pivnet-cli login --api-token "${PIVNET_TOKEN}"
+
+set +e
+tries=3
+while [[ ${tries} -gt 0 ]]
+do
+  echo "# pivnet-cli login"
+  pivnet-cli login --api-token "${PIVNET_TOKEN}" && break
+  tries=$(( ${tries} - 1 ))
+  echo "# pivnet-cli login ${tries} tries remaining"
+  [[ ${tries} -gt 0 ]] && echo "pivnet-cli login - waiting 5 mins for next try" && sleep 300
+done
+set -e
+
 ERT_VERSION=$(pivnet-cli releases --product-slug elastic-runtime --format=json | jq -r '.[ ] .version' | grep -F "${PRODUCT_VERSION}" | head -n 1)
 export ERT_VERSION
 if [[ $GLOB_FILTER == *"srt"* ]]; then
