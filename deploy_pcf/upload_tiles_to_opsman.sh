@@ -23,7 +23,7 @@ then
   exit $E_OPTERROR
 fi
 
-while getopts "u:p:t:g:v:e:" Option
+while getopts "u:p:t:g:v:e:i:" Option
 do
   case $Option in
     u )
@@ -84,9 +84,8 @@ case $IAAS in
   "vsphere")
     stemcell_glob="*vsphere*";;
   *)
-    stemcell_glob="*google*";;
-    # echo "Unhandled IAAS value: '${IAAS}'"
-    # exit 1;;
+    echo "Unhandled IAAS value: '${IAAS}'"
+    exit 1;;
 esac
 
 echo
