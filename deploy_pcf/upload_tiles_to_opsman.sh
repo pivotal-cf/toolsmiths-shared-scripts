@@ -192,7 +192,7 @@ om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
   --password "${OPSMAN_PASSWORD}" \
   upload-stemcell \
-  --stemcell ./"${stemcell_glob}".tgz
+  --stemcell ./${stemcell_glob}.tgz
 
 echo
 echo "=============================================================================================="
