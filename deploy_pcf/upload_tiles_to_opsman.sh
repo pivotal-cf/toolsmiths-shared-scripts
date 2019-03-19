@@ -52,7 +52,7 @@ do
       ;;
     i )
       irflag=true
-      ENV_NAME=$OPTARG
+      IAAS=$OPTARG
       ;;
     * ) usage ;;
   esac
