@@ -10,11 +10,12 @@ trflag=false
 grflag=false
 vrflag=false
 erflag=false
+irflag=false
 
 NO_ARGS=0
 E_OPTERROR=85
 
-usage() { echo "Usage: cmd -u <OPSMAN_USERNAME> -p <OPSMAN_PASSWORD> -t <PIVNET_TOKEN> -g <GLOB_FILTER> -v <PRODUCT_VERSION> -e <ENV_NAME>" 1>&2; exit 1; }
+usage() { echo "Usage: cmd -u <OPSMAN_USERNAME> -p <OPSMAN_PASSWORD> -t <PIVNET_TOKEN> -g <GLOB_FILTER> -v <PRODUCT_VERSION> -e <ENV_NAME> -i <IAAS>" 1>&2; exit 1; }
 
 if [ $# -eq "$NO_ARGS" ]
 then
@@ -49,12 +50,16 @@ do
       erflag=true
       ENV_NAME=$OPTARG
       ;;
+    i )
+      irflag=true
+      ENV_NAME=$OPTARG
+      ;;
     * ) usage ;;
   esac
 done
 shift $(($OPTIND - 1))
 
-if ! $urflag || ! $prflag || ! $trflag || ! $grflag || ! $vrflag || ! $erflag
+if ! $urflag || ! $prflag || ! $trflag || ! $grflag || ! $vrflag || ! $erflag || ! $irflag
 then
     echo "Required option was not specified" >&2
     usage
@@ -66,6 +71,23 @@ export ENV_NAME
 export PIVNET_TOKEN
 export PRODUCT_VERSION
 export GLOB_FILTER
+export IAAS
+
+echo
+echo "=============================================================================================="
+echo " Examining IAAS value ..."
+echo "=============================================================================================="
+stemcell_glob=""
+case $IAAS in
+  "gcp")
+    stemcell_glob="*google*";;
+  "vsphere")
+    stemcell_glob="*vsphere*";;
+  *)
+    stemcell_glob="*google*";;
+    # echo "Unhandled IAAS value: '${IAAS}'"
+    # exit 1;;
+esac
 
 echo
 echo "=============================================================================================="
@@ -158,11 +180,11 @@ case $stemcell_os in
     product_slug="stemcells-${stemcell_os}";;
 esac
 
-  pivnet-cli download-product-files \
-    --product-slug "${product_slug}" \
-    --release-version "${stemcell_version}" \
-    --glob "*google*" \
-    --accept-eula
+pivnet-cli download-product-files \
+  --product-slug "${product_slug}" \
+  --release-version "${stemcell_version}" \
+  --glob "${stemcell_glob}" \
+  --accept-eula
 
 echo "=============================================================================================="
 echo " Uploading stemcell ${stemcell_os} version ${stemcell_version} ... "
@@ -171,7 +193,7 @@ om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
   --password "${OPSMAN_PASSWORD}" \
   upload-stemcell \
-  -s ./*google*.tgz
+  --stemcell ./"${stemcell_glob}".tgz
 
 echo
 echo "=============================================================================================="
