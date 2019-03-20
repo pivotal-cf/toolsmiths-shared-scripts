@@ -172,15 +172,15 @@ echo "==========================================================================
 uploaded_product_version=$(om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
   --password "${OPSMAN_PASSWORD}" \
-  --format=json \
   available-products \
+  --format=json \
   |  jq -r '.[0]."version"')
 
   uploaded_product_name=$(om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
   --password "${OPSMAN_PASSWORD}" \
-  --format=json \
   available-products \
+  --format=json \
   |  jq -r '.[0]."name"')
 
 om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
