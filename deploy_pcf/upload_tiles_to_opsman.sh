@@ -11,11 +11,40 @@ grflag=false
 vrflag=false
 erflag=false
 irflag=false
+srflag=false
 
 NO_ARGS=0
 E_OPTERROR=85
 
-usage() { echo "Usage: cmd -u <OPSMAN_USERNAME> -p <OPSMAN_PASSWORD> -t <PIVNET_TOKEN> -g <GLOB_FILTER> -v <PRODUCT_VERSION> -e <ENV_NAME> -i <IAAS>" 1>&2; exit 1; }
+usage() { echo "Usage: cmd -u <OPSMAN_USERNAME> -p <OPSMAN_PASSWORD> -t <PIVNET_TOKEN> -g <GLOB_FILTER> -v <PRODUCT_VERSION> -e <ENV_NAME> -i <IAAS> -s <PRODUCT_SLUG>" 1>&2; exit 1; }
+
+download_tile() {
+  file_glob="INVALID_FILE_GLOB"
+
+  case $PRODUCT_SLUG in
+    'elastic-runtime' )
+      if [[ $GLOB_FILTER == *"srt"* ]]; then
+        file_glob="srt*.pivotal"
+      else
+        file_glob="cf*.pivotal"
+      fi
+      ;;
+    'pivotal-container-service' )
+        file_glob="*.pivotal"
+      ;;
+    *)
+      echo "Unsupported slug: '$slug'"
+      exit 1
+      ;;
+  esac
+
+  release_version=$(pivnet-cli releases --product-slug $PRODUCT_SLUG --format=json | jq -r '.[ ] .version' | grep -F "${PRODUCT_VERSION}" | head -n 1)
+  pivnet-cli download-product-files \
+      --product-slug $PRODUCT_SLUG \
+      --release-version "${release_version}" \
+      --glob $file_glob \
+      --accept-eula
+}
 
 if [ $# -eq "$NO_ARGS" ]
 then
@@ -23,7 +52,7 @@ then
   exit $E_OPTERROR
 fi
 
-while getopts "u:p:t:g:v:e:i:" Option
+while getopts "u:p:t:g:v:e:i:s:" Option
 do
   case $Option in
     u )
@@ -54,12 +83,16 @@ do
       irflag=true
       IAAS=$OPTARG
       ;;
+    s )
+      srflag=true
+      PRODUCT_SLUG=$OPTARG
+      ;;
     * ) usage ;;
   esac
 done
 shift $(($OPTIND - 1))
 
-if ! $urflag || ! $prflag || ! $trflag || ! $grflag || ! $vrflag || ! $erflag || ! $irflag
+if ! $urflag || ! $prflag || ! $trflag || ! $grflag || ! $vrflag || ! $erflag || ! $irflag || ! $srflag
 then
     echo "Required option was not specified" >&2
     usage
@@ -72,6 +105,7 @@ export PIVNET_TOKEN
 export PRODUCT_VERSION
 export GLOB_FILTER
 export IAAS
+export PRODUCT_SLUG
 
 echo
 echo "=============================================================================================="
@@ -103,7 +137,7 @@ curl -L "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64" > j
 
 echo
 echo "=============================================================================================="
-echo " Downloding ERT tile to @ https://pcf.$ENV_NAME.cf-app.com ..."
+echo " Downloding ${PRODUCT_SLUG} tile to @ https://pcf.$ENV_NAME.cf-app.com ..."
 echo "=============================================================================================="
 
 set +e
@@ -118,25 +152,11 @@ do
 done
 set -e
 
-ERT_VERSION=$(pivnet-cli releases --product-slug elastic-runtime --format=json | jq -r '.[ ] .version' | grep -F "${PRODUCT_VERSION}" | head -n 1)
-export ERT_VERSION
-if [[ $GLOB_FILTER == *"srt"* ]]; then
-  pivnet-cli download-product-files \
-    --product-slug elastic-runtime \
-    --release-version "${ERT_VERSION}" \
-    --glob srt*.pivotal \
-    --accept-eula
-else
-  pivnet-cli download-product-files \
-    --product-slug elastic-runtime \
-    --release-version "${ERT_VERSION}" \
-    --glob cf*.pivotal \
-    --accept-eula
-fi
+download_tile
 
 echo
 echo "=============================================================================================="
-echo " Uploading ERT tile to @ https://pcf.$ENV_NAME.cf-app.com ..."
+echo " Uploading ${PRODUCT_SLUG} tile to @ https://pcf.$ENV_NAME.cf-app.com ..."
 echo "=============================================================================================="
 om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
@@ -147,20 +167,27 @@ om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
 
 echo
 echo "=============================================================================================="
-echo " Staging ERT tile to @ https://pcf.$ENV_NAME.cf-app.com ..."
+echo " Staging ${PRODUCT_SLUG} tile to @ https://pcf.$ENV_NAME.cf-app.com ..."
 echo "=============================================================================================="
 uploaded_product_version=$(om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
   --password "${OPSMAN_PASSWORD}" \
+  --format=json \
   available-products \
-  | grep cf | awk '{print $4}')
-export uploaded_product_version
+  |  jq -r '.[0]."version"')
+
+  uploaded_product_name=$(om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
+  --username "${OPSMAN_USERNAME}" \
+  --password "${OPSMAN_PASSWORD}" \
+  --format=json \
+  available-products \
+  |  jq -r '.[0]."name"')
 
 om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
   --password "${OPSMAN_PASSWORD}" \
   stage-product \
-  --product-name cf \
+  --product-name ${uploaded_product_name} \
   --product-version "${uploaded_product_version}"
 
 stemcell_os=$(unzip -p "*.pivotal" metadata/*.yml | yq-go r - stemcell_criteria.os)
