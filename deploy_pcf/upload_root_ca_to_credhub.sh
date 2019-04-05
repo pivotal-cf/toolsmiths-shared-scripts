@@ -62,9 +62,14 @@ admin_user_password="$(echo "$uaa_admin" | jq -r .credential.value.password)"
 
 uaac target 10.0.0.5:8443 --skip-ssl-validation
 uaac token owner get login $admin_user_name --password=$admin_user_password --secret=$login_client_cred
-uaac contexts
 
-uaac client add --authorized_grant_types client_credentials --authorities credhub.read,credhub.write credhub --secret=credhub
+uaac clients | grep -q "name: credhub"
+if [ $? -ne 0 ]; then
+  uaac client add --authorized_grant_types client_credentials --authorities credhub.read,credhub.write credhub --secret=credhub
+else
+  echo "credhub client already exists"
+fi
+
 credhub login -s 10.0.0.5:8844 --ca-cert=/var/tempest/workspaces/default/root_ca_certificate --client-name=credhub --client-secret=credhub
 credhub set --type certificate --name /services/tls_ca \
 --root <(jq -r .ca ./tls_ca.json) \
