@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 PATH=$(pwd):$PATH
 export PATH
 
@@ -63,11 +63,11 @@ admin_user_password="$(echo "$uaa_admin" | jq -r .credential.value.password)"
 uaac target 10.0.0.5:8443 --skip-ssl-validation
 uaac token owner get login $admin_user_name --password=$admin_user_password --secret=$login_client_cred
 
-uaac clients | grep -q "name: credhub"
-if [ $? -ne 0 ]; then
-  uaac client add --authorized_grant_types client_credentials --authorities credhub.read,credhub.write credhub --secret=credhub
-else
+if uaac clients | grep -q "name: credhub"
+then
   echo "credhub client already exists"
+else
+  uaac client add --authorized_grant_types client_credentials --authorities credhub.read,credhub.write credhub --secret=credhub
 fi
 
 credhub login -s 10.0.0.5:8844 --ca-cert=/var/tempest/workspaces/default/root_ca_certificate --client-name=credhub --client-secret=credhub
