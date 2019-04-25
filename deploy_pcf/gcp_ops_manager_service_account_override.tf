@@ -10,6 +10,6 @@ resource "google_service_account_key" "opsman_service_account_key" {
 }
 
 output "service_account_email" {
-  value = "${element(concat(google_service_account.opsman_service_account.email, list("")), 0)}"
+  value = "${element(concat(google_service_account.opsman_service_account.*.email, list("")), 0)}"
 }
 
