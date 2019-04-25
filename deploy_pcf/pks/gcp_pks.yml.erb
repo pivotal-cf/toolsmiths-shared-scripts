@@ -87,7 +87,10 @@ product-properties:
     value:
       - "public_ip"
   .properties.telemetry_selector:
-    value: "disabled"
+    selected_option: "enabled"
+    value: "enabled"
+  .properties.telemetry_selector.enabled.environment_provider:
+    value: "pivotal-cf-toolsmiths"
 resource-config:
   pivotal-container-service:
     elb_names:
