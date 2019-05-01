@@ -50,11 +50,6 @@ export OPSMAN_PASSWORD
 export ENV_NAME
 export TARGET="https://pcf.${ENV_NAME}.cf-app.com"
 
-curl -L "https://github.com/pivotal-cf/om/releases/download/0.47.0/om-linux" > om-linux \
-  && chmod +x om-linux
-curl -L "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64" > jq \
-  && chmod +x jq
-
 uaa_login="$(./om-linux -t $TARGET -u $OPSMAN_USERNAME -p $OPSMAN_PASSWORD -k curl -s -p /api/v0/deployed/director/credentials/uaa_login_client_credentials)"
 uaa_admin="$(./om-linux -t $TARGET -u $OPSMAN_USERNAME -p $OPSMAN_PASSWORD -k curl -s -p /api/v0/deployed/director/credentials/uaa_admin_user_credentials)"
 

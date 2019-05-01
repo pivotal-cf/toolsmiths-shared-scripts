@@ -124,19 +124,6 @@ esac
 
 echo
 echo "=============================================================================================="
-echo " Downloading required tooling ..."
-echo "=============================================================================================="
-curl -L "https://github.com/pivotal-cf/om/releases/download/0.47.0/om-linux" > om-linux \
-  && chmod +x om-linux
-curl -L "https://github.com/pivotal-cf/pivnet-cli/releases/download/v0.0.55/pivnet-linux-amd64-0.0.55" > pivnet-cli \
-  && chmod +x pivnet-cli
-curl -L  "https://github.com/mikefarah/yq/releases/download/2.2.0/yq_linux_amd64" > yq-go \
-  && chmod +x yq-go
-curl -L "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64" > jq \
-  && chmod +x jq
-
-echo
-echo "=============================================================================================="
 echo " Downloding ${PRODUCT_SLUG} tile to @ https://pcf.$ENV_NAME.cf-app.com ..."
 echo "=============================================================================================="
 
@@ -220,11 +207,5 @@ om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --password "${OPSMAN_PASSWORD}" \
   upload-stemcell \
   --stemcell ./${stemcell_glob}.tgz
-
-echo
-echo "=============================================================================================="
-echo " Removing extraneous tooling and downloaded files ..."
-echo "=============================================================================================="
-rm -fv om-linux pivnet-cli yq-go jq
 
 rm -rfv ./*.pivotal ./*.tgz
