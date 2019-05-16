@@ -188,16 +188,21 @@ echo "==========================================================================
 product_slug=""
 case $stemcell_os in
   "ubuntu-trusty")
-    product_slug="stemcells";;
+    product_slug="stemcells"
+    stemcell_url="https://bosh.io/d/stemcells/bosh-google-kvm-${stemcell_os}-go_agent?v=${stemcell_version}"
+    stemcell_outfile="light-bosh-stemcell-${stemcell_version}-google-kvm-${stemcell_os}-go_agent.tgz"
+    curl -v -L --retry 10 --retry-connrefused "$stemcell_url" -o "${stemcell_outfile}"
+    ;;
   *)
-    product_slug="stemcells-${stemcell_os}";;
+    product_slug="stemcells-${stemcell_os}"
+    pivnet-cli download-product-files \
+      --product-slug "${product_slug}" \
+      --release-version "${stemcell_version}" \
+      --glob "${stemcell_glob}" \
+      --accept-eula
+    ;;
 esac
 
-pivnet-cli download-product-files \
-  --product-slug "${product_slug}" \
-  --release-version "${stemcell_version}" \
-  --glob "${stemcell_glob}" \
-  --accept-eula
 
 echo "=============================================================================================="
 echo " Uploading stemcell ${stemcell_os} version ${stemcell_version} ... "
