@@ -191,7 +191,7 @@ case $stemcell_os in
     product_slug="stemcells"
     stemcell_url="https://bosh.io/d/stemcells/bosh-google-kvm-${stemcell_os}-go_agent?v=${stemcell_version}"
     stemcell_outfile="light-bosh-stemcell-${stemcell_version}-google-kvm-${stemcell_os}-go_agent.tgz"
-    curl -v -L --retry 10 --retry-connrefused "$stemcell_url" -o "${stemcell_outfile}"
+    curl -v -L --retry 10 "$stemcell_url" -o "${stemcell_outfile}"
     ;;
   *)
     product_slug="stemcells-${stemcell_os}"
