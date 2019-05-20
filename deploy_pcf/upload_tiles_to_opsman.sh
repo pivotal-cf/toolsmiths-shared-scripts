@@ -184,7 +184,7 @@ product_slug=""
 case $stemcell_os in
   "ubuntu-trusty")
     product_slug="stemcells"
-    major_version=$(cut -f1 -d'.' $stemcell_version)
+    major_version=$(echo "$stemcell_version" | cut -f1 -d'.')
     stemcell_version=$(pivnet-cli releases -p $product_slug --format=json | jq '.[].version' -r  | grep $major_version | sort --version-sort | tail -n 1)
     ;;
   *)
