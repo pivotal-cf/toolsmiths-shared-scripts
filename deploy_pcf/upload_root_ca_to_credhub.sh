@@ -57,8 +57,10 @@ login_client_cred="$(echo "$uaa_login" | jq -r .credential.value.password)"
 admin_user_name="$(echo "$uaa_admin" | jq -r .credential.value.identity)"
 admin_user_password="$(echo "$uaa_admin" | jq -r .credential.value.password)"
 
+set +e
 which uaac > /dev/null
 UAAC_EC=$?
+set -e
 
 if [ $UAAC_EC -ne 0 ]
 then
