@@ -57,15 +57,27 @@ login_client_cred="$(echo "$uaa_login" | jq -r .credential.value.password)"
 admin_user_name="$(echo "$uaa_admin" | jq -r .credential.value.identity)"
 admin_user_password="$(echo "$uaa_admin" | jq -r .credential.value.password)"
 
-uaac target 10.0.0.5:8443 --skip-ssl-validation
-uaac token owner get login $admin_user_name --password=$admin_user_password --secret=$login_client_cred
+if [ $(which uaac > /dev/null) -ne 0 ]
+then
+  echo "uaac was not found on our PATH. Assuming we're on a 1.12 PCF and using the version in the tempest-web vendor directory."
+  UAAC_DIR=/home/tempest-web/tempest/web/vendor/uaac
+  UAAC="bundle exec vendor/bundle/ruby/2.3.0/bin/uaac"
+else
+  UAAC_DIR="."
+  UAAC=uaac
+fi
 
-if uaac clients | grep -q "name: credhub"
+pushd $UAAC_DIR
+$UAAC target 10.0.0.5:8443 --skip-ssl-validation
+$UAAC token owner get login $admin_user_name --password=$admin_user_password --secret=$login_client_cred
+
+if $UAAC clients | grep -q "name: credhub"
 then
   echo "credhub client already exists"
 else
-  uaac client add --authorized_grant_types client_credentials --authorities credhub.read,credhub.write credhub --secret=credhub
+  $UAAC client add --authorized_grant_types client_credentials --authorities credhub.read,credhub.write credhub --secret=credhub
 fi
+popd
 
 credhub login -s 10.0.0.5:8844 --ca-cert=/var/tempest/workspaces/default/root_ca_certificate --client-name=credhub --client-secret=credhub
 credhub set --type certificate --name /services/tls_ca \
