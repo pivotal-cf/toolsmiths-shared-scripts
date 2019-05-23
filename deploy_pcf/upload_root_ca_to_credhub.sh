@@ -57,7 +57,10 @@ login_client_cred="$(echo "$uaa_login" | jq -r .credential.value.password)"
 admin_user_name="$(echo "$uaa_admin" | jq -r .credential.value.identity)"
 admin_user_password="$(echo "$uaa_admin" | jq -r .credential.value.password)"
 
-if [ $(which uaac > /dev/null) -ne 0 ]
+which uaac > /dev/null
+UAAC_EC=$?
+
+if [ $UAAC_EC -ne 0 ]
 then
   echo "uaac was not found on our PATH. Assuming we're on a 1.12 PCF and using the version in the tempest-web vendor directory."
   UAAC_DIR=/home/tempest-web/tempest/web/vendor/uaac
