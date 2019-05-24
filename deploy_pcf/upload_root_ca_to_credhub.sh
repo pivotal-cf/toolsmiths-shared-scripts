@@ -84,8 +84,26 @@ else
 fi
 popd
 
+set +e
+which credhub > /dev/null
+CREDHUB_EC=$?
+set -e
+
+if [ $CREDHUB_EC -ne 0 ]
+then
+  echo "credhub CLI was not found on our path. Assuming we're on a 1.12 PCF and downloading the CLI from github."
+  curl -L https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/1.7.7/credhub-linux-1.7.7.tgz | tar xzf -
+  chmod +x ./credhub
+fi
+
 credhub login -s 10.0.0.5:8844 --ca-cert=/var/tempest/workspaces/default/root_ca_certificate --client-name=credhub --client-secret=credhub
 credhub set --type certificate --name /services/tls_ca \
 --root <(jq -r .ca ./tls_ca.json) \
 --certificate <(jq -r .certificate ./tls_ca.json) \
 --private <(jq -r .private_key ./tls_ca.json)
+
+#Try to cleanup what we downloaded
+if [ -f ./credhub ]
+then
+  rm ./credhub
+fi
