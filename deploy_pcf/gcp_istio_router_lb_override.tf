@@ -60,3 +60,7 @@ resource "google_dns_record_set" "wildcard-mesh-apps-dns" {
 output "mesh_router_pool" {
   value = "${google_compute_firewall.cf-mesh.name}"
 }
+
+output "mesh_dns" {
+  value = "${replace(replace(google_dns_record_set.wildcard-mesh-apps-dns.name, "/^\\*\\./", ""), "/\\.$/", "")}"
+}
