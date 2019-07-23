@@ -1,0 +1,51 @@
+---
+product-name: pivotal-container-service
+
+network-properties:
+  singleton_availability_zone:
+    name: default
+  other_availability_zones:
+     - name: default
+  network:
+    name: default
+  service_network:
+    name: default
+
+product-properties:
+  .properties.pks_api_hostname:
+    value: api.pks.<%= ENV.fetch('DOMAIN') %>
+  .pivotal-container-service.pks_tls:
+    value:
+      cert_pem: <%= ENV.fetch('DOMAIN_CRT').dump %>
+      private_key_pem: <%= ENV.fetch('DOMAIN_KEY').dump %>
+
+  .properties.plan1_selector:
+    value: "Plan Active"
+  .properties.plan1_selector.active.master_az_placement:
+    value:
+      - default
+  .properties.plan1_selector.active.worker_az_placement:
+    value:
+      - default
+
+  .properties.cloud_provider:
+    value: "vSphere"
+  .properties.cloud_provider.vsphere.vcenter_master_creds:
+    value:
+      identity: <%= ENV.fetch('VC_USERNAME') %>
+      password: <%= ENV.fetch('VC_PASSWORD') %>
+  .properties.cloud_provider.vsphere.vcenter_ip:
+    value: <%= ENV.fetch('VC_URL') %>
+  .properties.cloud_provider.vsphere.vcenter_dc:
+    value: <%= ENV.fetch('VC_DATACENTER') %>
+  .properties.cloud_provider.vsphere.vcenter_ds:
+    value: <%= ENV.fetch('VC_DATASTORE') %>
+  .properties.cloud_provider.vsphere.vcenter_vms:
+    value: <%= ENV.fetch('ENV_NAME') %>_vms
+  
+
+  .properties.telemetry_selector:
+    selected_option: "enabled"
+    value: "enabled"
+  .properties.telemetry_selector.enabled.environment_provider:
+    value: "pivotal-cf-toolsmiths"
