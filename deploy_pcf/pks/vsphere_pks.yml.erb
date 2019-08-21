@@ -42,10 +42,14 @@ product-properties:
     value: <%= ENV.fetch('VC_DATASTORE') %>
   .properties.cloud_provider.vsphere.vcenter_vms:
     value: <%= ENV.fetch('ENV_NAME') %>_vms
-  
 
   .properties.telemetry_selector:
     selected_option: "enabled"
     value: "enabled"
   .properties.telemetry_selector.enabled.environment_provider:
     value: "pivotal-cf-toolsmiths"
+  .properties.telemetry_installation_purpose_selector:
+    value: dev_or_pre_prod
+  # This property is found in the UAA config section
+  .properties.oidc_selector:
+    value: disabled

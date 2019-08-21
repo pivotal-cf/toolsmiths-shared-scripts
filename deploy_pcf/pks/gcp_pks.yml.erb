@@ -38,9 +38,9 @@ product-properties:
   .properties.plan1_selector.active.worker_instances:
     value: 3
   .properties.plan1_selector.active.master_vm_type:
-    value: small
+    value: medium.disk
   .properties.plan1_selector.active.worker_vm_type:
-    value: small
+    value: medium.disk
   .properties.plan2_selector:
     value: "Plan Active"
   .properties.plan2_selector.active.master_az_placement:
@@ -54,9 +54,9 @@ product-properties:
   .properties.plan2_selector.active.worker_instances:
     value: 3
   .properties.plan2_selector.active.master_vm_type:
-    value: small
+    value: medium.disk
   .properties.plan2_selector.active.worker_vm_type:
-    value: small
+    value: medium.disk
   .properties.plan3_selector:
     value: "Plan Active"
   .properties.plan3_selector.active.master_az_placement:
@@ -70,9 +70,9 @@ product-properties:
   .properties.plan3_selector.active.worker_instances:
     value: 4
   .properties.plan3_selector.active.master_vm_type:
-    value: large
+    value: large.disk
   .properties.plan3_selector.active.worker_vm_type:
-    value: large
+    value: large.disk
   .properties.cloud_provider:
     value: "GCP"
   .properties.cloud_provider.gcp.project_id:
@@ -91,6 +91,12 @@ product-properties:
     value: "enabled"
   .properties.telemetry_selector.enabled.environment_provider:
     value: "pivotal-cf-toolsmiths"
+  .properties.telemetry_installation_purpose_selector:
+    value: dev_or_pre_prod
+  # This property is found in the UAA config section
+  .properties.oidc_selector:
+    value: disabled
+
 resource-config:
   pivotal-container-service:
     elb_names:
