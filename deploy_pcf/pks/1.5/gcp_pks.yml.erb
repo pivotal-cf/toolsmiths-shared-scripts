@@ -25,6 +25,7 @@ product-properties:
     value:
       cert_pem: <%= ENV.fetch('DOMAIN_CRT').dump %>
       private_key_pem: <%= ENV.fetch('DOMAIN_KEY').dump %>
+
   .properties.plan1_selector:
     value: "Plan Active"
   .properties.plan1_selector.active.master_az_placement:
@@ -33,46 +34,7 @@ product-properties:
   .properties.plan1_selector.active.worker_az_placement:
     value:
       - <%= pks_azs[0] %>
-  .properties.plan1_selector.active.master_instances:
-    value: 1
-  .properties.plan1_selector.active.worker_instances:
-    value: 3
-  .properties.plan1_selector.active.master_vm_type:
-    value: medium.disk
-  .properties.plan1_selector.active.worker_vm_type:
-    value: medium.disk
-  .properties.plan2_selector:
-    value: "Plan Active"
-  .properties.plan2_selector.active.master_az_placement:
-    value:
-      - <%= pks_azs[0] %>
-  .properties.plan2_selector.active.worker_az_placement:
-    value:
-      - <%= pks_azs[0] %>
-  .properties.plan2_selector.active.master_instances:
-    value: 3
-  .properties.plan2_selector.active.worker_instances:
-    value: 3
-  .properties.plan2_selector.active.master_vm_type:
-    value: medium.disk
-  .properties.plan2_selector.active.worker_vm_type:
-    value: medium.disk
-  .properties.plan3_selector:
-    value: "Plan Active"
-  .properties.plan3_selector.active.master_az_placement:
-    value:
-      - <%= pks_azs[0] %>
-  .properties.plan3_selector.active.worker_az_placement:
-    value:
-      - <%= pks_azs[0] %>
-  .properties.plan3_selector.active.master_instances:
-    value: 1
-  .properties.plan3_selector.active.worker_instances:
-    value: 4
-  .properties.plan3_selector.active.master_vm_type:
-    value: large.disk
-  .properties.plan3_selector.active.worker_vm_type:
-    value: large.disk
+
   .properties.cloud_provider:
     value: "GCP"
   .properties.cloud_provider.gcp.project_id:
@@ -86,6 +48,7 @@ product-properties:
   .properties.vm_extensions:
     value:
       - "public_ip"
+
   .properties.telemetry_selector:
     selected_option: "enabled"
     value: "enabled"
