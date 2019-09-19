@@ -179,17 +179,18 @@ om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
 
 stemcell_os=$(unzip -p "*.pivotal" metadata/*.yml | yq-go r - stemcell_criteria.os)
 stemcell_version=$(unzip -p "*.pivotal" metadata/*.yml | yq-go r - stemcell_criteria.version)
+major_version=$(echo "$stemcell_version" | cut -f1 -d'.')
 
 product_slug=""
 case $stemcell_os in
   "ubuntu-trusty")
     product_slug="stemcells"
-    major_version=$(echo "$stemcell_version" | cut -f1 -d'.')
-    stemcell_version=$(pivnet-cli releases -p $product_slug --format=json | jq '.[].version' -r  | grep $major_version | sort --version-sort | tail -n 1)
     ;;
   *)
     product_slug="stemcells-${stemcell_os}";;
 esac
+
+stemcell_version=$(pivnet-cli releases -p $product_slug --format=json | jq '.[].version' -r  | grep $major_version | sort --version-sort | tail -n 1)
 
 echo
 echo "=============================================================================================="
