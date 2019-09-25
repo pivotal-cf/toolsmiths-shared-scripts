@@ -190,7 +190,7 @@ case $stemcell_os in
     product_slug="stemcells-${stemcell_os}";;
 esac
 
-stemcell_version=$(pivnet-cli releases -p $product_slug --format=json | jq '.[].version' -r  | grep -e "^$major_version$" | sort --version-sort | tail -n 1)
+stemcell_version=$(pivnet-cli releases -p $product_slug --format=json | jq '.[].version' -r  | grep -e "^$major_version$" -e "^$major_version\..*$" | sort --version-sort | tail -n 1)
 
 echo
 echo "=============================================================================================="
