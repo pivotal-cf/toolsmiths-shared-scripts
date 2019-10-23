@@ -30,7 +30,10 @@ download_tile() {
       fi
       ;;
     'pivotal-container-service' )
+      if [[ $GLOB_FILTER == *"pks"* ]]; then
         file_glob="*.pivotal"
+        export GLOB_FILTER='pivotal-container-service'
+      fi
       ;;
     *)
       echo "Unsupported slug: '$slug'"
@@ -161,14 +164,14 @@ uploaded_product_version=$(om-linux --target "https://pcf.${ENV_NAME}.cf-app.com
   --password "${OPSMAN_PASSWORD}" \
   available-products \
   --format=json \
-  |  jq -r '.[0]."version"')
+  |  jq -r ".[] | select(.name | contains(\"${GLOB_FILTER}\")) | .version")
 
   uploaded_product_name=$(om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
   --password "${OPSMAN_PASSWORD}" \
   available-products \
   --format=json \
-  |  jq -r '.[0]."name"')
+  |  jq -r ".[] | select(.name | contains(\"${GLOB_FILTER}\")) | .name")
 
 om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
