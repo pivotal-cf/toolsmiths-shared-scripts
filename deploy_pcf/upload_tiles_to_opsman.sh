@@ -23,17 +23,16 @@ download_tile() {
 
   case $PRODUCT_SLUG in
     'elastic-runtime' )
+      export STAGE_PRODUCT_SLUG='cf'
       if [[ $GLOB_FILTER == *"srt"* ]]; then
-        export STAGE_PRODUCT_SLUG='srt'
         file_glob="srt*.pivotal"
       else
-        export STAGE_PRODUCT_SLUG='cf'
         file_glob="cf*.pivotal"
       fi
       ;;
     'pivotal-container-service' )
-        export STAGE_PRODUCT_SLUG=''
-        file_glob="*.pivotal"
+      export STAGE_PRODUCT_SLUG='pivotal-container-service'
+      file_glob="*.pivotal"
       ;;
     *)
       echo "Unsupported slug: '$slug'"
