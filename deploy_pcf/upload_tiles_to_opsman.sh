@@ -24,16 +24,16 @@ download_tile() {
   case $PRODUCT_SLUG in
     'elastic-runtime' )
       if [[ $GLOB_FILTER == *"srt"* ]]; then
+        export STAGE_PRODUCT_SLUG='srt'
         file_glob="srt*.pivotal"
       else
+        export STAGE_PRODUCT_SLUG='cf'
         file_glob="cf*.pivotal"
       fi
       ;;
     'pivotal-container-service' )
-      if [[ $GLOB_FILTER == *"pks"* ]]; then
+        export STAGE_PRODUCT_SLUG=''
         file_glob="*.pivotal"
-        export GLOB_FILTER='pivotal-container-service'
-      fi
       ;;
     *)
       echo "Unsupported slug: '$slug'"
@@ -164,14 +164,14 @@ uploaded_product_version=$(om-linux --target "https://pcf.${ENV_NAME}.cf-app.com
   --password "${OPSMAN_PASSWORD}" \
   available-products \
   --format=json \
-  |  jq -r ".[] | select(.name | contains(\"${GLOB_FILTER}\")) | .version")
+  |  jq -r ".[] | select(.name | contains(\"${STAGE_PRODUCT_SLUG}\")) | .version")
 
   uploaded_product_name=$(om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
   --password "${OPSMAN_PASSWORD}" \
   available-products \
   --format=json \
-  |  jq -r ".[] | select(.name | contains(\"${GLOB_FILTER}\")) | .name")
+  |  jq -r ".[] | select(.name | contains(\"${STAGE_PRODUCT_SLUG}\")) | .name")
 
 om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
