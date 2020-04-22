@@ -4,7 +4,7 @@ $testbed = Proc.new do
   {
     "name" => "testbed-test",
     "version" => 3,
-    "esx" => (0..0).map do | idx |
+    "esx" => (0..1).map do | idx |
       {
         "name" => "esx.#{idx}",
         "vc" => "vc.0",
