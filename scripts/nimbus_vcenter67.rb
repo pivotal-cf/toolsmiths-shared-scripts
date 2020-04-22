@@ -15,6 +15,8 @@ $testbed = Proc.new do
         "cpus" => 32, # of vCPUs
         "memory" => 98000, # 98GB memory
         "disks" => [ 1000 * oneGB, 1000 * oneGB ],
+        "nicType" => ["vmxnet3"],
+        "network" => ["public"],
         "guestOSlist" => [         
           {
             "vmName" => "centos-vm.#{idx}",
@@ -33,9 +35,12 @@ $testbed = Proc.new do
         "clusters" => [
           {
             "name" => "cluster0",
-            "dc" => "vcqaDC"
+            "dc" => "vcqaDC",
+            "enableDrs" => true
           }
-        ]
+        ],
+        "nicType" => ["vmxnet3"],
+        "network" => ["public"],
       }
     ],
  
