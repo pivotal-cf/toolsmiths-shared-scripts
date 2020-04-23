@@ -3,7 +3,6 @@ oneGB = 1 * 1000 * 1000 # in KB
 $testbed = Proc.new do
   {
     'network' => [
-      {'name' => 'net.0', "enableDhcp" => true},
       {'name' => 'net.1', "enableDhcp" => false},
     ],
     "name" => "testbed-test",
@@ -25,7 +24,7 @@ $testbed = Proc.new do
             "ovfuri" => NimbusUtils.get_absolute_ovf("CentOS6_x64_2GB/CentOS6_x64_2GB.ovf")
           },
         ],
-        "networks" => ["net.0","net.1"]
+        "networks" => ["public","nsx::net.1"]
       }
     end,
  
@@ -42,7 +41,7 @@ $testbed = Proc.new do
             "dc" => "vcqaDC"
           }
         ],
-        "networks" => ["net.0", "net.1"]
+        "networks" => ["public", "nsx::net.1"]
       }
     ],
     
