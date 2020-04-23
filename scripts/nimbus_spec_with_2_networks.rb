@@ -24,6 +24,7 @@ $testbed = Proc.new do
             "ovfuri" => NimbusUtils.get_absolute_ovf("CentOS6_x64_2GB/CentOS6_x64_2GB.ovf")
           },
         ],
+        "nics" => 2,
         "networks" => ["public","nsx::net.1"]
       }
     end,
@@ -41,6 +42,7 @@ $testbed = Proc.new do
             "dc" => "vcqaDC"
           }
         ],
+        "nics" => 2,
         "networks" => ["public", "nsx::net.1"]
       }
     ],
