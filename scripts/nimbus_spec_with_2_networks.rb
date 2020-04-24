@@ -3,7 +3,7 @@ oneGB = 1 * 1000 * 1000 # in KB
 $testbed = Proc.new do
   {
     'network' => [
-      {'name' => 'net.1', "enableDhcp" => false},
+      {'name' => 'net.1', "enableDhcp" => true},
     ],
     "name" => "testbed-test",
     "version" => 3,
