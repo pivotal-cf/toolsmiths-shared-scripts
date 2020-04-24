@@ -23,9 +23,7 @@ $testbed = Proc.new do
             "vmName" => "centos-vm.#{idx}",
             "ovfuri" => NimbusUtils.get_absolute_ovf("CentOS6_x64_2GB/CentOS6_x64_2GB.ovf")
           },
-        ],
-        "nics" => 2,
-        "networks" => ["public","nsx::net.1"]
+        ]
       }
     end,
  
@@ -41,9 +39,7 @@ $testbed = Proc.new do
             "name" => "cluster0",
             "dc" => "vcqaDC"
           }
-        ],
-        "nics" => 2,
-        "networks" => ["public", "nsx::net.1"]
+        ]
       }
     ],
     
@@ -54,4 +50,3 @@ $testbed = Proc.new do
     end
   }
 end
-
