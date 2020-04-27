@@ -7,7 +7,6 @@ $testbed = Proc.new do
     "esx" => (0..0).map do | idx |
       {
         "name" => "esx.#{idx}",
-        "vc" => "vc.0",
         "customBuild" => "ob-15843807",
         "dc" => "vcqaDC",
         "clusterName" => "cluster0",
