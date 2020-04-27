@@ -2,9 +2,6 @@ oneGB = 1 * 1000 * 1000 # in KB
  
 $testbed = Proc.new do
   {
-    'network' => [
-      {'name' => 'net.1', "enableDhcp" => true},
-    ],
     "name" => "testbed-test",
     "version" => 3,
     "esx" => (0..0).map do | idx |
@@ -22,27 +19,10 @@ $testbed = Proc.new do
           {
             "vmName" => "centos-vm.#{idx}",
             "ovfuri" => NimbusUtils.get_absolute_ovf("CentOS6_x64_2GB/CentOS6_x64_2GB.ovf")
-          },
-        ]
-      }
-    end,
- 
-    "vcs" => [
-      {
-        "name" => "vc.0",
-        "type" => "vcva",
-        "customBuild" => "ob-15952498",
-        "dcName" => ["vcqaDC"],
-        "enableDrs" => true,
-        "clusters" => [
-          {
-            "name" => "cluster0",
-            "dc" => "vcqaDC"
           }
         ]
       }
-    ],
-    
+    end
 
     "beforePostBoot" => Proc.new do |runId, testbedSpec, vmList, catApi, logDir|
     end,
