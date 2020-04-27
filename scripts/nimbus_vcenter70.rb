@@ -14,7 +14,6 @@ $testbed = Proc.new do
         "style" => "fullInstall",
         "cpus" => 32, # 32 vCPUs
         "memory" => 98000, # 98GB memory
-        "fullClone" => true,
         "disks" => [ 2* 1000 * oneGB, 1000 * oneGB ], # 2 TB Disk
         "guestOSlist" => [         
           {
