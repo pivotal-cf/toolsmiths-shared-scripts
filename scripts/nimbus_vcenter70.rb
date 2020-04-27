@@ -2,9 +2,6 @@ oneGB = 1 * 1000 * 1000 # in KB
  
 $testbed = Proc.new do
   {
-     'network' => [
-      {'name' => 'net.1', "enableDhcp" => true},
-    ],
     "name" => "testbed-test",
     "version" => 3,
     "esx" => (0..0).map do | idx |
@@ -40,9 +37,7 @@ $testbed = Proc.new do
             "name" => "cluster0",
             "dc" => "vcqaDC"
           }
-        ],
-        "nics" => 2,
-        "networks" => ["public", "nsx::net.1"]
+        ]
       }
     ],
  
