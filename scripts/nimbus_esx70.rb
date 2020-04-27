@@ -22,7 +22,7 @@ $testbed = Proc.new do
           }
         ]
       }
-    end
+    end,
 
     "beforePostBoot" => Proc.new do |runId, testbedSpec, vmList, catApi, logDir|
     end,
