@@ -1,3 +1,4 @@
+$testbed = Proc.new do
 {
    "name" => "dual-network-testbed",
    "version" => 3,
@@ -20,6 +21,6 @@
       "nics" => 2,
       "networks" => ["nsx::net.0"]
    }
-]
+               ]
 }
 end
