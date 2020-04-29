@@ -7,6 +7,8 @@ $testbed = Proc.new do
     "esx" => (0..0).map do | idx |
       {
         "name" => "esx.#{idx}",
+        "nics" => 2, # 2 NICs
+        "networks" => ["public", "isolated-1"],
         "vc" => "vc.0",
         "customBuild" => "ob-15843807",
         "dc" => "vcqaDC",
