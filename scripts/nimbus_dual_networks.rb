@@ -1,12 +1,12 @@
 {
-"name" => "dual-network-testbed"
-"network" => [
-   {
-     "name" => "net.0",
-     "enableDhcp" => true
-   }
-]
- 
+   "name" => "dual-network-testbed",
+   "version" => 3,
+   "network" => [
+      {
+        "name" => "net.0",
+        "enableDhcp" => true
+      }
+                ],
 "genericVm" => [
    {
       "name" => "worker.0",
@@ -22,3 +22,4 @@
    }
 ]
 }
+end
