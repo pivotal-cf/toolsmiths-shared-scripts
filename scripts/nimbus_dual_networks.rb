@@ -14,7 +14,7 @@
     {
       'type' => 'worker-template',
       'nics' => 2,
-      'networks' => ['public', 'nsx::net.0']
+      'networks' => ['nsx::net.0']
     }
   ]
 }
