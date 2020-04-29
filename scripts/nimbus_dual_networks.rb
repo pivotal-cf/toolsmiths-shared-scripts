@@ -4,9 +4,9 @@
      "name" => "net.0",
      "enableDhcp" => true
    }
-],
+]
  
-genericVM => [
+"genericVM" => [
    {
       "name" => "worker.0",
       "type" => "worker-template",
