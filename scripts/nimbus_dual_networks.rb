@@ -1,4 +1,5 @@
 {
+"name" => "dual-network-testbed"
 "network" => [
    {
      "name" => "net.0",
@@ -6,7 +7,7 @@
    }
 ]
  
-"genericVM" => [
+"genericVm" => [
    {
       "name" => "worker.0",
       "type" => "worker-template",
