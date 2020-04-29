@@ -4,14 +4,9 @@ $testbed = Proc.new do
   {
     "name" => "testbed-test",
     "version" => 3,
-    "network" => [
-      {"name" => "net.0", "enableDhcp" => true},
-    ],
     "esx" => (0..0).map do | idx |
       {
         "name" => "esx.#{idx}",
-        "nics" => 2, # 2 NICs
-        "networks" => ["public", "nsx::net.0"],
         "vc" => "vc.0",
         "customBuild" => "ob-15843807",
         "dc" => "vcqaDC",
