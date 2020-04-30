@@ -1,3 +1,5 @@
+# command to run:
+# /mts/git/bin/nimbus-testbeddeploy --testbedSpecRubyFile https://raw.githubusercontent.com/pivotal-cf/toolsmiths-shared-scripts/master/scripts/nimbus_dual_networks.rb --runName iso --context general:nsx
 $testbed = Proc.new do
 {
    "name" => "dual-network-testbed",
@@ -21,6 +23,11 @@ $testbed = Proc.new do
       "nics" => 2,
       "networks" => ["nsx::net.0"]
    }
-               ]
+               ],
+ 
+    "beforePostBoot" => Proc.new do |runId, testbedSpec, vmList, catApi, logDir|
+    end,
+    "postBoot" => Proc.new do |runId, testbedSpec, vmList, catApi, logDir|
+    end
 }
 end
