@@ -23,11 +23,6 @@ $testbed = Proc.new do
       "nics" => 2,
       "networks" => ["nsx::net.0"]
    }
-               ],
- 
-    "beforePostBoot" => Proc.new do |runId, testbedSpec, vmList, catApi, logDir|
-    end,
-    "postBoot" => Proc.new do |runId, testbedSpec, vmList, catApi, logDir|
-    end
+               ]
 }
 end
