@@ -1,5 +1,3 @@
-runName dual-network-claas-centos1 --context general:nsx
-
 $testbed = Proc.new do
   {
     "name" => "testbed-test",
