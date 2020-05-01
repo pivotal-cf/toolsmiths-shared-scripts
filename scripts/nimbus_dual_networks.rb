@@ -12,7 +12,7 @@ $testbed = Proc.new do
 "genericVm" => [
    {
       "name" => "worker.0",
-      "type" => "claas-centos",
+      "type" => "worker-template",
       "nics" => 2,
       "networks" => ["public", "nsx::net.0"]
    },
