@@ -1,5 +1,4 @@
-# command to run:
-# /mts/git/bin/nimbus-testbeddeploy --testbedSpecRubyFile https://raw.githubusercontent.com/pivotal-cf/toolsmiths-shared-scripts/master/scripts/nimbus_dual_networks.rb --runName iso --context general:nsx
+#command to run: /mts/git/bin/nimbus-testbeddeploy --testbedSpecRubyFile https://raw.githubusercontent.com/pivotal-cf/toolsmiths-shared-scripts/master/scripts/dual-network.rb --runName dual-network-claas-centos1 --context general:nsx
 $testbed = Proc.new do
 {
    "name" => "dual-network-testbed",
@@ -13,13 +12,13 @@ $testbed = Proc.new do
 "genericVm" => [
    {
       "name" => "worker.0",
-      "type" => "worker-template",
+      "type" => "claas-centos",
       "nics" => 2,
       "networks" => ["public", "nsx::net.0"]
    },
    {
       "name" => "worker.1",
-      "type" => "worker-template",
+      "type" => "claas-centos",
       "nics" => 2,
       "networks" => ["nsx::net.0"]
    }
