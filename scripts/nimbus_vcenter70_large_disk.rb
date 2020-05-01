@@ -15,7 +15,7 @@ $testbed = Proc.new do
         "cpus" => 32, # 32 vCPUs
         "memory" => 98000, # 98GB memory
         "fullClone" => true,
-        "disks" => [ 200 * 1000 * oneGB ] # 200 TB Disk
+        "disks" => [ 100 * 1000 * oneGB ] # 100 TB Disk
       }
     end,
  
