@@ -1,3 +1,5 @@
+oneGB = 1 * 1000 * 1000 # in KB
+
 $testbed = Proc.new do
   {
     "name" => "testbed-test",
