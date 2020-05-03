@@ -1,0 +1,34 @@
+az-configuration:
+  - name: default-az
+    clusters:
+     - cluster: cluster0
+network-assignment:
+  singleton_availability_zone:
+    name: default-az
+  network:
+    name: default-network
+networks-configuration:
+   icmp_checks_enabled: true
+   networks:
+     - name: default-network
+       subnets:
+         - iaas_identifier: internal-network
+           cidr: 192.168.111.0/24
+           reserved_ip_ranges: 192.168.111.2-192.168.111.153
+           dns: 10.195.12.31
+           gateway: 192.168.111.1
+           availability_zone_names: [default-az]
+properties-configuration:
+  director_configuration:
+    ntp_servers_string: time1.oc.vmware.com
+  iaas_configuration:
+    vcenter_host: <edit me>
+    vcenter_username: <edit me>
+    vcenter_password: <edit me>
+    datacenter: vcqaDC
+    disk_type: thin
+    ephemeral_datastores_string: local-0
+    persistent_datastores_string: local-0
+    bosh_vm_folder: pcf_vms
+    bosh_template_folder: pcf_templates
+    bosh_disk_path: pcf_disks
