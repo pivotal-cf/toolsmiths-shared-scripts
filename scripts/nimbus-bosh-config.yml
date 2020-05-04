@@ -14,7 +14,7 @@ networks-configuration:
        subnets:
          - iaas_identifier: internal-network
            cidr: 192.168.111.0/24
-           reserved_ip_ranges: 192.168.111.2-192.168.111.153
+           reserved_ip_ranges: 192.168.111.0-192.168.111.152
            dns: 10.195.12.31
            gateway: 192.168.111.1
            availability_zone_names: [default-az]
