@@ -23,6 +23,7 @@ resource "google_compute_instance" "ops-manager" {
     initialize_params {
       image = "${google_compute_image.ops-manager-image.self_link}"
       size  = 150
+      type = "pd-ssd"
     }
   }
 
