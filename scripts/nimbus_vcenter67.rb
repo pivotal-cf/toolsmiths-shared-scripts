@@ -4,7 +4,7 @@ $testbed = Proc.new do
   {
     "name" => "testbed-test",
     "version" => 3,
-    "esx" => (0..0).map do | idx |
+    "esx" => (0..1).map do | idx |
       {
         "name" => "esx.#{idx}",
         "vc" => "vc.0",
@@ -21,10 +21,6 @@ $testbed = Proc.new do
           {
             "vmName" => "centos-vm.#{idx}",
             "ovfuri" => NimbusUtils.get_absolute_ovf("CentOS-7-64-VMTools/CentOS-7-x64.ovf")
-          },
-          {
-            "vmName" => "ubuntu-vm.#{idx}",
-            "ovfuri" => NimbusUtils.get_absolute_ovf("kubeReadyUbuntuBionic-1.15.0-v2.1/kubeReadyUbuntuBionic-1.15.0-v2.1.ovf")
           }
         ]
       }
