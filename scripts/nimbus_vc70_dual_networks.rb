@@ -28,7 +28,7 @@ $testbed = Proc.new do
         "guestOSlist" => [         
           {
             "vmName" => "centos-vm.#{idx}",
-            "ovfuri" => NimbusUtils.get_absolute_ovf("CentOS6_x64_2GB/CentOS6_x64_2GB.ovf")
+            "ovfuri" => NimbusUtils.get_absolute_ovf("CentOS-7-64-VMTools/CentOS-7-x64.ovf")
           }
         ]
       }
