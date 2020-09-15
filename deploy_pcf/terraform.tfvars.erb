@@ -13,7 +13,7 @@
 
 env_name = "<%= ENV.fetch('ENV_NAME') %>"
 region = "<%= region %>"
-opsman_image_url = "https://storage.googleapis.com/<%= ENV.fetch('ops_man_image') %>"
+opsman_image_url = "<%= ENV.fetch('ops_man_image_project') %>/<%= ENV.fetch('ops_man_image_name') %>"
 zones = <%= zones.rotate!(tries) %>
 project = "<%= ENV.fetch('GCP_PROJECT_NAME') %>"
 dns_suffix = "cf-app.com"
