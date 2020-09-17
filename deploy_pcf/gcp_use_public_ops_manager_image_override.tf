@@ -3,6 +3,7 @@ resource "google_compute_instance" "ops-manager" {
     initialize_params {
       image = "${var.opsman_image_url}"
       size = 150
+      type = "pd-ssd"
     }
   }
 }
