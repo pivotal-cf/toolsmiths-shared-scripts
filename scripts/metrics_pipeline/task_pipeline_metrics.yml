@@ -21,7 +21,7 @@ run:
       wf.open
       wf.write([{
         path: "toolsmiths.pipeline",
-        value: latency,
+        value: ENV.fetch('PIPELINE_COMPLETE'),
         source: metrics_source,
         tags: {
           environment => ENV.fetch('ENV_NAME'),
@@ -31,6 +31,7 @@ run:
       }])
       wf.close
 params:
+  PIPELINE_COMPLETE: 0
   ENV_NAME: ''
   GCP_PROJECT_NAME: ''
   POOL_NAME: ''
