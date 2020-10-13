@@ -24,7 +24,9 @@ run:
         value: latency,
         source: metrics_source,
         tags: {
-          location => key
+          environment => ENV.fetch('ENV_NAME'),
+          project => ENV.fetch('GCP_PROJECT_NAME'),
+          pool => ENV.fetch('POOL_NAME')
         }
       }])
       wf.close
