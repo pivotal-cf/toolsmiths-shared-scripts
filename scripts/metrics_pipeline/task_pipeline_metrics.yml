@@ -8,7 +8,7 @@ image_resource:
 run:
   path: /usr/local/bin/ruby
   args:
-    - '-c'
+    - '-e'
     - |
       require 'wavefront-sdk/credentials'
       require 'wavefront-sdk/write'
