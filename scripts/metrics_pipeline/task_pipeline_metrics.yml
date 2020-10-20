@@ -6,7 +6,7 @@ image_resource:
   source:
     repository: cftoolsmiths/network-check
 run:
-  path: /bin/ruby
+  path: /usr/local/bin/ruby
   args:
     - '-c'
     - |
