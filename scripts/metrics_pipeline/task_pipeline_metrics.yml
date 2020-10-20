@@ -29,7 +29,6 @@ run:
           'pool' => ENV.fetch('POOL_NAME')
         }
       }])
-      wf.close
 params:
   PIPELINE_COMPLETE: 0
   ENV_NAME: ''
