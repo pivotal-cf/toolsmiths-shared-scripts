@@ -24,9 +24,9 @@ run:
         value: ENV.fetch('PIPELINE_COMPLETE'),
         source: metrics_source,
         tags: {
-          environment => ENV.fetch('ENV_NAME'),
-          project => ENV.fetch('GCP_PROJECT_NAME'),
-          pool => ENV.fetch('POOL_NAME')
+          'environment' => ENV.fetch('ENV_NAME'),
+          'project' => ENV.fetch('GCP_PROJECT_NAME'),
+          'pool' => ENV.fetch('POOL_NAME')
         }
       }])
       wf.close
