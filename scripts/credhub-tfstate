@@ -2,6 +2,7 @@
 
 require 'zlib'
 require 'stringio'
+require 'English'
 
 def usage
   puts "Usage:"
@@ -27,6 +28,7 @@ if ARGV.length() == 1 && !(ENV['ENV_NAME'].nil?())
 
     `credhub set -t value -n "$ENV_NAME/tfstate_gz_uu" -v "$ENCODED_TFSTATE"`
 
+    exit $CHILD_STATUS.exitstatus
   elsif ARGV[0] == "get"
     encoded_tfstate = `credhub get -n "$ENV_NAME/tfstate_gz_uu" --output-json | jq -r '.["value"]'`
 
