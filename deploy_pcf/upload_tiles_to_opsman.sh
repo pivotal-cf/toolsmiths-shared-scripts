@@ -48,6 +48,18 @@ download_tile() {
       --accept-eula
 }
 
+check_stemcell_exists() {
+  stemcell_slug=$1
+  version=$2
+  iaas_glob=$3
+  if pivnet-cli product-files -p "$stemcell_slug" -r "$version" | grep "bosh-stemcell-${version}-${iaas_glob}" 1>/dev/null; then
+    return 0
+  else
+    echo "WARNING: No stemcell files on Pivnet for version ${version} and IaaS ${IAAS}." >&2
+    return 1
+  fi
+}
+
 if [ $# -eq "$NO_ARGS" ]
 then
   usage
@@ -180,8 +192,8 @@ om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --product-version "${uploaded_product_version}"
 
 stemcell_os=$(unzip -p "*.pivotal" metadata/*.yml | yq-go r - stemcell_criteria.os)
-stemcell_version=$(unzip -p "*.pivotal" metadata/*.yml | yq-go r - stemcell_criteria.version)
-major_version=$(echo "$stemcell_version" | cut -f1 -d'.')
+tile_stemcell_version=$(unzip -p "*.pivotal" metadata/*.yml | yq-go r - stemcell_criteria.version)
+major_version=$(echo "$tile_stemcell_version" | cut -f1 -d'.')
 
 product_slug=""
 case $stemcell_os in
@@ -192,7 +204,31 @@ case $stemcell_os in
     product_slug="stemcells-${stemcell_os}";;
 esac
 
-stemcell_version=$(pivnet-cli releases -p $product_slug --format=json | jq '.[].version' -r  | grep -e "^$major_version$" -e "^$major_version\..*$" | sort --version-sort | tail -n 1)
+has_tile="true"
+if ! check_stemcell_exists "$product_slug" "$tile_stemcell_version" "$stemcell_glob"; then
+  has_tile="false"
+fi
+
+latest_stemcell_version=$(pivnet-cli releases -p $product_slug --format=json | jq '.[].version' -r  | grep -e "^$major_version$" -e "^$major_version\..*$" | sort --version-sort | tail -n 1)
+
+if [[ "$tile_stemcell_version" != "$latest_stemcell_version" ]]; then
+  echo "Tile metadata specified $stemcell_os stemcell version $tile_stemcell_version, but $latest_stemcell_version is the latest release on Pivnet."
+fi
+
+has_latest="true"
+if ! check_stemcell_exists "$product_slug" "$latest_stemcell_version" "$stemcell_glob"; then
+  has_latest="false"
+fi
+
+stemcell_version=""
+if [[ $has_latest == "true" ]]; then
+  stemcell_version=$latest_stemcell_version
+elif [[ $has_tile == "true" ]]; then
+  stemcell_version=$tile_stemcell_version
+else
+  echo "ERROR: Could not find a compatible stemcell on Pivnet." >&2
+  exit 1
+fi
 
 echo
 echo "=============================================================================================="
