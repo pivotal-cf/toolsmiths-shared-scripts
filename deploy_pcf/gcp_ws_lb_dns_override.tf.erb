@@ -8,3 +8,25 @@ resource "google_dns_record_set" "wildcard-sys-dns" {
 resource "google_dns_record_set" "wildcard-apps-dns" {
   rrdatas = ["${<%= load_balancer %>}"]
 }
+
+// There is a bug on GCP DNS, For more details please see: #177709735
+resource "google_dns_record_set" "login-sys-dns" {
+  name = "login.sys.${google_dns_managed_zone.env_dns_zone.dns_name}"
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.env_dns_zone.name}"
+
+  rrdatas = ["${<%= load_balancer %>}"]
+}
+
+// There is a bug on GCP DNS, For more details please see: #177709735
+resource "google_dns_record_set" "uaa-sys-dns" {
+  name = "uaa.sys.${google_dns_managed_zone.env_dns_zone.dns_name}"
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.env_dns_zone.name}"
+
+  rrdatas = ["${<%= load_balancer %>}"]
+}
