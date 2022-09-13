@@ -48,7 +48,7 @@ gcloud compute firewall-rules create "${env_name}-internetless-management-egress
 gcloud compute firewall-rules create "${env_name}-internetless-intra-pcf-vm-egress-allow" \
        --network="${env_name}-pcf-network"     \
        --direction=egress \
-       --destination-ranges="$(gcloud compute addresses list  --filter "${env_name}-cf" --format="value[terminator=','](address)")"10.0.0.0/24,10.0.4.0/22,10.0.8.0/22 \
+       --destination-ranges="$(gcloud compute addresses list  --filter "${env_name}-cf" --format="value[terminator=','](address)")"10.0.0.0/26,10.0.4.0/24,10.0.8.0/24 \
        --action=allow \
        --rules=all \
        --priority=100
