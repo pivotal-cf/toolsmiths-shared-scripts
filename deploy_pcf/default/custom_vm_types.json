@@ -19,5 +19,12 @@
     "cpu": 1,
     "ephemeral_disk": 32768,
     "builtin": false
+  },
+  {
+    "name": "toolsmiths.medium-disk-2-4.32",
+    "ram": 4096,
+    "cpu": 2,
+    "ephemeral_disk": 32768,
+    "builtin": false
   }
 ]
