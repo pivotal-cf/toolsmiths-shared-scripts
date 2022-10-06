@@ -221,10 +221,10 @@ if ! check_stemcell_exists "$product_slug" "$latest_stemcell_version" "$stemcell
 fi
 
 stemcell_version=""
-if [[ $has_latest == "true" ]]; then
-  stemcell_version=$latest_stemcell_version
-elif [[ $has_tile == "true" ]]; then
+if [[ $has_tile == "true" ]]; then
   stemcell_version=$tile_stemcell_version
+elif [[ $has_latest == "true" ]]; then
+  stemcell_version=$latest_stemcell_version
 else
   echo "ERROR: Could not find a compatible stemcell on Pivnet." >&2
   exit 1
