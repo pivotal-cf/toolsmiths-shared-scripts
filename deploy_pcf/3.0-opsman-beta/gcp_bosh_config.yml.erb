@@ -62,10 +62,24 @@ networks-configuration:
          dns: 169.254.169.254
          gateway: <%= services_subnet_gateway %>
          availability_zone_names: <%= azs %>
-vmtypes-configuration:
-  custom_only: false
-  vm_types:
-  - name: default
-    cpu: 2
-    ram: 32768
-    ephemeral_disk: 131072
+resource-configuration:
+  compilation:
+    additional_networks: []
+    additional_vm_extensions: []
+    elb_names: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    internet_connected: true
+    swap_as_percent_of_memory_size: automatic
+  director:
+    additional_networks: []
+    additional_vm_extensions: []
+    elb_names: []
+    instance_type:
+      id: toolsmiths.custom-highram-2-32.128
+    instances: automatic
+    internet_connected: true
+    persistent_disk:
+      size_mb: automatic
+    swap_as_percent_of_memory_size: automatic
