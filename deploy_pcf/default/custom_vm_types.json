@@ -21,6 +21,13 @@
     "builtin": false
   },
   {
+    "name": "toolsmiths.custom-1-4.64",
+    "ram": 4096,
+    "cpu": 1,
+    "ephemeral_disk": 65536,
+    "builtin": false
+  },
+  {
     "name": "toolsmiths.medium-disk-2-4.32",
     "ram": 4096,
     "cpu": 2,
