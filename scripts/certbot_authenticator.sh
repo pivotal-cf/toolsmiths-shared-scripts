@@ -16,7 +16,9 @@ if [ -n "$challenge_record" ]; then
 	gcloud dns record-sets transaction remove ${r_data} --name=${r_name} --type=${r_type} --ttl=${r_ttl} --zone=${ENV_NAME}-zone
 fi
 
-gcloud dns record-sets transaction add "$CERTBOT_VALIDATION" --name=_acme-challenge.${CERTBOT_DOMAIN}. --ttl=300 --type=TXT --zone=${ENV_NAME}-zone
+# pass positional arg as data after -- to dodge issus with challenge strings starting with hyphens
+# see https://issuetracker.google.com/issues/193054503?pli=1
+gcloud dns record-sets transaction add --name=_acme-challenge.${CERTBOT_DOMAIN}. --ttl=300 --type=TXT --zone=${ENV_NAME}-zone -- "$CERTBOT_VALIDATION" 
 gcloud dns record-sets transaction execute --zone=${ENV_NAME}-zone
 
 # Sleep to make sure the change has time to propagate over to DNS
