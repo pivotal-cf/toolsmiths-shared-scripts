@@ -1,4 +1,5 @@
-<% http_lb=`terraform output http_lb_backend_name`.strip
+<% tcp_router=`terraform output tcp_router_pool`.strip
+ http_lb=`terraform output http_lb_backend_name`.strip
  ws_router=`terraform output ws_router_pool`.strip
  ssh_router=`terraform output ssh_router_pool`.strip %>
 
@@ -13,6 +14,11 @@
     "instances": 1,
     "elb_names": [
       "tcp:<%= ws_router %>"
+    ]
+  },
+  "tcp_router": {
+    "elb_names": [
+      "tcp:<%= tcp_router %>"
     ]
   },
   "control": {
