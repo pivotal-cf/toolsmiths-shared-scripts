@@ -20,6 +20,8 @@ usage() { echo "Usage: cmd -u <OPSMAN_USERNAME> -p <OPSMAN_PASSWORD> -t <PIVNET_
 
 download_tile() {
   echo "download start"
+  echo "key var"
+  echo $ACCOUNT_KEY
   echo $ACCOUNT_KEY > account_key.json
   cat account_key.json
   echo "that was the key"
