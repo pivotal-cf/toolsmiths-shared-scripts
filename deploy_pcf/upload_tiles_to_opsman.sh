@@ -19,6 +19,10 @@ E_OPTERROR=85
 usage() { echo "Usage: cmd -u <OPSMAN_USERNAME> -p <OPSMAN_PASSWORD> -t <PIVNET_TOKEN> -g <GLOB_FILTER> -v <PRODUCT_VERSION> -e <ENV_NAME> -i <IAAS> -s <PRODUCT_SLUG>" 1>&2; exit 1; }
 
 download_tile() {
+  echo "download start"
+  echo $GCP_SERVICE_ACCOUNT_KEY
+  echo "that was the key"
+  cat account_key.json
   echo $GCP_SERVICE_ACCOUNT_KEY > account_key.json
   gcloud auth activate-service-account --key-file account_key.json
 
