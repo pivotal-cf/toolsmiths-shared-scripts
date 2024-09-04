@@ -20,10 +20,9 @@ usage() { echo "Usage: cmd -u <OPSMAN_USERNAME> -p <OPSMAN_PASSWORD> -t <PIVNET_
 
 download_tile() {
   echo "download start"
-  echo $GCP_SERVICE_ACCOUNT_KEY
-  echo "that was the key"
+  echo $ACCOUNT_KEY > account_key.json
   cat account_key.json
-  echo $GCP_SERVICE_ACCOUNT_KEY > account_key.json
+  echo "that was the key"
   gcloud auth activate-service-account --key-file account_key.json
 
   gcloud storage cp gs://tas-prerelease/srt-7.0.0-build.11.pivotal
@@ -47,7 +46,7 @@ then
   exit $E_OPTERROR
 fi
 
-while getopts "u:p:t:g:v:e:i:s:" Option
+while getopts "u:p:t:g:v:e:i:s:a" Option
 do
   case $Option in
     u )
@@ -82,6 +81,10 @@ do
       srflag=true
       PRODUCT_SLUG=$OPTARG
       ;;
+    a )
+      arflag=true
+      ACCOUNT_KEY=$OPTARG
+      ;;
     * ) usage ;;
   esac
 done
@@ -101,6 +104,7 @@ export PRODUCT_VERSION
 export GLOB_FILTER
 export IAAS
 export PRODUCT_SLUG
+export ACCOUNT_KEY
 
 echo
 echo "=============================================================================================="
