@@ -93,7 +93,7 @@ do
 done
 shift $(($OPTIND - 1))
 
-if ! $urflag || ! $prflag || ! $trflag || ! $grflag || ! $vrflag || ! $erflag || ! $irflag || ! $srflag || ! arflag
+if ! $urflag || ! $prflag || ! $trflag || ! $grflag || ! $vrflag || ! $erflag || ! $irflag || ! $srflag || ! $arflag
 then
     echo "Required option was not specified" >&2
     usage
