@@ -19,33 +19,10 @@ E_OPTERROR=85
 usage() { echo "Usage: cmd -u <OPSMAN_USERNAME> -p <OPSMAN_PASSWORD> -t <PIVNET_TOKEN> -g <GLOB_FILTER> -v <PRODUCT_VERSION> -e <ENV_NAME> -i <IAAS> -s <PRODUCT_SLUG>" 1>&2; exit 1; }
 
 download_tile() {
-  file_glob="INVALID_FILE_GLOB"
+  echo $GCP_SERVICE_ACCOUNT_KEY > account_key.json
+  gcloud auth activate-service-account --key-file account_key.json
 
-  case $PRODUCT_SLUG in
-    'elastic-runtime' )
-      export STAGE_PRODUCT_SLUG='cf'
-      if [[ $GLOB_FILTER == *"srt"* ]]; then
-        file_glob="srt*.pivotal"
-      else
-        file_glob="cf*.pivotal"
-      fi
-      ;;
-    'pivotal-container-service' )
-      export STAGE_PRODUCT_SLUG='pivotal-container-service'
-      file_glob="*.pivotal"
-      ;;
-    *)
-      echo "Unsupported slug: '$slug'"
-      exit 1
-      ;;
-  esac
-
-  release_version=$(pivnet-cli releases --product-slug $PRODUCT_SLUG --format=json | jq -r '.[ ] .version' | grep -F "${PRODUCT_VERSION}" | head -n 1)
-  pivnet-cli download-product-files \
-      --product-slug $PRODUCT_SLUG \
-      --release-version "${release_version}" \
-      --glob $file_glob \
-      --accept-eula
+  gcloud storage cp gs://tas-prerelease/srt-7.0.0-build.11.pivotal
 }
 
 check_stemcell_exists() {
