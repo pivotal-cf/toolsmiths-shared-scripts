@@ -12,6 +12,7 @@ vrflag=false
 erflag=false
 irflag=false
 srflag=false
+arflag=false
 
 NO_ARGS=0
 E_OPTERROR=85
@@ -22,7 +23,7 @@ download_tile() {
   echo "download start"
   echo "key var"
   echo $ACCOUNT_KEY
-  echo $ACCOUNT_KEY > account_key.json
+  echo $ACCOUNT_KEY | base64 -d > account_key.json
   cat account_key.json
   echo "that was the key"
   gcloud auth activate-service-account --key-file account_key.json
