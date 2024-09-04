@@ -16,7 +16,7 @@ srflag=false
 NO_ARGS=0
 E_OPTERROR=85
 
-usage() { echo "Usage: cmd -u <OPSMAN_USERNAME> -p <OPSMAN_PASSWORD> -t <PIVNET_TOKEN> -g <GLOB_FILTER> -v <PRODUCT_VERSION> -e <ENV_NAME> -i <IAAS> -s <PRODUCT_SLUG>" 1>&2; exit 1; }
+usage() { echo "Usage: cmd -u <OPSMAN_USERNAME> -p <OPSMAN_PASSWORD> -t <PIVNET_TOKEN> -g <GLOB_FILTER> -v <PRODUCT_VERSION> -e <ENV_NAME> -i <IAAS> -s <PRODUCT_SLUG> -a <ACCOUNT_KEY>" 1>&2; exit 1; }
 
 download_tile() {
   echo "download start"
@@ -48,7 +48,7 @@ then
   exit $E_OPTERROR
 fi
 
-while getopts "u:p:t:g:v:e:i:s:a" Option
+while getopts "u:p:t:g:v:e:i:s:a:" Option
 do
   case $Option in
     u )
@@ -92,7 +92,7 @@ do
 done
 shift $(($OPTIND - 1))
 
-if ! $urflag || ! $prflag || ! $trflag || ! $grflag || ! $vrflag || ! $erflag || ! $irflag || ! $srflag
+if ! $urflag || ! $prflag || ! $trflag || ! $grflag || ! $vrflag || ! $erflag || ! $irflag || ! $srflag || ! arflag
 then
     echo "Required option was not specified" >&2
     usage
