@@ -20,6 +20,7 @@ E_OPTERROR=85
 usage() { echo "Usage: cmd -u <OPSMAN_USERNAME> -p <OPSMAN_PASSWORD> -t <PIVNET_TOKEN> -g <GLOB_FILTER> -v <PRODUCT_VERSION> -e <ENV_NAME> -i <IAAS> -s <PRODUCT_SLUG> -a <ACCOUNT_KEY>" 1>&2; exit 1; }
 
 download_tile() {
+  export STAGE_PRODUCT_SLUG='cf'
   echo $ACCOUNT_KEY | base64 -d > account_key.json
   gcloud auth activate-service-account --key-file account_key.json
   gcloud storage cp gs://tas-prerelease/srt-7.0.0-build.11.pivotal ./
