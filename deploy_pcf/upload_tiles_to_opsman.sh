@@ -152,6 +152,14 @@ echo
 echo "=============================================================================================="
 echo " Staging ${PRODUCT_SLUG} tile to @ https://pcf.$ENV_NAME.cf-app.com ..."
 echo "=============================================================================================="
+
+om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
+  --username "${OPSMAN_USERNAME}" \
+  --password "${OPSMAN_PASSWORD}" \
+  available-products \
+  --format=json
+
+echo "Looking for version"
 uploaded_product_version=$(om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
   --password "${OPSMAN_PASSWORD}" \
@@ -159,7 +167,9 @@ uploaded_product_version=$(om-linux --target "https://pcf.${ENV_NAME}.cf-app.com
   --format=json \
   |  jq -r ".[] | select(.name | contains(\"${STAGE_PRODUCT_SLUG}\")) | .version")
 
-  uploaded_product_name=$(om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
+
+echo "Looking for name"
+uploaded_product_name=$(om-linux --target "https://pcf.${ENV_NAME}.cf-app.com" -k \
   --username "${OPSMAN_USERNAME}" \
   --password "${OPSMAN_PASSWORD}" \
   available-products \
