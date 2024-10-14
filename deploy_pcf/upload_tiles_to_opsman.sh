@@ -23,7 +23,7 @@ download_tile() {
   export STAGE_PRODUCT_SLUG='cf'
   echo $ACCOUNT_KEY | base64 -d > account_key.json
   gcloud auth activate-service-account --key-file account_key.json
-  gcloud storage cp gs://tas-prerelease/srt-7.0.0-build.11.pivotal ./
+  gcloud storage cp gs://tas-prerelease/srt-10.0.0-build.4.pivotal ./
 }
 
 check_stemcell_exists() {
